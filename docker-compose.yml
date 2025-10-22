@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Flutter Development Environment
+  # ============================================
+  flutter-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: forever_us_in_love_dev
+    ports:
+      - "8080:8080"  # Flutter web development server
+      - "5000:5000"  # Flutter debugging port
+    volumes:
+      - .:/app
+      - flutter_pub_cache:/root/.pub-cache
+      - flutter_gradle_cache:/root/.gradle
+    environment:
+      - FLUTTER_WEB_PORT=8080
+      - FLUTTER_WEB_HOSTNAME=0.0.0.0
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+    command: flutter run -d web-server --web-port=8080 --web-hostname=0.0.0.0
+    networks:
+      - flutter_network
+
+  # ============================================
+  # Flutter Production Web (Nginx)
+  # ============================================
+  flutter-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: forever_us_in_love_web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    networks:
+      - flutter_network
+    restart: unless-stopped
+
+  # ============================================
+  # Optional: Backend API (if needed)
+  # ============================================
+  # api:
+  #   image: your-backend-api:latest
+  #   container_name: forever_us_in_love_api
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - DATABASE_URL=postgresql://user:password@db:5432/dbname
+  #   networks:
+  #     - flutter_network
+  #   depends_on:
+  #     - db
+
+  # ============================================
+  # Optional: Database (if needed)
+  # ============================================
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: forever_us_in_love_db
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=forever_us_in_love
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - flutter_network
+  #   restart: unless-stopped
+
+volumes:
+  flutter_pub_cache:
+    driver: local
+  flutter_gradle_cache:
+    driver: local
+  # postgres_data:
+  #   driver: local
+
+networks:
+  flutter_network:
+    driver: bridge
+
+# ============================================
+# Docker Compose Commands:
+# ============================================
+#
+# Development:
+#   docker-compose up flutter-dev
+#   Access at: http://localhost:8080
+#
+# Production Web:
+#   docker-compose up flutter-web
+#   Access at: http://localhost
+#
+# Build specific service:
+#   docker-compose build flutter-dev
+#
+# View logs:
+#   docker-compose logs -f flutter-dev
+#
+# Stop services:
+#   docker-compose down
+#
+# Remove volumes:
+#   docker-compose down -v
+#
+# Rebuild without cache:
+#   docker-compose build --no-cache
+#
+# ============================================
