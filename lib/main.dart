@@ -6,12 +6,20 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
+import 'features/onboarding/presentation/pages/splash_page.dart';
+import 'features/onboarding/presentation/pages/intro_page_1.dart';
+import 'features/onboarding/presentation/pages/intro_page_2.dart';
+import 'features/onboarding/presentation/pages/intro_page_3.dart';
+import 'features/onboarding/presentation/pages/permissions_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Load environment variables
-  await dotenv.load();
+  await dotenv.load().catchError((_) {
+    // If .env doesn't exist, continue without it
+    debugPrint('Warning: .env file not found, using default values');
+  });
   
   // Configure dependency injection
   await configureDependencies();
@@ -38,7 +46,17 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: const PlaceholderScreen(),
+      // Start with Splash Screen
+      home: const SplashPage(),
+      // Define routes
+      routes: {
+        '/splash': (context) => const SplashPage(),
+        '/onboarding-intro-1': (context) => const IntroPage1(),
+        '/onboarding-intro-2': (context) => const IntroPage2(),
+        '/onboarding-intro-3': (context) => const IntroPage3(),
+        '/permissions': (context) => const PermissionsPage(),
+        '/home': (context) => const PlaceholderScreen(),
+      },
     );
 }
 
