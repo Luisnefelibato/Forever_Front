@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 /// Onboarding Intro 2: "Verified profiles. Feel safe being yourself."
 /// 
@@ -13,23 +14,58 @@ import 'package:flutter/material.dart';
 /// - Text color: White (#FFFFFF) - TODO: Update with design
 /// - Active dot: Primary color - TODO: Update with design
 /// - Inactive dot: Gray/White transparent - TODO: Update with design
-class IntroPage2 extends StatelessWidget {
+class IntroPage2 extends StatefulWidget {
   const IntroPage2({super.key});
+
+  @override
+  State<IntroPage2> createState() => _IntroPage2State();
+}
+
+class _IntroPage2State extends State<IntroPage2> {
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoAdvance();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startAutoAdvance() {
+    _timer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/onboarding-intro-3');
+      }
+    });
+  }
+
+  void _navigateToNext() {
+    _timer.cancel();
+    Navigator.pushReplacementNamed(context, '/onboarding-intro-3');
+  }
+
+  void _navigateToPrevious() {
+    _timer.cancel();
+    Navigator.pushReplacementNamed(context, '/onboarding-intro-1');
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image placeholder
-          // TODO: Replace with actual dating couple image from design
+          // Background image
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[400], // Placeholder background
+              color: Colors.grey[400], // Fallback background
               image: const DecorationImage(
-                image: AssetImage('assets/images/onboarding/intro_2.jpg'),
+                image: AssetImage('assets/images/logo/intro_page_2.png'),
                 fit: BoxFit.cover,
-                // If image doesn't exist, will show gray background
                 onError: null,
               ),
             ),
@@ -110,11 +146,18 @@ class IntroPage2 extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // Navigation button (invisible but tappable for swipe area)
+                // Navigation area with swipe detection
                 GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacementNamed(
-                        context, '/onboarding-intro-3');
+                  onTap: _navigateToNext,
+                  onPanEnd: (details) {
+                    // Swipe left to go to next page
+                    if (details.velocity.pixelsPerSecond.dx < -500) {
+                      _navigateToNext();
+                    }
+                    // Swipe right to go to previous page
+                    else if (details.velocity.pixelsPerSecond.dx > 500) {
+                      _navigateToPrevious();
+                    }
                   },
                   child: Container(
                     width: double.infinity,

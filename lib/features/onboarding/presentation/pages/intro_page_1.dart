@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 /// Onboarding Intro 1: "Where meaningful connections begin again"
 /// 
@@ -13,23 +14,58 @@ import 'package:flutter/material.dart';
 /// - Text color: White (#FFFFFF) - TODO: Update with design
 /// - Active dot: Primary color - TODO: Update with design
 /// - Inactive dot: Gray/White transparent - TODO: Update with design
-class IntroPage1 extends StatelessWidget {
+class IntroPage1 extends StatefulWidget {
   const IntroPage1({super.key});
+
+  @override
+  State<IntroPage1> createState() => _IntroPage1State();
+}
+
+class _IntroPage1State extends State<IntroPage1> {
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoAdvance();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startAutoAdvance() {
+    _timer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/onboarding-intro-2');
+      }
+    });
+  }
+
+  void _navigateToNext() {
+    _timer.cancel();
+    Navigator.pushReplacementNamed(context, '/onboarding-intro-2');
+  }
+
+  void _navigateToPrevious() {
+    _timer.cancel();
+    // No previous page, stay here
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image placeholder
-          // TODO: Replace with actual dating couple image from design
+          // Background image
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[300], // Placeholder background
+              color: Colors.grey[300], // Fallback background
               image: const DecorationImage(
-                image: AssetImage('assets/images/onboarding/intro_1.jpg'),
+                image: AssetImage('assets/images/logo/intro_page_1.png'),
                 fit: BoxFit.cover,
-                // If image doesn't exist, will show gray background
                 onError: null,
               ),
             ),
@@ -110,11 +146,18 @@ class IntroPage1 extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // Navigation button (invisible but tappable for swipe area)
+                // Navigation area with swipe detection
                 GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacementNamed(
-                        context, '/onboarding-intro-2');
+                  onTap: _navigateToNext,
+                  onPanEnd: (details) {
+                    // Swipe left to go to next page
+                    if (details.velocity.pixelsPerSecond.dx < -500) {
+                      _navigateToNext();
+                    }
+                    // Swipe right to go to previous page (disabled for first page)
+                    else if (details.velocity.pixelsPerSecond.dx > 500) {
+                      _navigateToPrevious();
+                    }
                   },
                   child: Container(
                     width: double.infinity,

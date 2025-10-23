@@ -77,7 +77,7 @@ class _SplashPageState extends State<SplashPage>
   Widget build(BuildContext context) {
     return Scaffold(
       // TODO: Update background color with final design
-      backgroundColor: Colors.black, // Placeholder black background
+      backgroundColor: Colors.white, // Placeholder black background
       body: Center(
         child: AnimatedBuilder(
           animation: _animationController,
@@ -91,7 +91,7 @@ class _SplashPageState extends State<SplashPage>
             );
           },
           child: Image.asset(
-            'assets/images/logo/logo_splash.png',
+            'assets/images/logo/Logo_en_Negativo.png',
             width: 200,
             height: 200,
             fit: BoxFit.contain,

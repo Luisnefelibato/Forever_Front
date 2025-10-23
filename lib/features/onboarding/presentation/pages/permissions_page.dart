@@ -12,12 +12,12 @@ import 'package:permission_handler/permission_handler.dart';
 /// - Primary button: "Allow All" - TODO: Update color with design
 /// - Secondary button: "Customize Permission"
 /// 
-/// Colors to be updated with final design:
-/// - Background: White/Light - TODO: Update with design
-/// - Primary button: Accent color - TODO: Update with design
-/// - Text colors: Dark/Gray - TODO: Update with design
-/// - Toggle active: Primary color - TODO: Update with design
-/// - Toggle inactive: Gray - TODO: Update with design
+/// Colors implemented:
+/// - Background: White
+/// - Primary button: #2CA97B (Green)
+/// - Text colors: Black/Gray
+/// - Toggle active: #2CA97B with black border
+/// - Toggle inactive: White with black border
 class PermissionsPage extends StatefulWidget {
   const PermissionsPage({super.key});
 
@@ -30,28 +30,53 @@ class _PermissionsPageState extends State<PermissionsPage> {
   bool _cameraEnabled = false;
   bool _notificationsEnabled = false;
 
+  // Color constants
+  static const Color _allowButtonColor = Color(0xFF2CA97B);
+  static const Color _activeToggleColor = Color(0xFF2CA97B);
+  static const Color _inactiveToggleColor = Colors.white;
+  static const Color _borderColor = Colors.black;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // TODO: Update background color with final design
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Header with skip button
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Placeholder icon (32x32 gray circle)
+                  // App logo
                   Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
+                    width: 100,
+                    height: 100,
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.grey[300], // TODO: Replace with app icon
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo/Logo_en_Negativo.png',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback to gray circle if image fails to load
+                          return Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey[300],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   // Skip button
@@ -90,41 +115,40 @@ class _PermissionsPageState extends State<PermissionsPage> {
               ),
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
 
             // Permission items
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                children: [
                     _buildPermissionItem(
                       icon: Icons.location_on_outlined,
                       title: 'Location',
                       description:
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+                          'So we can show people near you, safely and respectfully.',
                       isEnabled: _locationEnabled,
                       onToggle: (value) {
                         setState(() => _locationEnabled = value);
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     _buildPermissionItem(
                       icon: Icons.camera_alt_outlined,
                       title: 'Camera',
                       description:
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+                          'We’ll use your camera to verify your ID  ',
                       isEnabled: _cameraEnabled,
                       onToggle: (value) {
                         setState(() => _cameraEnabled = value);
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     _buildPermissionItem(
                       icon: Icons.notifications_outlined,
                       title: 'Notifications',
                       description:
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+                          'Get gentle reminders when someone special connects',
                       isEnabled: _notificationsEnabled,
                       onToggle: (value) {
                         setState(() => _notificationsEnabled = value);
@@ -133,7 +157,6 @@ class _PermissionsPageState extends State<PermissionsPage> {
                   ],
                 ),
               ),
-            ),
 
             // Buttons
             Padding(
@@ -147,16 +170,19 @@ class _PermissionsPageState extends State<PermissionsPage> {
                     child: ElevatedButton(
                       onPressed: _handleAllowAll,
                       style: ElevatedButton.styleFrom(
-                        // TODO: Update button color with design
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
+                        backgroundColor: _allowButtonColor,
+                        foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(999),
+                          side: const BorderSide(
+                            color: Colors.white,
+                            width: 1,
+                          ),
                         ),
                         elevation: 0,
                       ),
                       child: const Text(
-                        'Allow All',
+                        'Allow',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -175,7 +201,7 @@ class _PermissionsPageState extends State<PermissionsPage> {
                         openAppSettings();
                       },
                       child: Text(
-                        'Customize Permission',
+                        'Go to Settings',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -187,7 +213,8 @@ class _PermissionsPageState extends State<PermissionsPage> {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -208,12 +235,16 @@ class _PermissionsPageState extends State<PermissionsPage> {
           height: 48,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.grey[200], // TODO: Update with design color
+            color: isEnabled ? _activeToggleColor : _inactiveToggleColor,
+            border: Border.all(
+              color: _borderColor,
+              width: 2.0,
+            ),
           ),
           child: Icon(
             icon,
             size: 24,
-            color: Colors.grey[700], // TODO: Update with design color
+            color: Colors.black,
           ),
         ),
         const SizedBox(width: 16),
@@ -245,8 +276,17 @@ class _PermissionsPageState extends State<PermissionsPage> {
         Switch(
           value: isEnabled,
           onChanged: onToggle,
-          // TODO: Update switch colors with design
-          activeColor: Colors.blue,
+          activeColor: Colors.black,
+          activeTrackColor: _activeToggleColor,
+          activeThumbColor: Colors.black,
+          inactiveThumbColor: Colors.black,
+          inactiveTrackColor: Colors.white,
+          trackOutlineColor: WidgetStateProperty.resolveWith<Color>((states) {
+            return Colors.black;
+          }),
+          trackOutlineWidth: WidgetStateProperty.resolveWith<double>((states) {
+            return 1.0;
+          }),
         ),
       ],
     );
