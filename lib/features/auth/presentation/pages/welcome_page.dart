@@ -68,24 +68,26 @@ class WelcomePage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                   // Logo - Super grande
-                  Image.asset(
-                    'assets/images/logo/Logo_For_Auth.png',
+                  SizedBox(
                     width: 250,
                     height: 100,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      // Fallback text logo
-                      return const Text(
-                        'ForeverUs\nIN Love',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          height: 1.2,
-                          fontFamily: 'Delight',
-                        ),
-                      );
-                    },
+                    child: Image.asset(
+                      'assets/images/logo/Logo_For_Auth.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Fallback text logo
+                        return const Text(
+                          'ForeverUs\nIN Love',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                            fontFamily: 'Delight',
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   
                   const SizedBox(height: 2),
