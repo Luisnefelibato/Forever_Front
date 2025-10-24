@@ -39,12 +39,14 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.0'
+          flutter-version: '3.10.0'
           channel: 'stable'
           cache: true
           
       - name: 📦 Get Flutter dependencies
         run: |
+          flutter --version
+          flutter doctor -v
           flutter pub get
           flutter pub deps
         
@@ -100,12 +102,14 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.0'
+          flutter-version: '3.10.0'
           channel: 'stable'
           cache: true
           
       - name: 📦 Get Flutter dependencies
         run: |
+          flutter --version
+          flutter doctor -v
           flutter pub get
           flutter pub deps
         
@@ -176,12 +180,14 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.0'
+          flutter-version: '3.10.0'
           channel: 'stable'
           cache: true
           
       - name: 📦 Get Flutter dependencies
         run: |
+          flutter --version
+          flutter doctor -v
           flutter pub get
           flutter pub deps
         
