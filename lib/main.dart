@@ -20,6 +20,7 @@ import 'features/auth/presentation/pages/forgot_password_email_page.dart';
 import 'features/auth/presentation/pages/forgot_password_code_page.dart';
 import 'features/auth/presentation/pages/reset_password_page.dart';
 import 'features/auth/presentation/pages/password_changed_page.dart';
+import 'features/auth/presentation/pages/account_created_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +71,8 @@ class MyApp extends StatelessWidget {
         '/register-phone': (context) => const RegisterPhonePage(),
         '/forgot-password': (context) => const ForgotPasswordEmailPage(),
         '/password-changed': (context) => const PasswordChangedPage(),
+        '/account-created': (context) => const AccountCreatedPage(),
+        '/about-you': (context) => const PlaceholderScreen(), // TODO: Replace with actual AboutYouPage
         '/home': (context) => const PlaceholderScreen(),
       },
       onGenerateRoute: (settings) {

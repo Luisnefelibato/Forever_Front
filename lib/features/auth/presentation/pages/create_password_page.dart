@@ -187,14 +187,10 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
     debugPrint('Creating account for: ${widget.email ?? widget.phone}');
     debugPrint('Registration type: ${widget.registrationType}');
     
-    // Navigate to OTP verification (to be implemented)
-    // Navigator.pushNamed(context, '/otp-verification', arguments: {...});
-    
-    // Temporary: Navigate to login
-    Navigator.pushNamedAndRemoveUntil(
+    // Navigate to account created confirmation page
+    Navigator.pushReplacementNamed(
       context,
-      '/login',
-      (route) => false,
+      '/account-created',
     );
   }
   
