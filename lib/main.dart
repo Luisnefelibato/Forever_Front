@@ -11,6 +11,8 @@ import 'features/onboarding/presentation/pages/intro_page_1.dart';
 import 'features/onboarding/presentation/pages/intro_page_2.dart';
 import 'features/onboarding/presentation/pages/intro_page_3.dart';
 import 'features/onboarding/presentation/pages/permissions_page.dart';
+import 'features/auth/presentation/pages/welcome_page.dart';
+import 'features/auth/presentation/pages/login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +57,8 @@ class MyApp extends StatelessWidget {
         '/onboarding-intro-2': (context) => const IntroPage2(),
         '/onboarding-intro-3': (context) => const IntroPage3(),
         '/permissions': (context) => const PermissionsPage(),
+        '/welcome': (context) => const WelcomePage(),
+        '/login': (context) => const LoginPage(),
         '/home': (context) => const PlaceholderScreen(),
       },
     );

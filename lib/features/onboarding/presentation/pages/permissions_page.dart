@@ -82,8 +82,8 @@ class _PermissionsPageState extends State<PermissionsPage> {
                   // Skip button
                   TextButton(
                     onPressed: () {
-                      // Navigate to home or next screen
-                      Navigator.pushReplacementNamed(context, '/home');
+                      // Navigate to welcome page
+                      Navigator.pushReplacementNamed(context, '/welcome');
                     },
                     child: Text(
                       'skip',
@@ -307,9 +307,9 @@ class _PermissionsPageState extends State<PermissionsPage> {
       Permission.notification,
     ].request();
 
-    // Navigate to home
+    // Navigate to welcome page
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/welcome');
     }
   }
 }
