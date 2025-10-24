@@ -25,12 +25,13 @@ on:
         options:
           - simulator
           - unsigned-ipa
+          - both
 
 jobs:
   build-ios-simulator:
     name: 🎯 Build for iOS Simulator (100% FREE)
     runs-on: macos-latest
-    if: github.event.inputs.build_type == 'simulator' || github.event.inputs.build_type == '' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event.inputs.build_type == 'simulator' || github.event.inputs.build_type == 'both' || github.event.inputs.build_type == '' || github.event_name == 'push' || github.event_name == 'pull_request'
     
     steps:
       - name: 📥 Checkout repository
@@ -39,7 +40,7 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.0'
+          flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
           
@@ -48,7 +49,17 @@ jobs:
           flutter --version
           flutter doctor -v
           flutter pub get
-          flutter pub deps
+        
+      - name: 🔍 Verify project structure
+        run: |
+          echo "Checking iOS project structure..."
+          ls -la ios/
+          if [ -f "ios/Podfile" ]; then
+            echo "✅ Podfile exists"
+          else
+            echo "❌ Podfile missing"
+            exit 1
+          fi
         
       - name: 🔍 Run Flutter analyzer
         run: flutter analyze
@@ -58,10 +69,20 @@ jobs:
         run: flutter test
         continue-on-error: true
         
-      - name: 📱 Install CocoaPods
+      - name: 📱 Install CocoaPods dependencies
         run: |
           cd ios
-          pod install --repo-update
+          # Update CocoaPods repo
+          pod repo update
+          # Install dependencies
+          pod install --verbose
+          # Verify pod installation
+          if [ -d "Pods" ]; then
+            echo "✅ CocoaPods installed successfully"
+          else
+            echo "❌ CocoaPods installation failed"
+            exit 1
+          fi
           
       - name: 🛠️ Setup Xcode version
         uses: maxim-lobanov/setup-xcode@v1
@@ -70,12 +91,13 @@ jobs:
           
       - name: 🏗️ Build iOS App for Simulator
         run: |
-          flutter build ios --simulator --debug
+          flutter build ios --simulator --debug --verbose
           
       - name: 📤 Upload Simulator Build as Artifact
         uses: actions/upload-artifact@v4
+        if: success()
         with:
-          name: ios-simulator-build
+          name: ios-simulator-build-${{ github.run_number }}
           path: build/ios/iphonesimulator/
           retention-days: 30
           
@@ -85,6 +107,7 @@ jobs:
           echo "🎉 iOS Simulator build completed successfully!"
           echo "📱 You can test this in iOS Simulator"
           echo "💡 To test: Open Xcode → Window → Devices and Simulators → Run your app"
+          echo "📦 Build artifacts uploaded"
           
       - name: ❌ Failure Notification
         if: failure()
@@ -93,7 +116,7 @@ jobs:
   build-ios-unsigned-ipa:
     name: 📦 Build Unsigned IPA (For Development)
     runs-on: macos-latest
-    if: github.event.inputs.build_type == 'unsigned-ipa'
+    if: github.event.inputs.build_type == 'unsigned-ipa' || github.event.inputs.build_type == 'both'
     
     steps:
       - name: 📥 Checkout repository
@@ -102,7 +125,7 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.0'
+          flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
           
@@ -111,7 +134,17 @@ jobs:
           flutter --version
           flutter doctor -v
           flutter pub get
-          flutter pub deps
+        
+      - name: 🔍 Verify project structure
+        run: |
+          echo "Checking iOS project structure..."
+          ls -la ios/
+          if [ -f "ios/Podfile" ]; then
+            echo "✅ Podfile exists"
+          else
+            echo "❌ Podfile missing"
+            exit 1
+          fi
         
       - name: 🔍 Run Flutter analyzer
         run: flutter analyze
@@ -121,93 +154,88 @@ jobs:
         run: flutter test
         continue-on-error: true
         
-      - name: 📱 Install CocoaPods
+      - name: 📱 Install CocoaPods dependencies
         run: |
           cd ios
-          pod install --repo-update
+          # Update CocoaPods repo
+          pod repo update
+          # Install dependencies
+          pod install --verbose
+          # Verify pod installation
+          if [ -d "Pods" ]; then
+            echo "✅ CocoaPods installed successfully"
+          else
+            echo "❌ CocoaPods installation failed"
+            exit 1
+          fi
           
       - name: 🛠️ Setup Xcode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
           
-      - name: 🏗️ Build Unsigned IPA
+      - name: 🏗️ Build iOS App (Debug, No Code Sign)
         run: |
-          # Build without code signing (for development only)
-          flutter build ios --debug --no-codesign
+          flutter build ios --debug --no-codesign --verbose
           
-          # Create IPA manually (since we can't use flutter build ipa without signing)
+      - name: 📦 Create IPA file
+        run: |
+          echo "Creating IPA from build..."
           cd build/ios/iphoneos
+          
+          # Create Payload directory
           mkdir -p Payload
+          
+          # Copy app to Payload
           cp -r Runner.app Payload/
-          zip -r ../../../ios-unsigned-app.zip Payload/
+          
+          # Create IPA (which is just a zip file)
+          zip -r ForeverUsInLove-unsigned.ipa Payload/
+          
+          # Move IPA to root
+          mv ForeverUsInLove-unsigned.ipa ../../../
+          
           cd ../../../
           
-      - name: 📤 Upload Unsigned Build as Artifact
+          # Verify IPA was created
+          if [ -f "ForeverUsInLove-unsigned.ipa" ]; then
+            echo "✅ IPA created successfully"
+            ls -lh ForeverUsInLove-unsigned.ipa
+          else
+            echo "❌ IPA creation failed"
+            exit 1
+          fi
+          
+      - name: 📤 Upload IPA as Artifact
         uses: actions/upload-artifact@v4
+        if: success()
         with:
-          name: ios-unsigned-build
-          path: |
-            build/ios/iphoneos/Runner.app
-            ios-unsigned-app.zip
+          name: ios-unsigned-ipa-${{ github.run_number }}
+          path: ForeverUsInLove-unsigned.ipa
+          retention-days: 30
+          
+      - name: 📤 Upload Runner.app as Artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ios-runner-app-${{ github.run_number }}
+          path: build/ios/iphoneos/Runner.app
           retention-days: 30
           
       - name: ✅ Success Notification
         if: success()
         run: |
           echo "🎉 Unsigned iOS build completed successfully!"
+          echo "📦 IPA file: ForeverUsInLove-unsigned.ipa"
           echo "⚠️  This build CANNOT be installed on real iPhone"
           echo "💡 This is for development and testing purposes only"
-          echo "🔐 To install on real iPhone, you need Apple Developer account ($99/year)"
+          echo "🔐 To install on real iPhone, you need:"
+          echo "    1. Apple Developer account (\$99/year)"
+          echo "    2. Code signing certificates"
+          echo "    3. Provisioning profiles"
+          echo ""
+          echo "📥 Download artifacts from the Actions tab"
           
       - name: ❌ Failure Notification
         if: failure()
         run: echo "❌ Unsigned iOS build failed. Check the logs for details."
-
-  # Optional: Build for multiple iOS versions
-  build-multiple-ios-versions:
-    name: 🔄 Build for Multiple iOS Versions
-    runs-on: macos-latest
-    if: github.event.inputs.build_type == 'multi-version'
-    strategy:
-      matrix:
-        ios-version: ['15.0', '16.0', '17.0']
-    
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: 🚀 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.10.0'
-          channel: 'stable'
-          cache: true
-          
-      - name: 📦 Get Flutter dependencies
-        run: |
-          flutter --version
-          flutter doctor -v
-          flutter pub get
-          flutter pub deps
-        
-      - name: 📱 Install CocoaPods
-        run: |
-          cd ios
-          pod install --repo-update
-          
-      - name: 🛠️ Setup Xcode version
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-          
-      - name: 🏗️ Build for iOS ${{ matrix.ios-version }}
-        run: |
-          flutter build ios --simulator --debug --target-platform ios --ios-version ${{ matrix.ios-version }}
-          
-      - name: 📤 Upload Build for iOS ${{ matrix.ios-version }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-${{ matrix.ios-version }}-build
-          path: build/ios/iphonesimulator/
-          retention-days: 30
