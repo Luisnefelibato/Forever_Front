@@ -12,7 +12,7 @@ dependencies:
   
   # Firebase - Versiones estables y compatibles
   firebase_core: ^2.24.2
-  firebase_auth: ^4.16.0
+  firebase_auth: ^4.15.3
   firebase_messaging: ^14.7.10
   
   # State Management - Versiones estables
@@ -20,8 +20,8 @@ dependencies:
   equatable: ^2.0.5
   
   # Dependency Injection - Versiones estables
-  get_it: ^7.6.7
-  injectable: ^2.3.5
+  get_it: ^7.6.4
+  injectable: ^2.3.2
   
   # Networking - Versiones estables
   dio: ^5.3.2
@@ -29,19 +29,19 @@ dependencies:
   pretty_dio_logger: ^1.3.1
   
   # Local Storage - Versiones estables
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.2.2
   flutter_secure_storage: ^9.0.0
   
   # Environment Variables - Versiones estables
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^5.1.0
   
   # Routing - Versiones estables
-  go_router: ^12.1.3
+  go_router: ^12.1.1
   
   # UI Components - Versiones estables
   cupertino_icons: ^1.0.6
-  flutter_svg: ^2.0.10+1
-  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.0
   shimmer: ^3.0.0
   
   # Forms & Validation - Versiones estables
@@ -51,14 +51,14 @@ dependencies:
   permission_handler: ^10.4.5
   
   # Camera & Image - Versiones estables
-  image_picker: ^1.0.8
-  camera: ^0.10.5+9
+  image_picker: ^1.0.4
+  camera: ^0.10.5
   
   # Location - Versiones estables
   geolocator: ^10.1.1
   
   # Google Sign In - Versiones estables
-  google_sign_in: ^6.1.6
+  google_sign_in: ^6.1.4
   
   # Utils - Versiones estables
   intl: ^0.18.1
