@@ -13,6 +13,8 @@ import 'features/onboarding/presentation/pages/intro_page_3.dart';
 import 'features/onboarding/presentation/pages/permissions_page.dart';
 import 'features/auth/presentation/pages/welcome_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/forgot_password_email_page.dart';
+import 'features/auth/presentation/pages/forgot_password_code_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +61,20 @@ class MyApp extends StatelessWidget {
         '/permissions': (context) => const PermissionsPage(),
         '/welcome': (context) => const WelcomePage(),
         '/login': (context) => const LoginPage(),
+        '/forgot-password': (context) => const ForgotPasswordEmailPage(),
         '/home': (context) => const PlaceholderScreen(),
+      },
+      onGenerateRoute: (settings) {
+        // Handle routes with arguments
+        if (settings.name == '/forgot-password-code') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => ForgotPasswordCodePage(
+              email: args?['email'] ?? '',
+            ),
+          );
+        }
+        return null;
       },
     );
 }
