@@ -151,17 +151,17 @@ class _IntroPage1State extends State<IntroPage1> {
                   onTap: _navigateToNext,
                   onPanEnd: (details) {
                     // Swipe left to go to next page
-                    if (details.velocity.pixelsPerSecond.dx < -500) {
+                    if (details.velocity.pixelsPerSecond.dx < -300) {
                       _navigateToNext();
                     }
                     // Swipe right to go to previous page (disabled for first page)
-                    else if (details.velocity.pixelsPerSecond.dx > 500) {
+                    else if (details.velocity.pixelsPerSecond.dx > 300) {
                       _navigateToPrevious();
                     }
                   },
                   child: Container(
                     width: double.infinity,
-                    height: 60,
+                    height: 200,
                     color: Colors.transparent,
                   ),
                 ),
