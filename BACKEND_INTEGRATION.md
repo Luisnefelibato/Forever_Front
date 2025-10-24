@@ -951,6 +951,311 @@ For backend API questions, contact:
 
 ---
 
-**Document Version**: 1.0  
+## 👤 About You Profile Completion
+
+### Overview
+
+After account creation, users complete their profile through the "About You" flow:
+1. **Name** (first name, last name)
+2. **Birthdate** (with 18+ age validation)
+3. **Gender & Interests** (upcoming)
+4. **Additional profile information** (upcoming)
+
+### Database Schema Updates
+
+Update the `users` table with profile completion tracking:
+
+```sql
+ALTER TABLE users ADD COLUMN profile_completion_step INTEGER DEFAULT 0;
+-- 0 = Account created, not started
+-- 1 = Name completed
+-- 2 = Birthdate completed
+-- 3 = Gender/Interests completed
+-- 4 = Profile complete
+
+ALTER TABLE users ADD COLUMN profile_completed_at TIMESTAMP NULL;
+```
+
+### API Endpoint: Update User Profile
+
+**Endpoint:** `POST /api/users/profile/update`
+
+**Purpose:** Update user profile information during "About You" flow
+
+**Headers:**
+```json
+{
+  "Authorization": "Bearer <access_token>",
+  "Content-Type": "application/json"
+}
+```
+
+**Request Body:**
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "dateOfBirth": "1990-06-04",
+  "completionStep": 2
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "firstName": "John",
+    "lastName": "Doe",
+    "dateOfBirth": "1990-06-04",
+    "age": 34,
+    "profileCompletionStep": 2,
+    "profileCompletionPercentage": 40
+  }
+}
+```
+
+**Error Responses:**
+
+**400 Bad Request** - Invalid data:
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "dateOfBirth",
+      "message": "User must be at least 18 years old"
+    }
+  ]
+}
+```
+
+**401 Unauthorized:**
+```json
+{
+  "success": false,
+  "message": "Authentication required",
+  "errorCode": "UNAUTHORIZED"
+}
+```
+
+**422 Unprocessable Entity:**
+```json
+{
+  "success": false,
+  "message": "Invalid date of birth format",
+  "errorCode": "INVALID_DATE_FORMAT"
+}
+```
+
+### Validation Rules
+
+**Backend must validate:**
+
+1. **First Name:**
+   - Required
+   - Minimum 1 character
+   - Maximum 25 characters
+   - Only alphabetic characters and spaces
+
+2. **Last Name:**
+   - Required
+   - Minimum 1 character
+   - Maximum 25 characters
+   - Only alphabetic characters and spaces
+
+3. **Date of Birth:**
+   - Required
+   - Valid date format (YYYY-MM-DD)
+   - User must be 18 years or older
+   - Date cannot be in the future
+   - Date must be a realistic age (not more than 120 years ago)
+
+### Backend Implementation Example (Node.js/Express)
+
+```javascript
+// routes/users.js
+router.post('/profile/update', authenticateToken, async (req, res) => {
+  try {
+    const { firstName, lastName, dateOfBirth, completionStep } = req.body;
+    const userId = req.user.id; // From JWT token
+
+    // Validate age (18+)
+    if (dateOfBirth) {
+      const birthDate = new Date(dateOfBirth);
+      const age = calculateAge(birthDate);
+      
+      if (age < 18) {
+        return res.status(400).json({
+          success: false,
+          message: 'User must be at least 18 years old',
+          errorCode: 'AGE_RESTRICTION'
+        });
+      }
+    }
+
+    // Update user profile
+    const updatedUser = await User.update(
+      {
+        first_name: firstName,
+        last_name: lastName,
+        date_of_birth: dateOfBirth,
+        profile_completion_step: completionStep,
+        updated_at: new Date()
+      },
+      {
+        where: { id: userId }
+      }
+    );
+
+    // Calculate profile completion percentage
+    const completionPercentage = (completionStep / 5) * 100;
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        userId,
+        firstName,
+        lastName,
+        dateOfBirth,
+        age: calculateAge(new Date(dateOfBirth)),
+        profileCompletionStep: completionStep,
+        profileCompletionPercentage: completionPercentage
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating profile',
+      errorCode: 'SERVER_ERROR'
+    });
+  }
+});
+
+function calculateAge(birthDate) {
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  return age;
+}
+```
+
+### Frontend Implementation
+
+**Service Method:**
+
+```dart
+// lib/features/profile/data/datasources/profile_remote_datasource.dart
+
+@RestApi()
+abstract class ProfileApiClient {
+  factory ProfileApiClient(Dio dio) = _ProfileApiClient;
+
+  @POST('/users/profile/update')
+  Future<ProfileUpdateResponse> updateProfile(
+    @Body() ProfileUpdateRequest request,
+  );
+}
+
+// Request model
+class ProfileUpdateRequest {
+  final String? firstName;
+  final String? lastName;
+  final String? dateOfBirth; // YYYY-MM-DD format
+  final int completionStep;
+
+  ProfileUpdateRequest({
+    this.firstName,
+    this.lastName,
+    this.dateOfBirth,
+    required this.completionStep,
+  });
+
+  Map<String, dynamic> toJson() => {
+    if (firstName != null) 'firstName': firstName,
+    if (lastName != null) 'lastName': lastName,
+    if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,
+    'completionStep': completionStep,
+  };
+}
+```
+
+**Usage in AboutYouBirthdatePage:**
+
+```dart
+void _validateAndContinue() async {
+  // ... validation code ...
+
+  try {
+    // Format date as YYYY-MM-DD
+    final dateOfBirth = '${_selectedYear!}-${_selectedMonth!.toString().padLeft(2, '0')}-${_selectedDay!.toString().padLeft(2, '0')}';
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    // Call API
+    final response = await profileApiClient.updateProfile(
+      ProfileUpdateRequest(
+        firstName: widget.firstName,
+        lastName: widget.lastName,
+        dateOfBirth: dateOfBirth,
+        completionStep: 2,
+      ),
+    );
+
+    // Hide loading
+    Navigator.pop(context);
+
+    // Navigate to next screen
+    Navigator.pushNamed(context, '/about-you-gender');
+
+  } catch (e) {
+    // Handle error
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: ${e.toString()}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+```
+
+### Migration Script
+
+```sql
+-- Add profile completion tracking
+ALTER TABLE users 
+  ADD COLUMN profile_completion_step INTEGER DEFAULT 0,
+  ADD COLUMN profile_completed_at TIMESTAMP NULL;
+
+-- Add index for faster queries
+CREATE INDEX idx_profile_completion ON users(profile_completion_step);
+
+-- Update existing users
+UPDATE users 
+SET profile_completion_step = 0 
+WHERE profile_completion_step IS NULL;
+```
+
+---
+
+**Document Version**: 1.1  
 **Last Updated**: 2025-10-24  
 **Author**: GenSpark AI Developer

@@ -21,6 +21,8 @@ import 'features/auth/presentation/pages/forgot_password_code_page.dart';
 import 'features/auth/presentation/pages/reset_password_page.dart';
 import 'features/auth/presentation/pages/password_changed_page.dart';
 import 'features/auth/presentation/pages/account_created_page.dart';
+import 'features/auth/presentation/pages/about_you_name_page.dart';
+import 'features/auth/presentation/pages/about_you_birthdate_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -101,6 +103,28 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) => ResetPasswordPage(
               resetToken: args?['resetToken'] as String?,
+            ),
+          );
+        }
+        if (settings.name == '/about-you-name') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => AboutYouNamePage(
+              email: args?['email'] as String?,
+              phone: args?['phone'] as String?,
+              countryCode: args?['countryCode'] as String?,
+            ),
+          );
+        }
+        if (settings.name == '/about-you-birthdate') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => AboutYouBirthdatePage(
+              firstName: args?['firstName'] as String?,
+              lastName: args?['lastName'] as String?,
+              email: args?['email'] as String?,
+              phone: args?['phone'] as String?,
+              countryCode: args?['countryCode'] as String?,
             ),
           );
         }
