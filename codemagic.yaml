@@ -1,90 +1,137 @@
+# 🆓 Codemagic FREE iOS Build Configuration
+# ⚠️ IMPORTANT: This builds iOS apps WITHOUT Apple Developer account
+# ✅ Generates .ipa files for testing
+# ❌ Cannot install on real iPhone (requires $99/year Apple Developer account)
+# ✅ Can test in iOS Simulator
+# ✅ Perfect for development and testing
+
 workflows:
-  ios-workflow:
-    name: iOS Workflow
-    instance_type: mac_mini_m1
-    max_build_duration: 120
+  ios-workflow-free:
+    name: 🆓 Free iOS Build (No Apple Developer Account)
+    max_build_duration: 60
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.imagineapps.foreverusinlove
       vars:
-        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.imagineapps.foreverusinlove"
-        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...)
-        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...)
-        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...)
-        CERTIFICATE_PRIVATE_KEY: Encrypted(...)
-      flutter: stable
+        FLUTTER_VERSION: "3.16.0"
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Set up code signing settings on Xcode project
+      - name: 🚀 Install Flutter
         script: |
-          xcode-project use-profiles
-      - name: Get Flutter packages
+          echo "Installing Flutter $FLUTTER_VERSION..."
+          flutter --version
+          flutter config --no-analytics
+          flutter doctor -v
+          
+      - name: 📦 Get Flutter dependencies
         script: |
-          flutter packages pub get
-      - name: Install pods
+          echo "Getting Flutter dependencies..."
+          flutter pub get
+          
+      - name: 🔍 Flutter analyze
         script: |
-          find . -name "Podfile" -execdir pod install \;
-      - name: Flutter analyze
-        script: |
+          echo "Running Flutter analyze..."
           flutter analyze
-      - name: Flutter unit tests
+          
+      - name: 🧪 Flutter unit tests
         script: |
+          echo "Running Flutter tests..."
           flutter test
-        ignore_failure: true
-      - name: Build ipa for distribution
+          
+      - name: 📱 Install CocoaPods
         script: |
-          flutter build ipa --release \
-            --build-name=1.0.0 \
-            --build-number=$(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
+          echo "Installing CocoaPods dependencies..."
+          find . -name "Podfile" -execdir pod install \;
+          
+      - name: 🏗️ Build iOS App for Simulator (FREE)
+        script: |
+          echo "Building iOS app for simulator (no code signing required)..."
+          flutter build ios --simulator --debug
+          
+      - name: 📦 Create Simulator Build Archive
+        script: |
+          echo "Creating simulator build archive..."
+          cd build/ios/iphonesimulator
+          zip -r ../../../ios-simulator-build.zip .
+          cd ../../../
+          
+      - name: 🏗️ Build Unsigned IPA (For Development)
+        script: |
+          echo "Building unsigned IPA for development..."
+          flutter build ios --debug --no-codesign
+          
+          # Create IPA manually (since we can't use flutter build ipa without signing)
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r ../../../ios-unsigned-app.zip Payload/
+          cd ../../../
+          
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ios/iphonesimulator/
+      - ios-simulator-build.zip
+      - build/ios/iphoneos/Runner.app
+      - ios-unsigned-app.zip
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
+      
     publishing:
       email:
         recipients:
-          - luisfgomezosp@gmail.com
+          - your-email@example.com
         notify:
           success: true
           failure: true
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true
-        beta_groups:
-          - Internal Testers
-        
-  # Android workflow (for reference)
-  android-workflow:
-    name: Android Workflow
-    instance_type: linux_x2
-    max_build_duration: 120
+      scripts:
+        - name: 📧 Notify Success
+          script: |
+            echo "🎉 iOS build completed successfully!"
+            echo "📱 Simulator build: Available for iOS Simulator testing"
+            echo "📦 Unsigned IPA: Available for development (cannot install on real iPhone)"
+            echo "⚠️  To install on real iPhone, you need Apple Developer account ($99/year)"
+
+  # Optional: Build for multiple iOS versions
+  ios-multi-version:
+    name: 🔄 Build for Multiple iOS Versions
+    max_build_duration: 90
     environment:
-      flutter: stable
+      vars:
+        FLUTTER_VERSION: "3.16.0"
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Get Flutter packages
+      - name: 🚀 Install Flutter
         script: |
-          flutter packages pub get
-      - name: Build APK
+          flutter --version
+          flutter pub get
+          
+      - name: 📱 Install CocoaPods
         script: |
-          flutter build apk --release
-      - name: Build App Bundle
+          find . -name "Podfile" -execdir pod install \;
+          
+      - name: 🏗️ Build for iOS 15.0
         script: |
-          flutter build appbundle --release
+          flutter build ios --simulator --debug --target-platform ios --ios-version 15.0
+          cd build/ios/iphonesimulator
+          zip -r ../../../ios-15-build.zip .
+          cd ../../../
+          
+      - name: 🏗️ Build for iOS 16.0
+        script: |
+          flutter build ios --simulator --debug --target-platform ios --ios-version 16.0
+          cd build/ios/iphonesimulator
+          zip -r ../../../ios-16-build.zip .
+          cd ../../../
+          
+      - name: 🏗️ Build for iOS 17.0
+        script: |
+          flutter build ios --simulator --debug --target-platform ios --ios-version 17.0
+          cd build/ios/iphonesimulator
+          zip -r ../../../ios-17-build.zip .
+          cd ../../../
+          
     artifacts:
-      - build/app/outputs/flutter-apk/*.apk
-      - build/app/outputs/bundle/**/*.aab
-    publishing:
-      email:
-        recipients:
-          - luisfgomezosp@gmail.com
-        notify:
-          success: true
-          failure: true
+      - ios-15-build.zip
+      - ios-16-build.zip
+      - ios-17-build.zip
