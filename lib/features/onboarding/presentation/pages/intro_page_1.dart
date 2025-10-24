@@ -85,9 +85,21 @@ class _IntroPage1State extends State<IntroPage1> {
             ),
           ),
 
-          // Content
-          SafeArea(
-            child: Column(
+          // Content with full-screen swipe detection
+          GestureDetector(
+            onHorizontalDragEnd: (details) {
+              // Swipe left (negative velocity) to go to next page
+              if (details.primaryVelocity! < -500) {
+                _navigateToNext();
+              }
+              // Swipe right (positive velocity) to go to previous page
+              // Disabled for first page, but gesture is still captured
+              else if (details.primaryVelocity! > 500) {
+                _navigateToPrevious();
+              }
+            },
+            child: SafeArea(
+              child: Column(
               children: [
                 // Skip button
                 Align(
@@ -96,6 +108,7 @@ class _IntroPage1State extends State<IntroPage1> {
                     padding: const EdgeInsets.all(16.0),
                     child: TextButton(
                       onPressed: () {
+                        _timer.cancel();
                         Navigator.pushReplacementNamed(context, '/permissions');
                       },
                       child: Text(
@@ -146,29 +159,10 @@ class _IntroPage1State extends State<IntroPage1> {
 
                 const SizedBox(height: 40),
 
-                // Navigation area with swipe detection
-                GestureDetector(
-                  onTap: _navigateToNext,
-                  onPanEnd: (details) {
-                    // Swipe left to go to next page
-                    if (details.velocity.pixelsPerSecond.dx < -300) {
-                      _navigateToNext();
-                    }
-                    // Swipe right to go to previous page (disabled for first page)
-                    else if (details.velocity.pixelsPerSecond.dx > 300) {
-                      _navigateToPrevious();
-                    }
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    height: 200,
-                    color: Colors.transparent,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
+                const Spacer(),
               ],
             ),
+          ),
           ),
         ],
       ),
