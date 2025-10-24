@@ -261,13 +261,20 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
       return;
     }
     
-    // Success - navigate to next screen
-    // TODO: Navigate to next step (gender/interests)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Birthdate validated successfully!'),
-        backgroundColor: _primaryGreen,
-      ),
+    // Success - navigate to next screen (gender)
+    Navigator.pushNamed(
+      context,
+      '/about-you-gender',
+      arguments: {
+        'firstName': widget.firstName,
+        'lastName': widget.lastName,
+        'email': widget.email,
+        'phone': widget.phone,
+        'countryCode': widget.countryCode,
+        'birthDay': _selectedDay,
+        'birthMonth': _selectedMonth,
+        'birthYear': _selectedYear,
+      },
     );
   }
   

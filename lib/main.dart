@@ -23,6 +23,11 @@ import 'features/auth/presentation/pages/password_changed_page.dart';
 import 'features/auth/presentation/pages/account_created_page.dart';
 import 'features/auth/presentation/pages/about_you_name_page.dart';
 import 'features/auth/presentation/pages/about_you_birthdate_page.dart';
+import 'features/auth/presentation/pages/about_you_gender_page.dart';
+import 'features/auth/presentation/pages/about_you_interests_page.dart';
+import 'features/auth/presentation/pages/about_you_looking_for_page.dart';
+import 'features/auth/presentation/pages/about_you_location_page.dart';
+import 'features/auth/presentation/pages/verification_prompt_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -125,6 +130,91 @@ class MyApp extends StatelessWidget {
               email: args?['email'] as String?,
               phone: args?['phone'] as String?,
               countryCode: args?['countryCode'] as String?,
+            ),
+          );
+        }
+        if (settings.name == '/about-you-gender') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => AboutYouGenderPage(
+              firstName: args?['firstName'] as String?,
+              lastName: args?['lastName'] as String?,
+              email: args?['email'] as String?,
+              phone: args?['phone'] as String?,
+              countryCode: args?['countryCode'] as String?,
+              birthDay: args?['birthDay'] as int?,
+              birthMonth: args?['birthMonth'] as int?,
+              birthYear: args?['birthYear'] as int?,
+            ),
+          );
+        }
+        if (settings.name == '/about-you-interests') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => AboutYouInterestsPage(
+              firstName: args?['firstName'] as String?,
+              lastName: args?['lastName'] as String?,
+              email: args?['email'] as String?,
+              phone: args?['phone'] as String?,
+              countryCode: args?['countryCode'] as String?,
+              birthDay: args?['birthDay'] as int?,
+              birthMonth: args?['birthMonth'] as int?,
+              birthYear: args?['birthYear'] as int?,
+              gender: args?['gender'] as String?,
+            ),
+          );
+        }
+        if (settings.name == '/about-you-looking-for') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => AboutYouLookingForPage(
+              firstName: args?['firstName'] as String?,
+              lastName: args?['lastName'] as String?,
+              email: args?['email'] as String?,
+              phone: args?['phone'] as String?,
+              countryCode: args?['countryCode'] as String?,
+              birthDay: args?['birthDay'] as int?,
+              birthMonth: args?['birthMonth'] as int?,
+              birthYear: args?['birthYear'] as int?,
+              gender: args?['gender'] as String?,
+              interests: args?['interests'] as String?,
+            ),
+          );
+        }
+        if (settings.name == '/about-you-location') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => AboutYouLocationPage(
+              firstName: args?['firstName'] as String?,
+              lastName: args?['lastName'] as String?,
+              email: args?['email'] as String?,
+              phone: args?['phone'] as String?,
+              countryCode: args?['countryCode'] as String?,
+              birthDay: args?['birthDay'] as int?,
+              birthMonth: args?['birthMonth'] as int?,
+              birthYear: args?['birthYear'] as int?,
+              gender: args?['gender'] as String?,
+              interests: args?['interests'] as String?,
+              lookingFor: args?['lookingFor'] as String?,
+            ),
+          );
+        }
+        if (settings.name == '/verification-prompt') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => VerificationPromptPage(
+              firstName: args?['firstName'] as String?,
+              lastName: args?['lastName'] as String?,
+              email: args?['email'] as String?,
+              phone: args?['phone'] as String?,
+              countryCode: args?['countryCode'] as String?,
+              birthDay: args?['birthDay'] as int?,
+              birthMonth: args?['birthMonth'] as int?,
+              birthYear: args?['birthYear'] as int?,
+              gender: args?['gender'] as String?,
+              interests: args?['interests'] as String?,
+              lookingFor: args?['lookingFor'] as String?,
+              location: args?['location'] as String?,
             ),
           );
         }
