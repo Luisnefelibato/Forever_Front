@@ -50,7 +50,7 @@ dependencies:
   
   # Camera & Image
   image_picker: ^1.0.4
-  camera: ^0.10.6
+  camera: ^0.10.5
   
   # Location
   geolocator: ^10.1.1
