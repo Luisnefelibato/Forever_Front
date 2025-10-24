@@ -2,51 +2,48 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- App Store Distribution -->
-	<key>method</key>
-	<string>app-store</string>
-	
-	<!-- Team ID from Apple Developer Account -->
-	<key>teamID</key>
-	<string>YOUR_TEAM_ID_HERE</string>
-	
-	<!-- Upload symbols for crash reporting -->
-	<key>uploadSymbols</key>
-	<true/>
-	
-	<!-- Upload bitcode (if needed) -->
-	<key>uploadBitcode</key>
-	<false/>
-	
-	<!-- Compile bitcode (if needed) -->
-	<key>compileBitcode</key>
-	<false/>
-	
-	<!-- Provisioning profiles by bundle ID -->
-	<key>provisioningProfiles</key>
-	<dict>
-		<key>com.imagineapps.foreverusinlove</key>
-		<string>YOUR_PROVISIONING_PROFILE_NAME</string>
-	</dict>
-	
-	<!-- Signing certificate -->
-	<key>signingCertificate</key>
-	<string>Apple Distribution</string>
-	
-	<!-- Signing style -->
-	<key>signingStyle</key>
-	<string>manual</string>
-	
-	<!-- Strip Swift symbols -->
-	<key>stripSwiftSymbols</key>
-	<true/>
-	
-	<!-- Thinning -->
-	<key>thinning</key>
-	<string>&lt;none&gt;</string>
-	
-	<!-- Destination -->
-	<key>destination</key>
-	<string>upload</string>
+    <!-- Export method for unsigned builds -->
+    <key>method</key>
+    <string>development</string>
+    
+    <!-- Team ID (leave empty for unsigned builds) -->
+    <key>teamID</key>
+    <string></string>
+    
+    <!-- Bundle identifier -->
+    <key>bundleIdentifier</key>
+    <string>com.imagineapps.foreverusinlove</string>
+    
+    <!-- App name -->
+    <key>appName</key>
+    <string>Forever Us In Love</string>
+    
+    <!-- Version -->
+    <key>version</key>
+    <string>1.0.0</string>
+    
+    <!-- Build number -->
+    <key>buildNumber</key>
+    <string>1</string>
+    
+    <!-- Compile bitcode (disabled for Flutter) -->
+    <key>compileBitcode</key>
+    <false/>
+    
+    <!-- Strip Swift symbols -->
+    <key>stripSwiftSymbols</key>
+    <true/>
+    
+    <!-- Thinning (disabled for unsigned) -->
+    <key>thinning</key>
+    <string>&lt;none&gt;</string>
+    
+    <!-- Upload bitcode (disabled) -->
+    <key>uploadBitcode</key>
+    <false/>
+    
+    <!-- Upload symbols (disabled) -->
+    <key>uploadSymbols</key>
+    <false/>
 </dict>
 </plist>
