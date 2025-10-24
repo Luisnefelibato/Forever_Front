@@ -170,6 +170,11 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         validator: _validateEmail,
+                        style: const TextStyle(
+                          fontFamily: 'Delight',
+                          color: Colors.black,
+                          fontSize: 14,
+                        ),
                         onChanged: (value) {
                           // Clear error when user starts typing
                           if (_showError) {

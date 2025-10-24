@@ -194,11 +194,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     //   'newPassword': _newPasswordController.text,
     // });
     
-    // For now, navigate to login
-    Navigator.pushNamedAndRemoveUntil(
+    // Navigate to password changed confirmation page
+    Navigator.pushReplacementNamed(
       context,
-      '/login',
-      (route) => false,
+      '/password-changed',
     );
   }
   

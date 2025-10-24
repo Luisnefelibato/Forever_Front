@@ -137,7 +137,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back, color: _primaryGreen),
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          // Always navigate to welcome page to avoid going back to forgot password flow
+                          Navigator.pushReplacementNamed(context, '/welcome');
+                        },
                         padding: EdgeInsets.zero,
                       ),
                     ),

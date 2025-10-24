@@ -293,20 +293,6 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               const SizedBox(height: 24),
               
-              // Error message
-              if (_validationState == 'error')
-                Center(
-                  child: Text(
-                    _errorMessage,
-                    style: TextStyle(
-                      fontFamily: 'Delight',
-                      fontSize: 14,
-                      color: _errorRed,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              
               // Success message
               if (_validationState == 'success')
                 Center(
@@ -323,36 +309,56 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               const SizedBox(height: 24),
               
-              // Countdown timer / Resend button
+              // Countdown timer / Resend button / Error message
               Center(
-                child: _canResend
-                    ? TextButton(
-                        onPressed: _handleResendCode,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                        ),
+                child: Column(
+                  children: [
+                    // Error message (only show if there's an error)
+                    if (_validationState == 'error')
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          'Send code again',
+                          _errorMessage,
                           style: TextStyle(
                             fontFamily: 'Delight',
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: _errorRed,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                      )
-                    : Text(
-                        'Send code again  ${_formatTime(_remainingSeconds)}',
-                        style: TextStyle(
-                          fontFamily: 'Delight',
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w400,
-                        ),
                       ),
+                    
+                    // Countdown timer or Resend button
+                    _canResend
+                        ? TextButton(
+                            onPressed: _handleResendCode,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                            ),
+                            child: Text(
+                              'Send code again',
+                              style: TextStyle(
+                                fontFamily: 'Delight',
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Send code again  ${_formatTime(_remainingSeconds)}',
+                            style: TextStyle(
+                              fontFamily: 'Delight',
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                  ],
+                ),
               ),
             ],
           ),
