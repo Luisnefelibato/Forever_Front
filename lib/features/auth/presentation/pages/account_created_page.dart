@@ -10,7 +10,16 @@ import 'package:flutter/material.dart';
 /// - Subtitle: "Your account has been successfully created, let's complete your profile." in white
 /// - Auto-navigation to about you after 3 seconds
 class AccountCreatedPage extends StatefulWidget {
-  const AccountCreatedPage({super.key});
+  final String? email;
+  final String? phone;
+  final String? countryCode;
+  
+  const AccountCreatedPage({
+    super.key,
+    this.email,
+    this.phone,
+    this.countryCode,
+  });
 
   @override
   State<AccountCreatedPage> createState() => _AccountCreatedPageState();
@@ -26,10 +35,18 @@ class _AccountCreatedPageState extends State<AccountCreatedPage> {
   @override
   void initState() {
     super.initState();
-    // Auto-navigate to about you after 3 seconds
+    // Auto-navigate to about you name screen after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/about-you');
+        Navigator.pushReplacementNamed(
+          context,
+          '/about-you-name',
+          arguments: {
+            'email': widget.email,
+            'phone': widget.phone,
+            'countryCode': widget.countryCode,
+          },
+        );
       }
     });
   }
@@ -117,6 +134,12 @@ class _AccountCreatedPageState extends State<AccountCreatedPage> {
           width: 1000,
           height: 1000,
           fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+}
+      fit: BoxFit.contain,
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'account_created_page.dart';
 
 /// Create Password Screen
 /// 
@@ -188,9 +189,15 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
     debugPrint('Registration type: ${widget.registrationType}');
     
     // Navigate to account created confirmation page
-    Navigator.pushReplacementNamed(
+    Navigator.pushReplacement(
       context,
-      '/account-created',
+      MaterialPageRoute(
+        builder: (context) => AccountCreatedPage(
+          email: widget.email,
+          phone: widget.phone,
+          countryCode: widget.countryCode,
+        ),
+      ),
     );
   }
   
