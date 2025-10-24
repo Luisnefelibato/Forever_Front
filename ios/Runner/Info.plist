@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Permissions for app features -->
+	<key>NSCameraUsageDescription</key>
+	<string>ForeverUs InLove necesita acceso a tu cámara para tomar fotos de perfil y verificar tu identidad.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ForeverUs InLove necesita acceso a tu galería para seleccionar fotos de perfil.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ForeverUs InLove usa tu ubicación para encontrar personas cerca de ti.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>ForeverUs InLove usa tu ubicación para encontrar personas cerca de ti.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ForeverUs InLove necesita acceso al micrófono para videollamadas.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>ForeverUs InLove puede acceder a tus contactos para ayudarte a conectar con amigos.</string>
+	<!-- Minimum iOS Version -->
+	<key>MinimumOSVersion</key>
+	<string>12.0</string>
+	<!-- Dark Mode Support -->
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 </dict>
 </plist>
