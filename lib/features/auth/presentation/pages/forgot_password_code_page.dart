@@ -156,9 +156,12 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
       // Navigate to reset password screen after a delay
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
-          // TODO: Navigate to reset password screen
-          // Navigator.pushReplacementNamed(context, '/reset-password');
-          Navigator.pop(context);
+          // TODO: Pass actual reset token from API response
+          Navigator.pushReplacementNamed(
+            context,
+            '/reset-password',
+            arguments: {'resetToken': 'mock_token_12345'},
+          );
         }
       });
     } else {

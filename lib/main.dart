@@ -15,6 +15,7 @@ import 'features/auth/presentation/pages/welcome_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/forgot_password_email_page.dart';
 import 'features/auth/presentation/pages/forgot_password_code_page.dart';
+import 'features/auth/presentation/pages/reset_password_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,6 +72,14 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) => ForgotPasswordCodePage(
               email: args?['email'] ?? '',
+            ),
+          );
+        }
+        if (settings.name == '/reset-password') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => ResetPasswordPage(
+              resetToken: args?['resetToken'] as String?,
             ),
           );
         }
