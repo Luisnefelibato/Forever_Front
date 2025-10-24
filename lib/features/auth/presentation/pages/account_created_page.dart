@@ -139,9 +139,3 @@ class _AccountCreatedPageState extends State<AccountCreatedPage> {
     );
   }
 }
-      fit: BoxFit.contain,
-        ),
-      ),
-    );
-  }
-}

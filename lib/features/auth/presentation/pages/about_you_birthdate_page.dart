@@ -468,10 +468,11 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
       onTap: _showDatePicker,
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: 20,
+          horizontal: 12,
           vertical: 16,
         ),
         decoration: BoxDecoration(
+          color: Colors.white, // White background
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
             color: showError ? _errorRed : Colors.black,
@@ -483,10 +484,13 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
             label,
             style: TextStyle(
               fontFamily: 'Delight',
-              fontSize: 16,
+              fontSize: 14, // Smaller font size to prevent overflow
               fontWeight: FontWeight.normal,
               color: isPlaceholder ? _placeholderGray : Colors.black,
             ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis, // Handle overflow gracefully
+            maxLines: 1, // Single line to prevent wrapping
           ),
         ),
       ),

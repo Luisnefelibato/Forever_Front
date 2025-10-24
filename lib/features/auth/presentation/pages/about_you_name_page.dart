@@ -169,7 +169,7 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
         backgroundColor: _primaryGreen,
         child: const Icon(
           Icons.arrow_forward,
-          color: Colors.white,
+          color: Colors.black,
           size: 28,
         ),
       ),
@@ -214,40 +214,42 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
         const SizedBox(height: 12),
         
         // Input field
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: showError ? _errorRed : Colors.black,
-              width: 1.5,
-            ),
+        TextField(
+          controller: controller,
+          style: const TextStyle(
+            fontFamily: 'Delight',
+            fontSize: 14,
+            color: Colors.black,
           ),
-          child: TextField(
-            controller: controller,
-            style: const TextStyle(
+          decoration: InputDecoration(
+            hintText: placeholder,
+            hintStyle: TextStyle(
               fontFamily: 'Delight',
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-              color: Colors.black,
+              color: Colors.grey[400],
+              fontSize: 14,
             ),
-            decoration: InputDecoration(
-              hintText: placeholder,
-              hintStyle: TextStyle(
-                fontFamily: 'Delight',
-                fontSize: 16,
-                fontWeight: FontWeight.normal,
-                color: _placeholderGray,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 18,
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
             ),
-            textCapitalization: TextCapitalization.words,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide(
+                color: showError ? _errorRed : Colors.black,
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide(
+                color: showError ? _errorRed : Colors.black,
+                width: 2,
+              ),
+            ),
           ),
+          textCapitalization: TextCapitalization.words,
         ),
         
         // Error message
