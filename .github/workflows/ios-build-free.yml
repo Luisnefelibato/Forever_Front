@@ -39,12 +39,14 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.13.0'
           channel: 'stable'
           cache: true
           
       - name: 📦 Get Flutter dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          flutter pub deps
         
       - name: 🔍 Run Flutter analyzer
         run: flutter analyze
@@ -57,7 +59,7 @@ jobs:
       - name: 📱 Install CocoaPods
         run: |
           cd ios
-          pod install
+          pod install --repo-update
           
       - name: 🛠️ Setup Xcode version
         uses: maxim-lobanov/setup-xcode@v1
@@ -98,12 +100,14 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.13.0'
           channel: 'stable'
           cache: true
           
       - name: 📦 Get Flutter dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          flutter pub deps
         
       - name: 🔍 Run Flutter analyzer
         run: flutter analyze
@@ -116,7 +120,7 @@ jobs:
       - name: 📱 Install CocoaPods
         run: |
           cd ios
-          pod install
+          pod install --repo-update
           
       - name: 🛠️ Setup Xcode version
         uses: maxim-lobanov/setup-xcode@v1
@@ -172,17 +176,19 @@ jobs:
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          flutter-version: '3.13.0'
           channel: 'stable'
           cache: true
           
       - name: 📦 Get Flutter dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          flutter pub deps
         
       - name: 📱 Install CocoaPods
         run: |
           cd ios
-          pod install
+          pod install --repo-update
           
       - name: 🛠️ Setup Xcode version
         uses: maxim-lobanov/setup-xcode@v1
