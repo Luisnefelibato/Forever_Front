@@ -10,60 +10,60 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # Firebase - Versiones estables y compatibles
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  firebase_messaging: ^14.7.10
+  # Firebase - Versiones compatibles con Flutter 3.19.0
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  firebase_messaging: ^14.9.4
   
   # State Management - Versiones estables
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
   
   # Dependency Injection - Versiones estables
-  get_it: ^7.6.4
-  injectable: ^2.3.2
+  get_it: ^7.7.0
+  injectable: ^2.4.2
   
   # Networking - Versiones estables
-  dio: ^5.3.2
-  retrofit: ^4.5.0
+  dio: ^5.4.3+1
+  retrofit: ^4.1.0
   pretty_dio_logger: ^1.3.1
   
   # Local Storage - Versiones estables
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.2.3
   flutter_secure_storage: ^9.0.0
   
   # Environment Variables - Versiones estables
   flutter_dotenv: ^5.1.0
   
   # Routing - Versiones estables
-  go_router: ^12.1.1
+  go_router: ^12.1.3
   
   # UI Components - Versiones estables
   cupertino_icons: ^1.0.6
-  flutter_svg: ^2.0.9
-  cached_network_image: ^3.3.0
+  flutter_svg: ^2.0.10+1
+  cached_network_image: ^3.4.0
   shimmer: ^3.0.0
   
   # Forms & Validation - Versiones estables
   formz: ^0.6.1
   
-  # Permissions - Versiones estables
-  permission_handler: ^10.4.5
+  # Permissions - Versiones compatibles
+  permission_handler: ^11.3.1
   
-  # Camera & Image - Versiones estables
-  image_picker: ^1.0.4
-  camera: ^0.10.5
+  # Camera & Image - Versiones compatibles
+  image_picker: ^1.1.2
+  camera: ^0.10.6
   
   # Location - Versiones estables
   geolocator: ^10.1.1
   
-  # Google Sign In - Versiones estables
-  google_sign_in: ^6.1.4
+  # Google Sign In - Versiones compatibles
+  google_sign_in: ^6.2.2
   
   # Utils - Versiones estables
-  intl: ^0.18.1
+  intl: ^0.19.0
   logger: ^2.0.2+1
-  connectivity_plus: ^4.0.2
+  connectivity_plus: ^6.0.5
 
 dev_dependencies:
   flutter_test:
