@@ -52,8 +52,10 @@ CREATE TABLE users (
     first_name VARCHAR(25),
     last_name VARCHAR(25),
     date_of_birth DATE,
-    gender VARCHAR(20), -- 'Man', 'Woman', 'No Binari'
-    interests VARCHAR(50), -- 'Man', 'Woman', 'Man and Woman'
+    gender VARCHAR(20), -- 'Woman', 'Man', 'No binary'
+    interests VARCHAR(50), -- 'Woman', 'Man', 'No binary', 'All of them'
+    looking_for VARCHAR(50), -- 'Long-term relationship', 'Life partner', 'Friendship', 'Companionship', 'We'll see'
+    location VARCHAR(255), -- City, State, Country format (e.g., 'Bogotá, Bogota, Colombia')
     
     -- Verification Status
     email_verified BOOLEAN DEFAULT FALSE,
@@ -970,8 +972,12 @@ ALTER TABLE users ADD COLUMN profile_completion_step INTEGER DEFAULT 0;
 -- 0 = Account created, not started
 -- 1 = Name completed
 -- 2 = Birthdate completed
--- 3 = Gender/Interests completed
--- 4 = Profile complete
+-- 3 = Gender completed
+-- 4 = Interests (meeting preferences) completed
+-- 5 = Looking for (relationship type) completed
+-- 6 = Location completed
+-- 7 = Verification prompt shown
+-- 8 = Profile complete
 
 ALTER TABLE users ADD COLUMN profile_completed_at TIMESTAMP NULL;
 ```
@@ -990,13 +996,27 @@ ALTER TABLE users ADD COLUMN profile_completed_at TIMESTAMP NULL;
 }
 ```
 
-**Request Body:**
+**Request Body (Basic Profile - Name & Birthdate):**
 ```json
 {
   "firstName": "John",
   "lastName": "Doe",
   "dateOfBirth": "1990-06-04",
   "completionStep": 2
+}
+```
+
+**Request Body (Complete Profile - All Fields):**
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "dateOfBirth": "1990-06-04",
+  "gender": "Man",
+  "interests": "Woman",
+  "lookingFor": "Long-term relationship",
+  "location": "Bogotá, Bogota, Colombia",
+  "completionStep": 6
 }
 ```
 
@@ -1011,8 +1031,12 @@ ALTER TABLE users ADD COLUMN profile_completed_at TIMESTAMP NULL;
     "lastName": "Doe",
     "dateOfBirth": "1990-06-04",
     "age": 34,
-    "profileCompletionStep": 2,
-    "profileCompletionPercentage": 40
+    "gender": "Man",
+    "interests": "Woman",
+    "lookingFor": "Long-term relationship",
+    "location": "Bogotá, Bogota, Colombia",
+    "profileCompletionStep": 6,
+    "profileCompletionPercentage": 75
   }
 }
 ```
@@ -1074,13 +1098,43 @@ ALTER TABLE users ADD COLUMN profile_completed_at TIMESTAMP NULL;
    - Date cannot be in the future
    - Date must be a realistic age (not more than 120 years ago)
 
+4. **Gender:**
+   - Required
+   - Must be one of: "Woman", "Man", "No binary"
+   - Case-sensitive validation
+
+5. **Interests (Meeting Preferences):**
+   - Required
+   - Must be one of: "Woman", "Man", "No binary", "All of them"
+   - Case-sensitive validation
+
+6. **Looking For (Relationship Type):**
+   - Required
+   - Must be one of: "Long-term relationship", "Life partner", "Friendship", "Companionship", "We'll see"
+   - Case-sensitive validation
+
+7. **Location:**
+   - Required
+   - Format: "City, State, Country"
+   - Maximum 255 characters
+   - Should be validated against a location database/API
+
 ### Backend Implementation Example (Node.js/Express)
 
 ```javascript
 // routes/users.js
 router.post('/profile/update', authenticateToken, async (req, res) => {
   try {
-    const { firstName, lastName, dateOfBirth, completionStep } = req.body;
+    const { 
+      firstName, 
+      lastName, 
+      dateOfBirth, 
+      gender, 
+      interests, 
+      lookingFor, 
+      location, 
+      completionStep 
+    } = req.body;
     const userId = req.user.id; // From JWT token
 
     // Validate age (18+)
@@ -1097,12 +1151,52 @@ router.post('/profile/update', authenticateToken, async (req, res) => {
       }
     }
 
+    // Validate gender
+    const validGenders = ['Woman', 'Man', 'No binary'];
+    if (gender && !validGenders.includes(gender)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid gender value',
+        errorCode: 'INVALID_GENDER'
+      });
+    }
+
+    // Validate interests
+    const validInterests = ['Woman', 'Man', 'No binary', 'All of them'];
+    if (interests && !validInterests.includes(interests)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid interests value',
+        errorCode: 'INVALID_INTERESTS'
+      });
+    }
+
+    // Validate looking for
+    const validLookingFor = [
+      'Long-term relationship', 
+      'Life partner', 
+      'Friendship', 
+      'Companionship', 
+      'We\'ll see'
+    ];
+    if (lookingFor && !validLookingFor.includes(lookingFor)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid lookingFor value',
+        errorCode: 'INVALID_LOOKING_FOR'
+      });
+    }
+
     // Update user profile
     const updatedUser = await User.update(
       {
         first_name: firstName,
         last_name: lastName,
         date_of_birth: dateOfBirth,
+        gender: gender,
+        interests: interests,
+        looking_for: lookingFor,
+        location: location,
         profile_completion_step: completionStep,
         updated_at: new Date()
       },
@@ -1111,8 +1205,8 @@ router.post('/profile/update', authenticateToken, async (req, res) => {
       }
     );
 
-    // Calculate profile completion percentage
-    const completionPercentage = (completionStep / 5) * 100;
+    // Calculate profile completion percentage (max step is 8)
+    const completionPercentage = Math.round((completionStep / 8) * 100);
 
     res.status(200).json({
       success: true,
@@ -1122,7 +1216,11 @@ router.post('/profile/update', authenticateToken, async (req, res) => {
         firstName,
         lastName,
         dateOfBirth,
-        age: calculateAge(new Date(dateOfBirth)),
+        age: dateOfBirth ? calculateAge(new Date(dateOfBirth)) : null,
+        gender,
+        interests,
+        lookingFor,
+        location,
         profileCompletionStep: completionStep,
         profileCompletionPercentage: completionPercentage
       }
@@ -1173,12 +1271,20 @@ class ProfileUpdateRequest {
   final String? firstName;
   final String? lastName;
   final String? dateOfBirth; // YYYY-MM-DD format
+  final String? gender; // 'Woman', 'Man', 'No binary'
+  final String? interests; // 'Woman', 'Man', 'No binary', 'All of them'
+  final String? lookingFor; // 'Long-term relationship', 'Life partner', etc.
+  final String? location; // 'City, State, Country' format
   final int completionStep;
 
   ProfileUpdateRequest({
     this.firstName,
     this.lastName,
     this.dateOfBirth,
+    this.gender,
+    this.interests,
+    this.lookingFor,
+    this.location,
     required this.completionStep,
   });
 
@@ -1186,6 +1292,10 @@ class ProfileUpdateRequest {
     if (firstName != null) 'firstName': firstName,
     if (lastName != null) 'lastName': lastName,
     if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,
+    if (gender != null) 'gender': gender,
+    if (interests != null) 'interests': interests,
+    if (lookingFor != null) 'lookingFor': lookingFor,
+    if (location != null) 'location': location,
     'completionStep': completionStep,
   };
 }
@@ -1240,13 +1350,16 @@ void _validateAndContinue() async {
 ### Migration Script
 
 ```sql
--- Add profile completion tracking
+-- Add profile completion tracking and new fields
 ALTER TABLE users 
   ADD COLUMN profile_completion_step INTEGER DEFAULT 0,
-  ADD COLUMN profile_completed_at TIMESTAMP NULL;
+  ADD COLUMN profile_completed_at TIMESTAMP NULL,
+  ADD COLUMN looking_for VARCHAR(50),
+  ADD COLUMN location VARCHAR(255);
 
 -- Add index for faster queries
 CREATE INDEX idx_profile_completion ON users(profile_completion_step);
+CREATE INDEX idx_location ON users(location);
 
 -- Update existing users
 UPDATE users 
