@@ -4,13 +4,13 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
   
-  # Firebase - Versiones compatibles con Dart SDK 3.2.0
+  # Firebase - Versiones compatibles con Dart SDK 3.1.0
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
   firebase_messaging: ^14.7.10
@@ -47,8 +47,8 @@ dependencies:
   # Forms & Validation - Versiones compatibles
   formz: ^0.6.1
   
-  # Permissions - Versiones compatibles con Dart SDK 3.2.0
-  permission_handler: ^11.0.1
+  # Permissions - Versiones compatibles con Dart SDK 3.1.0
+  permission_handler: ^10.4.5
   
   # Camera & Image - Versiones compatibles
   image_picker: ^1.0.4
@@ -58,7 +58,7 @@ dependencies:
   geolocator: ^10.1.0
   
   # Google Sign In - Versiones compatibles
-  google_sign_in: ^6.1.5
+  google_sign_in: ^6.1.4
   
   # Utils - Versiones compatibles
   intl: ^0.18.1
