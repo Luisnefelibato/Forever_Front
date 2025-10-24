@@ -69,7 +69,7 @@ jobs:
           flutter build ios --simulator --debug
           
       - name: 📤 Upload Simulator Build as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-simulator-build
           path: build/ios/iphonesimulator/
@@ -136,7 +136,7 @@ jobs:
           cd ../../../
           
       - name: 📤 Upload Unsigned Build as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-unsigned-build
           path: |
@@ -194,7 +194,7 @@ jobs:
           flutter build ios --simulator --debug --target-platform ios --ios-version ${{ matrix.ios-version }}
           
       - name: 📤 Upload Build for iOS ${{ matrix.ios-version }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-${{ matrix.ios-version }}-build
           path: build/ios/iphonesimulator/
