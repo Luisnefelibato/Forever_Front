@@ -1,30 +1,48 @@
 import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
+import '../network/dio_client.dart';
+import '../network/auth_api_client.dart';
+import '../storage/secure_storage_service.dart';
+import '../../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
 
 final getIt = GetIt.instance;
 
 /// Configure dependency injection
-/// 
-/// This function will be called at app startup to register all dependencies
-/// Use @injectable annotation in classes to auto-register them
-@InjectableInit()
 Future<void> configureDependencies() async {
-  // TODO: Add generated code here when running build_runner
-  // await getIt.init();
-  
-  // Manual registration for now (until code generation is set up)
+  // Register dependencies
   _registerCoreDependencies();
   _registerAuthDependencies();
 }
 
 void _registerCoreDependencies() {
-  // Register core dependencies (network, storage, etc.)
-  // Example:
-  // getIt.registerLazySingleton<Dio>(() => createDioInstance());
+  // Storage
+  getIt.registerLazySingleton<SecureStorageService>(
+    () => SecureStorageService(),
+  );
+
+  // Dio Client
+  getIt.registerLazySingleton(
+    () => DioClient.instance,
+  );
+
+  // API Client
+  getIt.registerLazySingleton<AuthApiClient>(
+    () => AuthApiClient(getIt()),
+  );
 }
 
 void _registerAuthDependencies() {
-  // Register auth-related dependencies
-  // Example:
-  // getIt.registerFactory<LoginBloc>(() => LoginBloc(getIt()));
+  // Data Sources
+  getIt.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(apiClient: getIt()),
+  );
+
+  // Repositories
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(
+      remoteDataSource: getIt(),
+      storageService: getIt(),
+    ),
+  );
 }
