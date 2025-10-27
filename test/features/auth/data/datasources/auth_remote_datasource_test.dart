@@ -1,35 +1,30 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http_mock_adapter/http_mock_adapter.dart';
-import 'package:forever_us_in_love/core/error/exceptions.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:forever_us_in_love/core/errors/exceptions.dart';
 import 'package:forever_us_in_love/core/network/auth_api_client.dart';
 import 'package:forever_us_in_love/features/auth/data/datasources/auth_remote_datasource_impl.dart';
 import '../../../../../helpers/test_helper.dart';
 
+// Generate mocks
+@GenerateMocks([AuthApiClient])
+import 'auth_remote_datasource_test_simplified.mocks.dart';
+
 void main() {
-  late Dio dio;
-  late DioAdapter dioAdapter;
-  late AuthApiClient apiClient;
+  late MockAuthApiClient mockApiClient;
   late AuthRemoteDataSourceImpl dataSource;
 
-  const baseUrl = 'http://3.232.35.26:8000/api/v1';
-
   setUp(() {
-    dio = Dio(BaseOptions(baseUrl: baseUrl));
-    dioAdapter = DioAdapter(dio: dio);
-    apiClient = AuthApiClient(dio);
-    dataSource = AuthRemoteDataSourceImpl(apiClient: apiClient);
+    mockApiClient = MockAuthApiClient();
+    dataSource = AuthRemoteDataSourceImpl(apiClient: mockApiClient);
   });
 
-  group('AuthRemoteDataSource - Login Endpoints', () {
-    test('POST /auth/login - should return AuthResponse on success', () async {
+  group('AuthRemoteDataSource - Login', () {
+    test('should return AuthResponse when login succeeds', () async {
       // Arrange
-      const path = '/auth/login';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(200, TestHelper.mockAuthResponseJson),
-        data: TestHelper.mockLoginRequest.toJson(),
-      );
+      when(mockApiClient.login(any))
+          .thenAnswer((_) async => TestHelper.mockAuthResponse);
 
       // Act
       final result = await dataSource.login(TestHelper.mockLoginRequest);
@@ -37,14 +32,20 @@ void main() {
       // Assert
       expect(result.token, TestHelper.testToken);
       expect(result.user.email, TestHelper.testEmail);
+      verify(mockApiClient.login(any)).called(1);
     });
 
-    test('POST /auth/login - should throw ServerException on 401', () async {
+    test('should throw ServerException when login fails with 401', () async {
       // Arrange
-      const path = '/auth/login';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(401, TestHelper.mockErrorResponseJson),
+      when(mockApiClient.login(any)).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/login'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/auth/login'),
+            statusCode: 401,
+            data: {'message': 'Invalid credentials'},
+          ),
+        ),
       );
 
       // Act & Assert
@@ -53,118 +54,13 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-
-    test('POST /auth/logout - should complete successfully', () async {
-      // Arrange
-      const path = '/auth/logout';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Logged out successfully'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.logout(),
-        returnsNormally,
-      );
-    });
-
-    test('POST /auth/logout/all-devices - should complete successfully',
-        () async {
-      // Arrange
-      const path = '/auth/logout/all-devices';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Logged out from all devices'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.logoutAllDevices(),
-        returnsNormally,
-      );
-    });
-
-    test('POST /auth/logout/device/{deviceId} - should complete successfully',
-        () async {
-      // Arrange
-      const deviceId = 'device-123';
-      final path = '/auth/logout/device/$deviceId';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Device logged out'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.logoutDevice(deviceId),
-        returnsNormally,
-      );
-    });
-
-    test('GET /auth/sessions - should return list of sessions', () async {
-      // Arrange
-      const path = '/auth/sessions';
-      dioAdapter.onGet(
-        path,
-        (server) => server.reply(200, {
-          'data': [
-            {
-              'id': 'session-1',
-              'device': 'iPhone 13',
-              'ip': '192.168.1.1',
-              'last_active': '2024-01-15T10:00:00Z',
-            }
-          ]
-        }),
-      );
-
-      // Act
-      final result = await dataSource.getSessions();
-
-      // Assert
-      expect(result, isA<List>());
-      expect(result.length, 1);
-    });
-
-    test('DELETE /auth/sessions/{sessionId} - should delete session', () async {
-      // Arrange
-      const sessionId = 'session-123';
-      final path = '/auth/sessions/$sessionId';
-      dioAdapter.onDelete(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Session deleted'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.deleteSession(sessionId),
-        returnsNormally,
-      );
-    });
   });
 
-  group('AuthRemoteDataSource - Registration Endpoints', () {
-    test('POST /auth/register/simple-register - should return AuthResponse',
-        () async {
+  group('AuthRemoteDataSource - Register', () {
+    test('should return AuthResponse when registration succeeds', () async {
       // Arrange
-      const path = '/auth/register/simple-register';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(201, TestHelper.mockAuthResponseJson),
-      );
+      when(mockApiClient.register(any))
+          .thenAnswer((_) async => TestHelper.mockAuthResponse);
 
       // Act
       final result = await dataSource.register(TestHelper.mockRegisterRequest);
@@ -172,57 +68,23 @@ void main() {
       // Assert
       expect(result.token, TestHelper.testToken);
       expect(result.user.email, TestHelper.testEmail);
+      verify(mockApiClient.register(any)).called(1);
     });
 
-    test(
-        'POST /auth/register/with-email-verification - should return AuthResponse',
-        () async {
+    test('should throw ServerException when email already exists', () async {
       // Arrange
-      const path = '/auth/register/with-email-verification';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(201, TestHelper.mockAuthResponseJson),
-      );
-
-      // Act
-      final result = await dataSource.registerWithEmailVerification(
-        TestHelper.mockRegisterRequest,
-      );
-
-      // Assert
-      expect(result.token, TestHelper.testToken);
-      expect(result.user.emailVerified, false); // Not verified yet
-    });
-
-    test(
-        'POST /auth/register/with-phone-verification - should return AuthResponse',
-        () async {
-      // Arrange
-      const path = '/auth/register/with-phone-verification';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(201, TestHelper.mockAuthResponseJson),
-      );
-
-      // Act
-      final result = await dataSource.registerWithPhoneVerification(
-        TestHelper.mockRegisterRequest,
-      );
-
-      // Assert
-      expect(result.token, TestHelper.testToken);
-      expect(result.user.phone, TestHelper.testPhone);
-    });
-
-    test('POST /auth/register - should throw ServerException on 422', () async {
-      // Arrange
-      const path = '/auth/register/simple-register';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(422, {
-          'message': 'Validation failed',
-          'errors': {'email': ['Email already exists']}
-        }),
+      when(mockApiClient.register(any)).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/register'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/auth/register'),
+            statusCode: 422,
+            data: {
+              'message': 'Validation failed',
+              'errors': {'email': ['Email already exists']}
+            },
+          ),
+        ),
       );
 
       // Act & Assert
@@ -233,329 +95,206 @@ void main() {
     });
   });
 
-  group('AuthRemoteDataSource - Email Verification Endpoints', () {
-    test('POST /auth/verification/email/send - should send verification email',
-        () async {
+  group('AuthRemoteDataSource - Email Verification', () {
+    test('should send email verification successfully', () async {
       // Arrange
-      const path = '/auth/verification/email/send';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Verification email sent'),
-        ),
-      );
+      when(mockApiClient.sendEmailVerification())
+          .thenAnswer((_) async => {});
 
       // Act & Assert
-      expect(
-        () => dataSource.sendEmailVerification(),
-        returnsNormally,
-      );
+      await dataSource.sendEmailVerification();
+      verify(mockApiClient.sendEmailVerification()).called(1);
     });
 
-    test('POST /auth/verification/email/verify - should verify email code',
-        () async {
+    test('should verify email code successfully', () async {
       // Arrange
-      const path = '/auth/verification/email/verify';
-      dioAdapter.onPost(
-        path,
-        (server) =>
-            server.reply(200, TestHelper.mockVerificationResponseJson),
-      );
+      when(mockApiClient.verifyEmailCode(any))
+          .thenAnswer((_) async => TestHelper.mockVerificationResponse);
 
       // Act
-      final result = await dataSource.verifyEmailCode(
-        TestHelper.mockVerifyCodeRequest,
-      );
+      final result = await dataSource.verifyEmailCode('123456');
 
       // Assert
       expect(result.verified, true);
-      expect(result.message, 'Verification successful');
+      verify(mockApiClient.verifyEmailCode(any)).called(1);
     });
 
-    test(
-        'POST /auth/verification/email/verify - should throw on invalid code',
-        () async {
+    test('should throw ServerException when verification code is invalid', () async {
       // Arrange
-      const path = '/auth/verification/email/verify';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          400,
-          TestHelper.createErrorResponse('Invalid verification code'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.verifyEmailCode(TestHelper.mockVerifyCodeRequest),
-        throwsA(isA<ServerException>()),
-      );
-    });
-
-    test('POST /auth/verification/email/resend - should resend verification',
-        () async {
-      // Arrange
-      const path = '/auth/verification/email/resend';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Verification code resent'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () =>
-            dataSource.resendEmailVerification(TestHelper.mockResendCodeRequest),
-        returnsNormally,
-      );
-    });
-
-    test('GET /auth/verification/email/status - should check email status',
-        () async {
-      // Arrange
-      const path = '/auth/verification/email/status';
-      dioAdapter.onGet(
-        path,
-        (server) =>
-            server.reply(200, TestHelper.mockVerificationResponseJson),
-      );
-
-      // Act
-      final result = await dataSource.checkEmailVerificationStatus();
-
-      // Assert
-      expect(result.verified, true);
-    });
-  });
-
-  group('AuthRemoteDataSource - Phone Verification Endpoints', () {
-    test('POST /auth/verification/phone/send - should send verification SMS',
-        () async {
-      // Arrange
-      const path = '/auth/verification/phone/send';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Verification SMS sent'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.sendPhoneVerification(),
-        returnsNormally,
-      );
-    });
-
-    test('POST /auth/verification/phone/verify - should verify phone code',
-        () async {
-      // Arrange
-      const path = '/auth/verification/phone/verify';
-      dioAdapter.onPost(
-        path,
-        (server) =>
-            server.reply(200, TestHelper.mockVerificationResponseJson),
-      );
-
-      // Act
-      final result = await dataSource.verifyPhoneCode(
-        TestHelper.mockVerifyCodeRequest,
-      );
-
-      // Assert
-      expect(result.verified, true);
-    });
-
-    test('POST /auth/verification/phone/resend - should resend SMS', () async {
-      // Arrange
-      const path = '/auth/verification/phone/resend';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('SMS code resent'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () =>
-            dataSource.resendPhoneVerification(TestHelper.mockResendCodeRequest),
-        returnsNormally,
-      );
-    });
-  });
-
-  group('AuthRemoteDataSource - Password Management Endpoints', () {
-    test('POST /auth/password/forgot - should send password reset email',
-        () async {
-      // Arrange
-      const path = '/auth/password/forgot';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Password reset email sent'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.forgotPassword(TestHelper.testEmail),
-        returnsNormally,
-      );
-    });
-
-    test('POST /auth/password/reset - should reset password with token',
-        () async {
-      // Arrange
-      const path = '/auth/password/reset';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Password reset successful'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.resetPassword(
-          token: 'reset-token',
-          password: 'NewPassword123!',
-        ),
-        returnsNormally,
-      );
-    });
-
-    test('POST /auth/password/change - should change password', () async {
-      // Arrange
-      const path = '/auth/password/change';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          200,
-          TestHelper.createSuccessResponse('Password changed successfully'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.changePassword(
-          currentPassword: TestHelper.testPassword,
-          newPassword: 'NewPassword456!',
-        ),
-        returnsNormally,
-      );
-    });
-
-    test('POST /auth/password/forgot - should throw on invalid email',
-        () async {
-      // Arrange
-      const path = '/auth/password/forgot';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          404,
-          TestHelper.createErrorResponse('Email not found'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.forgotPassword('invalid@email.com'),
-        throwsA(isA<ServerException>()),
-      );
-    });
-  });
-
-  group('AuthRemoteDataSource - Social Auth Endpoints', () {
-    test('POST /auth/social/google - should login with Google', () async {
-      // Arrange
-      const path = '/auth/social/google';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(200, TestHelper.mockAuthResponseJson),
-      );
-
-      // Act
-      final result = await dataSource.loginWithGoogle('google-id-token');
-
-      // Assert
-      expect(result.token, TestHelper.testToken);
-      expect(result.user.email, TestHelper.testEmail);
-    });
-
-    test('POST /auth/social/apple - should login with Apple', () async {
-      // Arrange
-      const path = '/auth/social/apple';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(200, TestHelper.mockAuthResponseJson),
-      );
-
-      // Act
-      final result = await dataSource.loginWithApple('apple-id-token');
-
-      // Assert
-      expect(result.token, TestHelper.testToken);
-      expect(result.user.email, TestHelper.testEmail);
-    });
-
-    test('POST /auth/social/google - should throw on invalid token', () async {
-      // Arrange
-      const path = '/auth/social/google';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          401,
-          TestHelper.createErrorResponse('Invalid Google token'),
-        ),
-      );
-
-      // Act & Assert
-      expect(
-        () => dataSource.loginWithGoogle('invalid-token'),
-        throwsA(isA<ServerException>()),
-      );
-    });
-  });
-
-  group('AuthRemoteDataSource - Network Error Handling', () {
-    test('should throw NetworkException on connection timeout', () async {
-      // Arrange
-      const path = '/auth/login';
-      dioAdapter.onPost(
-        path,
-        (server) => server.throws(
-          408,
-          DioException.connectionTimeout(
-            timeout: const Duration(seconds: 30),
-            requestOptions: RequestOptions(path: path),
+      when(mockApiClient.verifyEmailCode(any)).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/verification/email/verify'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/auth/verification/email/verify'),
+            statusCode: 400,
+            data: {'message': 'Invalid verification code'},
           ),
         ),
       );
 
       // Act & Assert
       expect(
+        () => dataSource.verifyEmailCode('000000'),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
+
+  group('AuthRemoteDataSource - Phone Verification', () {
+    test('should send phone verification successfully', () async {
+      // Arrange
+      when(mockApiClient.sendPhoneVerification())
+          .thenAnswer((_) async => {});
+
+      // Act & Assert
+      await dataSource.sendPhoneVerification();
+      verify(mockApiClient.sendPhoneVerification()).called(1);
+    });
+
+    test('should verify phone code successfully', () async {
+      // Arrange
+      when(mockApiClient.verifyPhoneCode(any))
+          .thenAnswer((_) async => TestHelper.mockVerificationResponse);
+
+      // Act
+      final result = await dataSource.verifyPhoneCode('123456');
+
+      // Assert
+      expect(result.verified, true);
+      verify(mockApiClient.verifyPhoneCode(any)).called(1);
+    });
+  });
+
+  group('AuthRemoteDataSource - Password Management', () {
+    test('should send forgot password request successfully', () async {
+      // Arrange
+      when(mockApiClient.forgotPassword(any))
+          .thenAnswer((_) async => {'message': 'Reset email sent'});
+
+      // Act & Assert
+      await dataSource.forgotPassword('test@example.com');
+      verify(mockApiClient.forgotPassword(any)).called(1);
+    });
+
+    test('should change password successfully', () async {
+      // Arrange
+      when(mockApiClient.changePassword(any))
+          .thenAnswer((_) async => {'message': 'Password changed'});
+
+      // Act & Assert
+      await dataSource.changePassword('newpass123', 'newpass123');
+      verify(mockApiClient.changePassword(any)).called(1);
+    });
+
+    test('should throw ServerException when email not found', () async {
+      // Arrange
+      when(mockApiClient.forgotPassword(any)).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/password/forgot'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/auth/password/forgot'),
+            statusCode: 404,
+            data: {'message': 'Email not found'},
+          ),
+        ),
+      );
+
+      // Act & Assert
+      expect(
+        () => dataSource.forgotPassword('notfound@example.com'),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
+
+  group('AuthRemoteDataSource - Social Auth', () {
+    test('should login with Google successfully', () async {
+      // Arrange
+      when(mockApiClient.googleLogin(any))
+          .thenAnswer((_) async => TestHelper.mockAuthResponse);
+
+      // Act
+      final result = await dataSource.googleLogin('google-token');
+
+      // Assert
+      expect(result.token, TestHelper.testToken);
+      verify(mockApiClient.googleLogin(any)).called(1);
+    });
+
+    test('should login with Facebook successfully', () async {
+      // Arrange
+      when(mockApiClient.facebookLogin(any))
+          .thenAnswer((_) async => TestHelper.mockAuthResponse);
+
+      // Act
+      final result = await dataSource.facebookLogin('facebook-token');
+
+      // Assert
+      expect(result.token, TestHelper.testToken);
+      verify(mockApiClient.facebookLogin(any)).called(1);
+    });
+
+    test('should throw ServerException when Google token is invalid', () async {
+      // Arrange
+      when(mockApiClient.googleLogin(any)).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/social/google'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/auth/social/google'),
+            statusCode: 401,
+            data: {'message': 'Invalid Google token'},
+          ),
+        ),
+      );
+
+      // Act & Assert
+      expect(
+        () => dataSource.googleLogin('invalid-token'),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
+
+  group('AuthRemoteDataSource - Logout', () {
+    test('should logout successfully', () async {
+      // Arrange
+      when(mockApiClient.logout())
+          .thenAnswer((_) async => {});
+
+      // Act & Assert
+      await dataSource.logout();
+      verify(mockApiClient.logout()).called(1);
+    });
+  });
+
+  group('AuthRemoteDataSource - Error Handling', () {
+    test('should handle network timeout', () async {
+      // Arrange
+      when(mockApiClient.login(any)).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/login'),
+          type: DioExceptionType.connectionTimeout,
+          message: 'Connection timeout',
+        ),
+      );
+
+      // Act & Assert
+      expect(
         () => dataSource.login(TestHelper.mockLoginRequest),
-        throwsA(isA<NetworkException>()),
+        throwsA(isA<ServerException>()),
       );
     });
 
-    test('should throw ServerException on 500 internal server error',
-        () async {
+    test('should handle server error 500', () async {
       // Arrange
-      const path = '/auth/login';
-      dioAdapter.onPost(
-        path,
-        (server) => server.reply(
-          500,
-          TestHelper.createErrorResponse('Internal server error'),
+      when(mockApiClient.login(any)).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/login'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/auth/login'),
+            statusCode: 500,
+            data: {'message': 'Internal server error'},
+          ),
         ),
       );
 

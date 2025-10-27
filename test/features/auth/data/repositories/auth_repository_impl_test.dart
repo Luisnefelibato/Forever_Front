@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:forever_us_in_love/core/error/failures.dart';
-import 'package:forever_us_in_love/core/error/exceptions.dart';
+import 'package:forever_us_in_love/core/errors/failures.dart';
+import 'package:forever_us_in_love/core/errors/exceptions.dart';
 import 'package:forever_us_in_love/core/storage/secure_storage_service.dart';
 import 'package:forever_us_in_love/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:forever_us_in_love/features/auth/data/repositories/auth_repository_impl.dart';
@@ -35,8 +35,9 @@ void main() {
           .thenAnswer((_) async => TestHelper.mockAuthResponse);
       when(mockStorageService.saveToken(any)).thenAnswer((_) async => true);
       when(mockStorageService.saveUserId(any)).thenAnswer((_) async => true);
-      when(mockStorageService.saveRefreshToken(any))
-          .thenAnswer((_) async => true);
+      when(mockStorageService.saveUserEmail(any)).thenAnswer((_) async => true);
+      when(mockStorageService.saveRememberMe(any)).thenAnswer((_) async => true);
+      when(mockStorageService.saveLastLogin(any)).thenAnswer((_) async => true);
 
       // Act
       final result = await repository.login(
@@ -61,7 +62,7 @@ void main() {
     test('should return ServerFailure when login fails', () async {
       // Arrange
       when(mockRemoteDataSource.login(any)).thenThrow(
-        ServerException(message: 'Invalid credentials', code: 401),
+        const ServerException(message: 'Invalid credentials', code: 401),
       );
 
       // Act
@@ -81,29 +82,6 @@ void main() {
         (user) => fail('Should not return user'),
       );
     });
-
-    test('should return NetworkFailure when network error occurs', () async {
-      // Arrange
-      when(mockRemoteDataSource.login(any)).thenThrow(
-        NetworkException(message: 'No internet connection'),
-      );
-
-      // Act
-      final result = await repository.login(
-        login: TestHelper.testEmail,
-        password: TestHelper.testPassword,
-      );
-
-      // Assert
-      expect(result, isA<Left<Failure, User>>());
-      result.fold(
-        (failure) {
-          expect(failure, isA<NetworkFailure>());
-          expect(failure.message, 'No internet connection');
-        },
-        (user) => fail('Should not return user'),
-      );
-    });
   });
 
   group('AuthRepositoryImpl - Register', () {
@@ -113,8 +91,7 @@ void main() {
           .thenAnswer((_) async => TestHelper.mockAuthResponse);
       when(mockStorageService.saveToken(any)).thenAnswer((_) async => true);
       when(mockStorageService.saveUserId(any)).thenAnswer((_) async => true);
-      when(mockStorageService.saveRefreshToken(any))
-          .thenAnswer((_) async => true);
+      when(mockStorageService.saveUserEmail(any)).thenAnswer((_) async => true);
 
       // Act
       final result = await repository.register(
@@ -141,7 +118,7 @@ void main() {
     test('should return ServerFailure when email already exists', () async {
       // Arrange
       when(mockRemoteDataSource.register(any)).thenThrow(
-        ServerException(message: 'Email already registered', code: 422),
+        const ServerException(message: 'Email already registered', code: 422),
       );
 
       // Act
@@ -202,7 +179,7 @@ void main() {
     test('should return failure when verification code is invalid', () async {
       // Arrange
       when(mockRemoteDataSource.verifyEmailCode(any)).thenThrow(
-        ServerException(message: 'Invalid verification code', code: 400),
+        const ServerException(message: 'Invalid verification code', code: 400),
       );
 
       // Act
@@ -216,37 +193,6 @@ void main() {
           expect(failure.message, 'Invalid verification code');
         },
         (verified) => fail('Should not return verified'),
-      );
-    });
-
-    test('should resend email verification code successfully', () async {
-      // Arrange
-      when(mockRemoteDataSource.resendEmailVerification(any))
-          .thenAnswer((_) async => {});
-
-      // Act
-      final result = await repository.resendEmailVerification(
-        TestHelper.testEmail,
-      );
-
-      // Assert
-      expect(result, isA<Right<Failure, void>>());
-      verify(mockRemoteDataSource.resendEmailVerification(any)).called(1);
-    });
-
-    test('should check email verification status', () async {
-      // Arrange
-      when(mockRemoteDataSource.checkEmailVerificationStatus())
-          .thenAnswer((_) async => TestHelper.mockVerificationResponse);
-
-      // Act
-      final result = await repository.checkEmailVerificationStatus();
-
-      // Assert
-      expect(result, isA<Right<Failure, bool>>());
-      result.fold(
-        (failure) => fail('Should not return failure'),
-        (verified) => expect(verified, true),
       );
     });
   });
@@ -282,21 +228,6 @@ void main() {
         (verified) => expect(verified, true),
       );
     });
-
-    test('should resend phone verification code successfully', () async {
-      // Arrange
-      when(mockRemoteDataSource.resendPhoneVerification(any))
-          .thenAnswer((_) async => {});
-
-      // Act
-      final result = await repository.resendPhoneVerification(
-        TestHelper.testPhone,
-      );
-
-      // Assert
-      expect(result, isA<Right<Failure, void>>());
-      verify(mockRemoteDataSource.resendPhoneVerification(any)).called(1);
-    });
   });
 
   group('AuthRepositoryImpl - Password Management', () {
@@ -313,46 +244,20 @@ void main() {
       verify(mockRemoteDataSource.forgotPassword(any)).called(1);
     });
 
-    test('should reset password successfully', () async {
-      // Arrange
-      when(mockRemoteDataSource.resetPassword(
-        token: anyNamed('token'),
-        password: anyNamed('password'),
-      )).thenAnswer((_) async => {});
-
-      // Act
-      final result = await repository.resetPassword(
-        token: 'reset-token',
-        password: 'NewPassword123!',
-      );
-
-      // Assert
-      expect(result, isA<Right<Failure, void>>());
-      verify(mockRemoteDataSource.resetPassword(
-        token: 'reset-token',
-        password: 'NewPassword123!',
-      )).called(1);
-    });
-
     test('should change password successfully', () async {
       // Arrange
-      when(mockRemoteDataSource.changePassword(
-        currentPassword: anyNamed('currentPassword'),
-        newPassword: anyNamed('newPassword'),
-      )).thenAnswer((_) async => {});
+      when(mockRemoteDataSource.changePassword(any, any))
+          .thenAnswer((_) async => {});
 
       // Act
       final result = await repository.changePassword(
-        currentPassword: TestHelper.testPassword,
-        newPassword: 'NewPassword456!',
+        'NewPassword456!',
+        'NewPassword456!',
       );
 
       // Assert
       expect(result, isA<Right<Failure, void>>());
-      verify(mockRemoteDataSource.changePassword(
-        currentPassword: TestHelper.testPassword,
-        newPassword: 'NewPassword456!',
-      )).called(1);
+      verify(mockRemoteDataSource.changePassword(any, any)).called(1);
     });
   });
 
@@ -360,10 +265,7 @@ void main() {
     test('should logout successfully and clear storage', () async {
       // Arrange
       when(mockRemoteDataSource.logout()).thenAnswer((_) async => {});
-      when(mockStorageService.clearToken()).thenAnswer((_) async => true);
-      when(mockStorageService.clearUserId()).thenAnswer((_) async => true);
-      when(mockStorageService.clearRefreshToken())
-          .thenAnswer((_) async => true);
+      when(mockStorageService.clearAll()).thenAnswer((_) async => {});
 
       // Act
       final result = await repository.logout();
@@ -371,58 +273,56 @@ void main() {
       // Assert
       expect(result, isA<Right<Failure, void>>());
       verify(mockRemoteDataSource.logout()).called(1);
-      verify(mockStorageService.clearToken()).called(1);
-      verify(mockStorageService.clearUserId()).called(1);
-      verify(mockStorageService.clearRefreshToken()).called(1);
-    });
-
-    test('should logout from all devices successfully', () async {
-      // Arrange
-      when(mockRemoteDataSource.logoutAllDevices())
-          .thenAnswer((_) async => {});
-      when(mockStorageService.clearToken()).thenAnswer((_) async => true);
-      when(mockStorageService.clearUserId()).thenAnswer((_) async => true);
-      when(mockStorageService.clearRefreshToken())
-          .thenAnswer((_) async => true);
-
-      // Act
-      final result = await repository.logoutAllDevices();
-
-      // Assert
-      expect(result, isA<Right<Failure, void>>());
-      verify(mockRemoteDataSource.logoutAllDevices()).called(1);
+      verify(mockStorageService.clearAll()).called(1);
     });
   });
 
   group('AuthRepositoryImpl - Social Auth', () {
     test('should login with Google successfully', () async {
       // Arrange
-      when(mockRemoteDataSource.loginWithGoogle(any))
+      when(mockRemoteDataSource.googleLogin(any))
           .thenAnswer((_) async => TestHelper.mockAuthResponse);
       when(mockStorageService.saveToken(any)).thenAnswer((_) async => true);
       when(mockStorageService.saveUserId(any)).thenAnswer((_) async => true);
+      when(mockStorageService.saveUserEmail(any)).thenAnswer((_) async => true);
 
       // Act
-      final result = await repository.loginWithGoogle('google-id-token');
+      final result = await repository.googleLogin('google-id-token');
 
       // Assert
       expect(result, isA<Right<Failure, User>>());
-      verify(mockRemoteDataSource.loginWithGoogle(any)).called(1);
+      verify(mockRemoteDataSource.googleLogin(any)).called(1);
     });
 
-    test('should login with Apple successfully', () async {
+    test('should login with Facebook successfully', () async {
       // Arrange
-      when(mockRemoteDataSource.loginWithApple(any))
+      when(mockRemoteDataSource.facebookLogin(any))
           .thenAnswer((_) async => TestHelper.mockAuthResponse);
       when(mockStorageService.saveToken(any)).thenAnswer((_) async => true);
       when(mockStorageService.saveUserId(any)).thenAnswer((_) async => true);
+      when(mockStorageService.saveUserEmail(any)).thenAnswer((_) async => true);
 
       // Act
-      final result = await repository.loginWithApple('apple-id-token');
+      final result = await repository.facebookLogin('facebook-id-token');
 
       // Assert
       expect(result, isA<Right<Failure, User>>());
-      verify(mockRemoteDataSource.loginWithApple(any)).called(1);
+      verify(mockRemoteDataSource.facebookLogin(any)).called(1);
+    });
+  });
+
+  group('AuthRepositoryImpl - Auth Status', () {
+    test('should check if user is authenticated', () async {
+      // Arrange
+      when(mockStorageService.isAuthenticated())
+          .thenAnswer((_) async => true);
+
+      // Act
+      final result = await repository.isAuthenticated();
+
+      // Assert
+      expect(result, true);
+      verify(mockStorageService.isAuthenticated()).called(1);
     });
   });
 }

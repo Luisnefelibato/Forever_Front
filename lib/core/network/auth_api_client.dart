@@ -47,7 +47,7 @@ abstract class AuthApiClient {
   Future<AuthResponse> refreshToken();
 
   @GET("/auth/sessions")
-  Future<List<Map<String, dynamic>>> getSessions();
+  Future<Map<String, dynamic>> getSessions();
 
   @DELETE("/auth/sessions/{tokenId}")
   Future<void> terminateSession(@Path("tokenId") String tokenId);
