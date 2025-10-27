@@ -1,0 +1,886 @@
+{
+	"info": {
+		"name": "ForeverUsInLove - Auth API",
+		"description": "API de autenticación y verificación de ForeverUsInLove\n\nVariables:\n- base_url: URL base del API\n- token: Token de autenticación Bearer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9999999"
+	},
+	"item": [
+		{
+			"name": "Login & Logout",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('token', jsonData.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"user@example.com\",\n    \"password\": \"Password123!@#\",\n    \"remember\": true,\n    \"device_token\": \"optional_device_token\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login con email, username o phone"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Cerrar sesión actual"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout All",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout-all"
+							]
+						},
+						"description": "Cerrar todas las sesiones"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh-token"
+							]
+						},
+						"description": "Refresh del token actual"
+					},
+					"response": []
+				},
+				{
+					"name": "Sessions List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"sessions"
+							]
+						},
+						"description": "Listar todas las sesiones activas"
+					},
+					"response": []
+				},
+				{
+					"name": "Terminate Session",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/sessions/:tokenId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"sessions",
+								":tokenId"
+							],
+							"variable": [
+								{
+									"key": "tokenId",
+									"value": "",
+									"description": "ID del token a eliminar"
+								}
+							]
+						},
+						"description": "Terminar sesión específica"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Registration",
+			"item": [
+				{
+					"name": "Simple Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"Password123!@#\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"date_of_birth\": \"1990-01-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register/simple-register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register",
+								"simple-register"
+							]
+						},
+						"description": "Registro simplificado de usuarios"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Username",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register/check-username?username=testuser",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register",
+								"check-username"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "testuser",
+									"description": "Username a verificar"
+								}
+							]
+						},
+						"description": "Verificar disponibilidad de username"
+					},
+					"response": []
+				},
+				{
+					"name": "Suggest Usernames",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register/suggest-usernames?first_name=John&last_name=Doe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register",
+								"suggest-usernames"
+							],
+							"query": [
+								{
+									"key": "first_name",
+									"value": "John"
+								},
+								{
+									"key": "last_name",
+									"value": "Doe"
+								}
+							]
+						},
+						"description": "Sugerir usernames basados en nombre"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verification",
+			"item": [
+				{
+					"name": "Email",
+					"item": [
+						{
+							"name": "Send Email Verification",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/verification/email/send",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"verification",
+										"email",
+										"send"
+									]
+								},
+								"description": "Enviar código de verificación por email"
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Email Code",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"123456\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/verification/email/verify",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"verification",
+										"email",
+										"verify"
+									]
+								},
+								"description": "Verificar código de email"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Phone",
+					"item": [
+						{
+							"name": "Send Phone Verification",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/verification/phone/send",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"verification",
+										"phone",
+										"send"
+									]
+								},
+								"description": "Enviar código de verificación por SMS"
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Phone Code",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"123456\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/verification/phone/verify",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"verification",
+										"phone",
+										"verify"
+									]
+								},
+								"description": "Verificar código SMS"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Identity (Onfido)",
+					"item": [
+						{
+							"name": "Create Workflow Run",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workflow_id\": \"your_workflow_id\",\n    \"custom_data\": {}\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/verification/identity/workflow-run",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"verification",
+										"identity",
+										"workflow-run"
+									]
+								},
+								"description": "Crear workflow run de Onfido (Workflow Studio)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Workflow Run",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/verification/identity/workflow-run/:workflowRunId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"verification",
+										"identity",
+										"workflow-run",
+										":workflowRunId"
+									],
+									"variable": [
+										{
+											"key": "workflowRunId",
+											"value": "",
+											"description": "ID del workflow run"
+										}
+									]
+								},
+								"description": "Obtener estado del workflow run"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Resend Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"email\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/verification/resend",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"verification",
+								"resend"
+							]
+						},
+						"description": "Reenviar código de verificación (email o phone)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Password Management",
+			"item": [
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"identifier\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/password/forgot",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"password",
+								"forgot"
+							]
+						},
+						"description": "Recuperar contraseña (auto-detecta email/phone)"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"OldPassword123!\",\n    \"new_password\": \"NewPassword123!\",\n    \"new_password_confirmation\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/password/change",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"password",
+								"change"
+							]
+						},
+						"description": "Cambiar contraseña (requiere autenticación)"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Password Strength",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"Password123!@#\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/password/strength",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"password",
+								"strength"
+							]
+						},
+						"description": "Verificar fortaleza de contraseña"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Social Auth",
+			"item": [
+				{
+					"name": "Google Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"google_id_token\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/social/google",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"social",
+								"google"
+							]
+						},
+						"description": "Login/Registro con Google"
+					},
+					"response": []
+				},
+				{
+					"name": "Facebook Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"facebook_access_token\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/social/facebook",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"social",
+								"facebook"
+							]
+						},
+						"description": "Login/Registro con Facebook"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost",
+			"type": "string",
+			"description": "URL base del API"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string",
+			"description": "Token de autenticación Bearer (se establece automáticamente después del login)"
+		}
+	]
+}
+
