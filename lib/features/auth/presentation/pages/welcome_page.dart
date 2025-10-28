@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/di/injection.dart';
+import '../../data/services/social_auth_service.dart';
 
 /// Welcome / Auth Home Screen
 /// 
@@ -15,12 +18,142 @@ import 'package:flutter/material.dart';
 /// - Continue with phone → Registration flow
 /// - Facebook/Google → OAuth flow
 /// - Log In → Login screen
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _borderGreen = Color(0xFF2CA97B);
+  
+  // State variables
+  bool _isLoadingGoogle = false;
+  bool _isLoadingFacebook = false;
+  
+  late final SocialAuthService _socialAuthService;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize social auth service (dependencies already configured in main.dart)
+    _socialAuthService = GetIt.instance<SocialAuthService>();
+  }
+
+  /// Handle Google Sign In
+  Future<void> _handleGoogleSignIn() async {
+    if (_isLoadingGoogle) return;
+    
+    setState(() {
+      _isLoadingGoogle = true;
+    });
+
+    try {
+      // Use social auth service for Google sign in
+      final result = await _socialAuthService.signInWithGoogle();
+
+      result.fold(
+        (failure) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Google login failed: ${failure.message}'),
+                backgroundColor: const Color(0xFFE53935),
+              ),
+            );
+          }
+        },
+        (user) {
+          if (mounted) {
+            // Navigate to about you name page to complete profile
+            Navigator.pushReplacementNamed(
+              context,
+              '/about-you-name',
+              arguments: {
+                'email': user.email,
+                'phone': user.phone,
+                'countryCode': null,
+              },
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google login error: $e'),
+            backgroundColor: const Color(0xFFE53935),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingGoogle = false;
+        });
+      }
+    }
+  }
+
+  /// Handle Facebook Sign In
+  Future<void> _handleFacebookSignIn() async {
+    if (_isLoadingFacebook) return;
+    
+    setState(() {
+      _isLoadingFacebook = true;
+    });
+
+    try {
+      // Use social auth service for Facebook sign in
+      final result = await _socialAuthService.signInWithFacebook();
+
+      result.fold(
+        (failure) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Facebook login failed: ${failure.message}'),
+                backgroundColor: const Color(0xFFE53935),
+              ),
+            );
+          }
+        },
+        (user) {
+          if (mounted) {
+            // Navigate to about you name page to complete profile
+            Navigator.pushReplacementNamed(
+              context,
+              '/about-you-name',
+              arguments: {
+                'email': user.email,
+                'phone': user.phone,
+                'countryCode': null,
+              },
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Facebook login error: $e'),
+            backgroundColor: const Color(0xFFE53935),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingFacebook = false;
+        });
+      }
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -217,10 +350,8 @@ class WelcomePage extends StatelessWidget {
                     children: [
                       // Facebook button
                       _buildSocialButton(
-                        onPressed: () {
-                          // TODO: Implement Facebook login
-                          debugPrint('Facebook login pressed');
-                        },
+                        onPressed: _isLoadingFacebook ? null : _handleFacebookSignIn,
+                        isLoading: _isLoadingFacebook,
                         child: const Icon(
                           Icons.facebook,
                           color: Color(0xFF1877F2),
@@ -232,10 +363,8 @@ class WelcomePage extends StatelessWidget {
                       
                       // Google button
                       _buildSocialButton(
-                        onPressed: () {
-                          // TODO: Implement Google login
-                          debugPrint('Google login pressed');
-                        },
+                        onPressed: _isLoadingGoogle ? null : _handleGoogleSignIn,
+                        isLoading: _isLoadingGoogle,
                         child: const Icon(
                           Icons.g_mobiledata,
                           color: Color(0xFF4285F4),
@@ -343,8 +472,9 @@ class WelcomePage extends StatelessWidget {
   }
   
   Widget _buildSocialButton({
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     required Widget child,
+    bool isLoading = false,
   }) {
     return Container(
       width: 48,
@@ -356,7 +486,16 @@ class WelcomePage extends StatelessWidget {
       ),
       child: IconButton(
         onPressed: onPressed,
-        icon: child,
+        icon: isLoading 
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(_primaryGreen),
+              ),
+            )
+          : child,
         padding: EdgeInsets.zero,
       ),
     );

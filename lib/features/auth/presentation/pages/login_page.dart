@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../data/models/requests/login_request.dart';
 
 /// Login / Email Screen
 /// 
@@ -31,12 +35,24 @@ class _LoginPageState extends State<LoginPage> {
   bool _rememberMe = true;
   bool _obscurePassword = true;
   bool _showError = false;
+  bool _isLoading = false;
   String _errorMessage = '';
+  
+  late final AuthRepository _authRepository;
   
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
   static const Color _errorBackground = Color(0xFFFFEBEE);
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize dependency injection
+    configureDependencies();
+    // Initialize auth repository
+    _authRepository = GetIt.instance<AuthRepository>();
+  }
   
   @override
   void dispose() {
@@ -45,30 +61,64 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
   
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     setState(() {
       _showError = false;
+      _isLoading = true;
     });
     
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement actual login logic
-      final email = _emailController.text.trim();
-      final password = _passwordController.text;
-      
-      // Simulate validation error for demo
-      if (email.isEmpty || password.isEmpty) {
+      try {
+        final login = _emailController.text.trim();
+        final password = _passwordController.text;
+        
+        // Create login request
+        final loginRequest = LoginRequest(
+          login: login,
+          password: password,
+          remember: _rememberMe,
+          deviceToken: null, // TODO: Add device token if needed
+        );
+        
+        // Perform login
+        final result = await _authRepository.login(
+          login: login,
+          password: password,
+          remember: _rememberMe,
+          deviceToken: null,
+        );
+        
+        result.fold(
+          (failure) {
+            setState(() {
+              _showError = true;
+              _errorMessage = failure.message;
+              _isLoading = false;
+            });
+          },
+          (user) {
+            setState(() {
+              _isLoading = false;
+            });
+            
+            // Navigate to home page on successful login
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          },
+        );
+      } catch (e) {
         setState(() {
           _showError = true;
-          _errorMessage = 'The mobile number, email and/or password are not valid.';
+          _errorMessage = 'An unexpected error occurred. Please try again.';
+          _isLoading = false;
         });
-      } else {
-        // Success - navigate to home
-        Navigator.pushReplacementNamed(context, '/home');
       }
     } else {
       setState(() {
         _showError = true;
-        _errorMessage = 'The mobile number, email and/or password are not valid.';
+        _errorMessage = 'Please fill in all required fields correctly.';
+        _isLoading = false;
       });
     }
   }
@@ -100,6 +150,16 @@ class _LoginPageState extends State<LoginPage> {
     
     if (value.length < 8) {
       return 'Password must be at least 8 characters';
+    }
+    
+    // Check for password requirements (matching server validation)
+    bool hasLowercase = value.contains(RegExp(r'[a-z]'));
+    bool hasUppercase = value.contains(RegExp(r'[A-Z]'));
+    bool hasNumber = value.contains(RegExp(r'[0-9]'));
+    bool hasSpecialChar = value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    
+    if (!hasLowercase || !hasUppercase || !hasNumber || !hasSpecialChar) {
+      return 'Password must contain: lowercase, uppercase, number, and special character';
     }
     
     return null;
@@ -404,7 +464,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _handleLogin,
+                      onPressed: _isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _primaryGreen,
                         foregroundColor: Colors.white,
@@ -413,15 +473,24 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Log In',
-                        style: TextStyle(
-                          fontFamily: 'Delight',
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Log In',
+                              style: TextStyle(
+                                fontFamily: 'Delight',
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                 ),

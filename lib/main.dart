@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
+import 'core/services/token_refresh_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/onboarding/presentation/pages/splash_page.dart';
 import 'features/onboarding/presentation/pages/intro_page_1.dart';
@@ -28,6 +29,9 @@ import 'features/auth/presentation/pages/about_you_interests_page.dart';
 import 'features/auth/presentation/pages/about_you_looking_for_page.dart';
 import 'features/auth/presentation/pages/about_you_location_page.dart';
 import 'features/auth/presentation/pages/verification_prompt_page.dart';
+import 'features/auth/presentation/pages/phone_verification_page.dart';
+import 'features/auth/presentation/pages/active_sessions_page.dart';
+import 'features/auth/presentation/pages/email_verification_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,14 +45,17 @@ void main() async {
   // Configure dependency injection
   await configureDependencies();
   
+  // Start token refresh service
+  final tokenRefreshService = getIt<TokenRefreshService>();
+  await tokenRefreshService.start();
+  
   // Lock screen orientation to portrait only
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
   
-  // Initialize Firebase (when implemented)
-  // await Firebase.initializeApp();
+  // Laravel native authentication - no Firebase needed
   
   runApp(const MyApp());
 }
@@ -99,7 +106,7 @@ class MyApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>?;
           return MaterialPageRoute(
             builder: (context) => ForgotPasswordCodePage(
-              email: args?['email'] ?? '',
+              email: args?['email'] as String? ?? '',
             ),
           );
         }
@@ -199,6 +206,30 @@ class MyApp extends StatelessWidget {
             ),
           );
         }
+        if (settings.name == '/phone-verification') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => PhoneVerificationPage(
+              phone: args?['phone'] as String? ?? '',
+              firstName: args?['firstName'] as String? ?? '',
+              lastName: args?['lastName'] as String? ?? '',
+              dateOfBirth: args?['dateOfBirth'] as String? ?? '',
+              password: args?['password'] as String? ?? '',
+            ),
+          );
+        }
+        if (settings.name == '/email-verification') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => EmailVerificationPage(
+              email: args?['email'] as String? ?? '',
+              firstName: args?['firstName'] as String? ?? '',
+              lastName: args?['lastName'] as String? ?? '',
+              dateOfBirth: args?['dateOfBirth'] as String? ?? '',
+              password: args?['password'] as String? ?? '',
+            ),
+          );
+        }
         if (settings.name == '/verification-prompt') {
           final args = settings.arguments as Map<String, dynamic>?;
           return MaterialPageRoute(
@@ -216,6 +247,11 @@ class MyApp extends StatelessWidget {
               lookingFor: args?['lookingFor'] as String?,
               location: args?['location'] as String?,
             ),
+          );
+        }
+        if (settings.name == '/active-sessions') {
+          return MaterialPageRoute(
+            builder: (context) => const ActiveSessionsPage(),
           );
         }
         return null;

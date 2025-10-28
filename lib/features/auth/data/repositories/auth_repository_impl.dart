@@ -4,9 +4,11 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_datasource.dart';
+import '../../domain/datasources/auth_remote_datasource.dart';
 import '../models/requests/register_request.dart';
 import '../models/requests/login_request.dart';
+import '../models/requests/verify_code_request.dart';
+import '../models/requests/resend_code_request.dart';
 
 /// Implementation of auth repository
 class AuthRepositoryImpl implements AuthRepository {
@@ -32,6 +34,7 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         phone: phone,
         password: password,
+        passwordConfirmation: password, // Use same password for confirmation
         firstName: firstName,
         lastName: lastName,
         dateOfBirth: dateOfBirth,
@@ -66,12 +69,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String login,
     required String password,
     bool remember = true,
+    String? deviceToken,
   }) async {
     try {
       final request = LoginRequest(
         login: login,
         password: password,
         remember: remember,
+        deviceToken: deviceToken,
       );
 
       final response = await remoteDataSource.login(request);
@@ -104,11 +109,85 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> logout() async {
+  Future<Either<Failure, bool>> logout() async {
     try {
       await remoteDataSource.logout();
       await storageService.clearAll();
-      return const Right(null);
+      return const Right(true);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> logoutAll() async {
+    try {
+      await remoteDataSource.logoutAllDevices();
+      await storageService.clearAll();
+      return const Right(true);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Map<String, dynamic>>>> getActiveSessions() async {
+    try {
+      final sessions = await remoteDataSource.getActiveSessions();
+      return Right(sessions);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> logoutDevice(String deviceId) async {
+    try {
+      await remoteDataSource.logoutDevice(deviceId);
+      return const Right(true);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> deleteSession(String sessionId) async {
+    try {
+      await remoteDataSource.deleteSession(sessionId);
+      return const Right(true);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> refreshToken() async {
+    try {
+      final response = await remoteDataSource.refreshToken();
+      
+      // Update stored token
+      await storageService.saveToken(response.token);
+      await storageService.saveUserId(response.user.id);
+      
+      if (response.user.email != null) {
+        await storageService.saveUserEmail(response.user.email!);
+      }
+      if (response.user.phone != null) {
+        await storageService.saveUserPhone(response.user.phone!);
+      }
+
+      final user = response.user.toEntity();
+      return Right(user);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.code));
     } catch (e) {
@@ -131,7 +210,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, bool>> verifyEmailCode(String code) async {
     try {
-      final response = await remoteDataSource.verifyEmailCode(code);
+      final request = VerifyCodeRequest(code: code);
+      final response = await remoteDataSource.verifyCode(request);
       return Right(response.verified);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.code));
@@ -155,7 +235,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, bool>> verifyPhoneCode(String code) async {
     try {
-      final response = await remoteDataSource.verifyPhoneCode(code);
+      final request = VerifyCodeRequest(code: code);
+      final response = await remoteDataSource.verifyPhoneCode(request);
       return Right(response.verified);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.code));
@@ -167,7 +248,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> resendVerificationCode(String type) async {
     try {
-      await remoteDataSource.resendCode(type);
+      final request = ResendCodeRequest(type: type);
+      await remoteDataSource.resendCode(request);
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.code));
@@ -206,7 +288,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> googleLogin(String token) async {
     try {
-      final response = await remoteDataSource.googleLogin(token);
+      final response = await remoteDataSource.loginWithGoogle(token);
 
       // Save token and user data
       await storageService.saveToken(response.token);
@@ -229,7 +311,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> facebookLogin(String token) async {
     try {
-      final response = await remoteDataSource.facebookLogin(token);
+      final response = await remoteDataSource.loginWithFacebook(token);
 
       // Save token and user data
       await storageService.saveToken(response.token);

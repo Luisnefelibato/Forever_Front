@@ -1,139 +1,120 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../storage/secure_storage_service.dart';
+import 'auth_api_client.dart';
 
-/// Interceptor for handling authentication and token management
+/// Interceptor para manejar autenticación automática y refresh token
 class AuthInterceptor extends Interceptor {
-  final SecureStorageService _storage = SecureStorageService();
+  final SecureStorageService _storageService;
+  final AuthApiClient _authApiClient;
+  bool _isRefreshing = false;
+  final List<RequestOptions> _pendingRequests = [];
+
+  AuthInterceptor({
+    required SecureStorageService storageService,
+    required AuthApiClient authApiClient,
+  })  : _storageService = storageService,
+        _authApiClient = authApiClient;
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    // Add token to all requests if available
-    final token = await _storage.getToken();
-    
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    // Agregar token de autorización si está disponible
+    final token = await _storageService.getToken();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
-      
-      if (kDebugMode) {
-        print('🔑 Added token to request: ${options.path}');
-        print('   Token: ${token.substring(0, 20)}...');
-      }
     }
-
-    if (kDebugMode) {
-      print('🚀 REQUEST: ${options.method} ${options.path}');
-      if (options.data != null) {
-        print('📦 Body: ${options.data}');
-      }
-    }
-
+    
+    // Agregar headers necesarios para Laravel
+    options.headers['Accept'] = 'application/json';
+    options.headers['Content-Type'] = 'application/json';
+    
     handler.next(options);
   }
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) {
-    if (kDebugMode) {
-      print('✅ RESPONSE: ${response.statusCode} ${response.requestOptions.path}');
-    }
-    handler.next(response);
-  }
-
-  @override
-  void onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
-    if (kDebugMode) {
-      print('❌ ERROR: ${err.response?.statusCode} ${err.requestOptions.path}');
-      print('❌ Message: ${err.message}');
-      if (err.response?.data != null) {
-        print('❌ Response Data: ${err.response?.data}');
-      }
-    }
-
-    // Handle 401 Unauthorized - Token expired or invalid
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    // Solo manejar errores 401 (Unauthorized)
     if (err.response?.statusCode == 401) {
-      if (kDebugMode) {
-        print('🔄 Token expired/invalid, attempting refresh...');
+      // Si ya estamos refrescando, agregar a la cola de espera
+      if (_isRefreshing) {
+        _pendingRequests.add(err.requestOptions);
+        return;
       }
-      
-      try {
-        // Try to refresh token
-        final refreshed = await _refreshToken();
-        
-        if (refreshed) {
-          // Retry original request with new token
-          final token = await _storage.getToken();
-          err.requestOptions.headers['Authorization'] = 'Bearer $token';
-          
-          // Create new Dio instance to avoid interceptor loop
-          final dio = Dio(BaseOptions(
-            baseUrl: 'http://3.232.35.26:8000/api/v1',
-          ));
-          
-          final response = await dio.fetch(err.requestOptions);
-          return handler.resolve(response);
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Token refresh failed: $e');
-        }
-        
-        // Clear token and redirect to login
-        await _storage.clearAll();
-        // TODO: Navigate to login page using navigation service
-      }
-    }
 
-    handler.next(err);
+      try {
+        await _refreshTokenAndRetry(err, handler);
+      } catch (e) {
+        // Si el refresh falla, limpiar tokens y redirigir al login
+        await _clearTokensAndRedirect();
+        handler.next(err);
+      }
+    } else {
+      handler.next(err);
+    }
   }
 
-  /// Attempt to refresh the authentication token
-  Future<bool> _refreshToken() async {
+  /// Refrescar token y reintentar peticiones pendientes
+  Future<void> _refreshTokenAndRetry(DioException err, ErrorInterceptorHandler handler) async {
+    _isRefreshing = true;
+
     try {
-      final dio = Dio(BaseOptions(
-        baseUrl: 'http://3.232.35.26:8000/api/v1',
-      ));
-
-      final token = await _storage.getToken();
+      // Intentar refrescar el token
+      final response = await _authApiClient.refreshToken();
       
-      if (token == null) {
-        return false;
-      }
-
-      final response = await dio.post(
-        '/auth/refresh-token',
-        options: Options(
-          headers: {'Authorization': 'Bearer $token'},
-        ),
-      );
-
-      if (response.statusCode == 200 && response.data != null) {
-        final newToken = response.data['token'];
+      if (response.token != null && response.token!.isNotEmpty) {
+        // Guardar nuevo token
+        await _storageService.saveToken(response.token!);
         
-        if (newToken != null) {
-          await _storage.saveToken(newToken);
-          
-          if (kDebugMode) {
-            print('✅ Token refreshed successfully');
-          }
-          
-          return true;
-        }
+        // Actualizar headers de la petición original
+        err.requestOptions.headers['Authorization'] = 'Bearer ${response.token}';
+        
+        // Reintentar petición original
+        final dio = Dio();
+        final retryResponse = await dio.fetch(err.requestOptions);
+        handler.resolve(retryResponse);
+        
+        // Procesar peticiones pendientes
+        await _processPendingRequests(response.token!);
+      } else {
+        throw Exception('Token refresh failed: empty token');
       }
-
-      return false;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Token refresh error: $e');
-      }
-      return false;
+      debugPrint('Token refresh failed: $e');
+      throw e;
+    } finally {
+      _isRefreshing = false;
     }
+  }
+
+  /// Procesar peticiones que estaban esperando el refresh
+  Future<void> _processPendingRequests(String newToken) async {
+    final dio = Dio();
+    
+    for (final requestOptions in _pendingRequests) {
+      try {
+        requestOptions.headers['Authorization'] = 'Bearer $newToken';
+        await dio.fetch(requestOptions);
+      } catch (e) {
+        debugPrint('Failed to retry pending request: $e');
+      }
+    }
+    
+    _pendingRequests.clear();
+  }
+
+  /// Limpiar tokens y preparar para redirección al login
+  Future<void> _clearTokensAndRedirect() async {
+    try {
+      await _storageService.clearToken();
+      await _storageService.clearAll(); // Esto limpia todo incluyendo userId
+      debugPrint('Tokens cleared, user should be redirected to login');
+    } catch (e) {
+      debugPrint('Error clearing tokens: $e');
+    }
+  }
+
+  /// Método público para limpiar tokens (útil para logout)
+  Future<void> clearTokens() async {
+    await _clearTokensAndRedirect();
   }
 }

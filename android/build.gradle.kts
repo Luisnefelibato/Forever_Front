@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Laravel native authentication - no Firebase needed
+    }
+}
+
 allprojects {
     repositories {
         google()

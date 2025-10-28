@@ -10,11 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # Firebase - Versiones compatibles con Flutter 3.19.0
-  firebase_core: ^2.32.0
-  firebase_auth: ^4.20.0
-  firebase_messaging: ^14.9.4
-  
   # State Management - Versiones estables
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
@@ -59,6 +54,9 @@ dependencies:
   
   # Google Sign In - Versiones compatibles
   google_sign_in: ^6.2.2
+  
+  # Facebook Sign In - Versiones compatibles
+  flutter_facebook_auth: ^6.0.4
   
   # Utils - Versiones estables
   intl: ^0.19.0

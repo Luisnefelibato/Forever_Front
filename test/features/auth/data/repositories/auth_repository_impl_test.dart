@@ -11,8 +11,11 @@ import 'package:forever_us_in_love/features/auth/domain/entities/user.dart';
 import '../../../../../helpers/test_helper.dart';
 
 // Generate mocks using mockito
-@GenerateMocks([AuthRemoteDataSource, SecureStorageService])
+@GenerateMocks([SecureStorageService])
 import 'auth_repository_impl_test.mocks.dart';
+
+// Manual mock for AuthRemoteDataSource
+class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
 
 void main() {
   late AuthRepositoryImpl repository;

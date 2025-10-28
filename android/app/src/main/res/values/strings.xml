@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Facebook App Configuration -->
+    <!-- Replace with your actual Facebook App ID from Facebook Developer Console -->
+    <string name="facebook_app_id">1234567890123456</string>
+    <!-- Replace with your actual Facebook Client Token from Facebook Developer Console -->
+    <string name="facebook_client_token">abcdef1234567890abcdef1234567890</string>
+    <!-- Replace with your actual Facebook Login Protocol Scheme -->
+    <string name="fb_login_protocol_scheme">fb1234567890123456</string>
+    
+    <!-- App Name -->
+    <string name="app_name">ForeverUs In Love</string>
+</resources>

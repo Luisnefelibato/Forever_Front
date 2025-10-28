@@ -9,6 +9,9 @@ class RegisterRequest {
   final String? phone;
   final String password;
   
+  @JsonKey(name: 'password_confirmation')
+  final String passwordConfirmation;
+  
   @JsonKey(name: 'first_name')
   final String firstName;
   
@@ -22,6 +25,7 @@ class RegisterRequest {
     this.email,
     this.phone,
     required this.password,
+    required this.passwordConfirmation,
     required this.firstName,
     required this.lastName,
     required this.dateOfBirth,

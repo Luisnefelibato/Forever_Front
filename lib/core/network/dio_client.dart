@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../config/app_config.dart';
 import 'auth_interceptor.dart';
+import 'error_interceptor.dart';
+import 'auth_api_client.dart';
+import '../storage/secure_storage_service.dart';
 
 /// Dio HTTP Client configuration
 class DioClient {
@@ -24,11 +27,19 @@ class DioClient {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
+        validateStatus: (status) {
+          // Accept all status codes to handle errors manually
+          return status != null && status < 600;
+        },
       ),
     );
 
-    // Add Auth Interceptor for token management
-    dio.interceptors.add(AuthInterceptor());
+    // Add Error Interceptor for better error handling
+    dio.interceptors.add(ErrorInterceptor());
+
+    // Add Auth Interceptor for token management and refresh
+    // Note: We'll configure this in the dependency injection setup
+    // dio.interceptors.add(AuthInterceptor());
 
     // Add Logger in development mode
     dio.interceptors.add(

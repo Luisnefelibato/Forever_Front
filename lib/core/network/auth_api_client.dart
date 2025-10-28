@@ -31,7 +31,7 @@ abstract class AuthApiClient {
   );
 
   // ============================================================================
-  // LOGIN & LOGOUT
+  // LOGIN & LOGOUT (Laravel Native - 6 endpoints)
   // ============================================================================
 
   @POST("/auth/login")
@@ -43,14 +43,17 @@ abstract class AuthApiClient {
   @POST("/auth/logout-all")
   Future<void> logoutAll();
 
-  @POST("/auth/refresh-token")
-  Future<AuthResponse> refreshToken();
+  @POST("/auth/logout/device/{device_id}")
+  Future<void> logoutDevice(@Path("device_id") String deviceId);
 
   @GET("/auth/sessions")
   Future<Map<String, dynamic>> getSessions();
 
-  @DELETE("/auth/sessions/{tokenId}")
-  Future<void> terminateSession(@Path("tokenId") String tokenId);
+  @DELETE("/auth/sessions/{session_id}")
+  Future<void> deleteSession(@Path("session_id") String sessionId);
+
+  @POST("/auth/refresh-token")
+  Future<AuthResponse> refreshToken();
 
   // ============================================================================
   // EMAIL VERIFICATION

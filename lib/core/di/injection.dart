@@ -1,10 +1,15 @@
 import 'package:get_it/get_it.dart';
 import '../network/dio_client.dart';
 import '../network/auth_api_client.dart';
+import '../network/auth_interceptor.dart';
 import '../storage/secure_storage_service.dart';
-import '../../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../services/token_refresh_service.dart';
+import '../../features/auth/domain/datasources/auth_remote_datasource.dart';
+import '../../features/auth/data/datasources/auth_remote_datasource_impl.dart' as data_source;
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/data/services/social_auth_service.dart';
+import '../../features/auth/data/services/auth_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -28,21 +33,51 @@ void _registerCoreDependencies() {
 
   // API Client
   getIt.registerLazySingleton<AuthApiClient>(
-    () => AuthApiClient(getIt()),
+    () => AuthApiClient(DioClient.instance),
+  );
+
+  // Auth Interceptor for automatic token refresh
+  getIt.registerLazySingleton<AuthInterceptor>(
+    () => AuthInterceptor(
+      storageService: getIt<SecureStorageService>(),
+      authApiClient: getIt<AuthApiClient>(),
+    ),
+  );
+
+  // Token Refresh Service
+  getIt.registerLazySingleton<TokenRefreshService>(
+    () => TokenRefreshService(
+      storageService: getIt<SecureStorageService>(),
+      authApiClient: getIt<AuthApiClient>(),
+      authInterceptor: getIt<AuthInterceptor>(),
+    ),
   );
 }
 
 void _registerAuthDependencies() {
   // Data Sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(apiClient: getIt()),
+    () => data_source.AuthRemoteDataSourceImpl(apiClient: getIt<AuthApiClient>()),
   );
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
-      remoteDataSource: getIt(),
-      storageService: getIt(),
+      remoteDataSource: getIt<AuthRemoteDataSource>(),
+      storageService: getIt<SecureStorageService>(),
+    ),
+  );
+
+  // Social Auth Service
+  getIt.registerLazySingleton<SocialAuthService>(
+    () => SocialAuthService(authRepository: getIt<AuthRepository>()),
+  );
+
+  // Auth Service
+  getIt.registerLazySingleton<AuthService>(
+    () => AuthService(
+      authRepository: getIt<AuthRepository>(),
+      tokenRefreshService: getIt<TokenRefreshService>(),
     ),
   );
 }

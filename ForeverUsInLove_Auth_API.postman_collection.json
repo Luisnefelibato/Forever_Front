@@ -871,7 +871,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost",
+			"value": "http://3.232.35.26:8000",
 			"type": "string",
 			"description": "URL base del API"
 		},

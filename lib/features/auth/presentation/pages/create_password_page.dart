@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/repositories/auth_repository.dart';
 import 'account_created_page.dart';
 
 /// Create Password Screen
@@ -169,36 +172,87 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
     return Colors.black;
   }
   
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     if (!_canCreateAccount()) {
       // Don't submit if password is invalid
       return;
     }
     
-    // TODO: Implement actual API call to create account
-    // final response = await dio.post('/api/auth/register', data: {
-    //   'email': widget.email,
-    //   'phone': widget.phone,
-    //   'countryCode': widget.countryCode,
-    //   'password': _passwordController.text,
-    // });
-    
-    // For now, show success message and navigate to next step
-    // In real implementation, this would go to OTP verification
-    debugPrint('Creating account for: ${widget.email ?? widget.phone}');
-    debugPrint('Registration type: ${widget.registrationType}');
-    
-    // Navigate to account created confirmation page
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AccountCreatedPage(
-          email: widget.email,
-          phone: widget.phone,
-          countryCode: widget.countryCode,
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2CA97B)),
+          ),
         ),
-      ),
-    );
+      );
+      
+      // Get auth repository
+      final authRepository = GetIt.instance<AuthRepository>();
+      
+      // Register user with real API
+      final result = await authRepository.register(
+        email: widget.email,
+        password: _passwordController.text,
+        firstName: 'User', // TODO: Get from user input
+        lastName: 'Name',  // TODO: Get from user input
+        dateOfBirth: '1990-01-01', // TODO: Get from user input
+      );
+      
+      // Close loading dialog
+      if (mounted) {
+        Navigator.pop(context);
+      }
+      
+      // Handle result
+      result.fold(
+        (failure) {
+          // Show error message
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error creating account: ${failure.message}'),
+                backgroundColor: const Color(0xFFE53935),
+              ),
+            );
+          }
+        },
+        (user) {
+          // Registration successful, navigate to email verification
+          if (mounted) {
+            Navigator.pushReplacementNamed(
+              context,
+              '/email-verification',
+              arguments: {
+                'email': widget.email,
+                'firstName': 'User', // TODO: Get from user input
+                'lastName': 'Name',  // TODO: Get from user input
+                'dateOfBirth': '1990-01-01', // TODO: Get from user input
+                'password': _passwordController.text,
+              },
+            );
+          }
+        },
+      );
+    } catch (e) {
+      // Close loading dialog
+      if (mounted) {
+        Navigator.pop(context);
+      }
+      
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating account: $e'),
+            backgroundColor: const Color(0xFFE53935),
+          ),
+        );
+      }
+    }
   }
   
   @override

@@ -1,0 +1,10 @@
+[33m98ef4fd[m[33m ([m[1;36mHEAD[m[33m, [m[1;31mgithub/main[m[33m)[m Fix dependency versions: Downgrade all packages to be compatible with Dart SDK 3.0.0 (Flutter 3.10.0)
+[33mca27ab1[m Fix GitHub Actions: Use Flutter 3.10.0, add debugging, and relax SDK requirements
+[33mba76715[m Fix connectivity_plus version: Downgrade to 4.0.2 to resolve Android embedding v2 conflict
+[33m80129bb[m Fix ALL dependencies: Use exact stable versions that work together without conflicts
+[33m0b3777a[m Fix SDK compatibility: Downgrade to Dart SDK 3.1.0 and adjust dependencies accordingly
+[33me0ceb52[m Fix GitHub Actions workflow: Use Flutter 3.13.0, add dependency debugging, and improve CocoaPods installation
+[33m2a035a0[m Fix ALL dependency conflicts: Downgrade all packages to versions compatible with Dart SDK 3.2.0
+[33me2a49b2[m Fix camera version compatibility (downgrade to 0.10.5 for Dart SDK 3.2.0)
+[33mbba5d38[m Fix google_sign_in version compatibility (downgrade to 6.2.1 for Dart SDK 3.2.0)
+[33m77ce873[m Fix GitHub Actions: Update upload-artifact to v4 (fix deprecated v3)

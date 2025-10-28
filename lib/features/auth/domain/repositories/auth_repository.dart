@@ -19,10 +19,26 @@ abstract class AuthRepository {
     required String login,
     required String password,
     bool remember = true,
+    String? deviceToken,
   });
 
   /// Logout current session
-  Future<Either<Failure, void>> logout();
+  Future<Either<Failure, bool>> logout();
+
+  /// Logout all sessions
+  Future<Either<Failure, bool>> logoutAll();
+
+  /// Logout specific device
+  Future<Either<Failure, bool>> logoutDevice(String deviceId);
+
+  /// Get active sessions
+  Future<Either<Failure, List<Map<String, dynamic>>>> getActiveSessions();
+
+  /// Delete specific session
+  Future<Either<Failure, bool>> deleteSession(String sessionId);
+
+  /// Refresh authentication token
+  Future<Either<Failure, User>> refreshToken();
 
   /// Send email verification code
   Future<Either<Failure, void>> sendEmailVerification();
