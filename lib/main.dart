@@ -32,6 +32,7 @@ import 'features/auth/presentation/pages/verification_prompt_page.dart';
 import 'features/auth/presentation/pages/phone_verification_page.dart';
 import 'features/auth/presentation/pages/active_sessions_page.dart';
 import 'features/auth/presentation/pages/email_verification_page.dart';
+import 'features/verification/presentation/pages/pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -252,6 +253,33 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/active-sessions') {
           return MaterialPageRoute(
             builder: (context) => const ActiveSessionsPage(),
+          );
+        }
+        // ============================================================================
+        // VERIFICATION ROUTES
+        // ============================================================================
+        if (settings.name == '/verification/intro') {
+          return MaterialPageRoute(
+            builder: (context) => const VerificationIntroPage(),
+          );
+        }
+        if (settings.name == '/verification/payment') {
+          return MaterialPageRoute(
+            builder: (context) => const VerificationPaymentPage(),
+          );
+        }
+        if (settings.name == '/verification/processing') {
+          return MaterialPageRoute(
+            builder: (context) => const VerificationProcessingPage(),
+          );
+        }
+        if (settings.name == '/verification/onfido') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => OnfidoVerificationPage(
+              sdkToken: args?['sdk_token'] as String? ?? '',
+              workflowRunId: args?['workflow_run_id'] as String? ?? '',
+            ),
           );
         }
         return null;

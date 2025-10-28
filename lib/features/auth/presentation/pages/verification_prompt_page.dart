@@ -63,13 +63,8 @@ class VerificationPromptPage extends StatelessWidget {
   }
   
   void _verifyIdentity(BuildContext context) {
-    // TODO: Navigate to verification flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Starting verification flow...'),
-        backgroundColor: _primaryGreen,
-      ),
-    );
+    // Navigate to new verification intro page
+    Navigator.pushNamed(context, '/verification/intro');
   }
   
   void _remindLater(BuildContext context) {
