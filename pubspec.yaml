@@ -66,6 +66,13 @@ dependencies:
   # Functional Programming & JSON
   dartz: ^0.10.1
   json_annotation: ^4.9.0
+  
+  # Payment Integration (commented - add when ready to integrate)
+  # pay: ^2.0.0  # For Apple Pay / Google Pay
+  # flutter_stripe: ^10.1.1  # Alternative: Stripe with Apple/Google Pay
+  
+  # Identity Verification (commented - add when ready to integrate)
+  # onfido_sdk: ^10.0.0  # Onfido SDK for identity verification
 
 dev_dependencies:
   flutter_test:
