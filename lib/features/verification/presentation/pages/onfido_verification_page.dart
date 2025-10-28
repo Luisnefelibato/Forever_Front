@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/services/onfido_service.dart';
 
 /// Onfido Verification Page
 /// 
@@ -41,18 +42,21 @@ class _OnfidoVerificationPageState extends State<OnfidoVerificationPage> {
         _statusMessage = 'Preparing identity verification...';
       });
 
-      // Simular inicialización del SDK
-      await Future.delayed(const Duration(seconds: 2));
+      // Usar el servicio real de Onfido
+      final result = await OnfidoService.startVerification(
+        sdkToken: widget.sdkToken,
+        workflowRunId: widget.workflowRunId,
+      );
 
-      // TODO: Integrar con el SDK real de Onfido
-      // final onfidoService = GetIt.instance<OnfidoVerificationService>();
-      // final result = await onfidoService.startVerification(
-      //   sdkToken: widget.sdkToken,
-      //   workflowRunId: widget.workflowRunId,
-      // );
+      if (!mounted) return;
 
-      // Por ahora, simulamos el proceso
-      await _simulateOnfidoFlow();
+      if (result) {
+        // Verificación completada exitosamente
+        await _handleVerificationComplete();
+      } else {
+        // Usuario canceló o hubo un error
+        _handleCancellation();
+      }
     } catch (e) {
       _handleError(e.toString());
     }
@@ -70,7 +74,7 @@ class _OnfidoVerificationPageState extends State<OnfidoVerificationPage> {
     for (final step in steps) {
       if (!mounted) return;
       setState(() => _statusMessage = step);
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
     }
 
     if (!mounted) return;
@@ -337,7 +341,7 @@ class _OnfidoSimulationDialogState extends State<_OnfidoSimulationDialog> {
     for (int i = 0; i < _steps.length; i++) {
       if (!mounted) return;
       setState(() => _currentStep = i);
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
     }
 
     if (mounted) {

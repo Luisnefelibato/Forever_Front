@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
+import '../../data/services/onfido_service.dart';
 
 /// Verification Payment Page
 /// 
@@ -312,7 +313,7 @@ class _VerificationPaymentPageState extends State<VerificationPaymentPage> {
       // Por ahora simulamos el proceso de pago
       
       // Simular procesamiento de pago
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
       
       // Simulación: 90% de éxito
       final success = DateTime.now().second % 10 != 0;
@@ -321,41 +322,18 @@ class _VerificationPaymentPageState extends State<VerificationPaymentPage> {
         throw Exception('Payment failed. Please try again.');
       }
 
-      // Pago exitoso - crear sesión de verificación con el backend
+      // Pago exitoso - iniciar proceso completo de verificación
       final paymentTransactionId = 'txn_${DateTime.now().millisecondsSinceEpoch}';
       
-      // TODO: Llamar al endpoint del backend para crear la sesión de verificación
-      // final verificationSession = await _createVerificationSession(paymentTransactionId);
-      
-      // Simular respuesta del backend
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final mockSdkToken = 'sdk_token_${DateTime.now().millisecondsSinceEpoch}';
-      final mockWorkflowRunId = 'wfr_${DateTime.now().millisecondsSinceEpoch}';
-
-      if (!mounted) return;
-
-      // Mostrar pantalla de procesamiento de 3 segundos
-      await Navigator.pushNamed(
-        context,
-        '/verification/processing',
+      // Iniciar proceso completo de verificación (sin backend)
+      final verificationSuccess = await OnfidoService.startCompleteVerification(
+        userId: 'current_user_id', // TODO: Obtener del estado de autenticación
+        paymentTransactionId: paymentTransactionId,
       );
 
       if (!mounted) return;
 
-      // Navegar a la pantalla de Onfido SDK
-      final onfidoResult = await Navigator.pushNamed(
-        context,
-        '/verification/onfido',
-        arguments: {
-          'sdk_token': mockSdkToken,
-          'workflow_run_id': mockWorkflowRunId,
-        },
-      );
-
-      if (!mounted) return;
-
-      if (onfidoResult == true) {
+      if (verificationSuccess) {
         // Verificación completada exitosamente
         Navigator.pop(context, true);
       } else {
