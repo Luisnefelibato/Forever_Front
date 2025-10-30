@@ -13,10 +13,19 @@ LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) => LoginRequest(
       deviceToken: json['device_token'] as String?,
     );
 
-Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
-    <String, dynamic>{
-      'login': instance.login,
-      'password': instance.password,
-      'remember': instance.remember,
-      'device_token': instance.deviceToken,
-    };
+Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) {
+  final val = <String, dynamic>{
+    'login': instance.login,
+    'password': instance.password,
+    'remember': instance.remember,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('device_token', instance.deviceToken);
+  return val;
+}

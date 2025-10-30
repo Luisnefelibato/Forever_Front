@@ -572,7 +572,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       // Small logo on top (replaces heart icon)
                       SizedBox(
-                        height: 36,
+                        height: 56,
                         child: Image.asset(
                           'assets/images/logo/Logo_Login.png',
                           fit: BoxFit.contain,
@@ -584,7 +584,7 @@ class _LoginPageState extends State<LoginPage> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'Delight',
-                          fontSize: 22,
+                          fontSize: 15,
                           height: 1.25,
                           color: Colors.black,
                           fontWeight: FontWeight.w800,
@@ -607,9 +607,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: const Text(
                             'Create account with email',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: 'Delight',
-                              fontSize: 18,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: Colors.black,
                             ),
@@ -634,9 +636,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: const Text(
                             'Create account with phone',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: 'Delight',
-                              fontSize: 18,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: _primaryGreen,
                             ),

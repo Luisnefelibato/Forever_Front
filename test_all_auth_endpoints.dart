@@ -84,14 +84,10 @@ void main() async {
     'POST',
     '/auth/register/simple-register',
     {
-      'email': testEmail,
-      'phone': testPhone,
-      'password': testPassword,
-      'password_confirmation': testPassword,
-      'first_name': 'Test',
-      'last_name': 'User',
-      'date_of_birth': '1990-01-01',
-    },
+    "email": "luis.gomez@imagineapps.co",
+      "password": "Password123!",
+      "password_confirmation": "Password123!"
+},
     null,
   );
 
@@ -101,12 +97,8 @@ void main() async {
     '/auth/register/with-email-verification',
     {
       'email': 'verify${DateTime.now().millisecondsSinceEpoch}@example.com',
-      'phone': '+1234567891',
       'password': testPassword,
       'password_confirmation': testPassword,
-      'first_name': 'Email',
-      'last_name': 'Verify',
-      'date_of_birth': '1990-01-01',
     },
     null,
   );
@@ -117,12 +109,8 @@ void main() async {
     '/auth/register/with-phone-verification',
     {
       'email': 'phone${DateTime.now().millisecondsSinceEpoch}@example.com',
-      'phone': '+1234567892',
       'password': testPassword,
       'password_confirmation': testPassword,
-      'first_name': 'Phone',
-      'last_name': 'Verify',
-      'date_of_birth': '1990-01-01',
     },
     null,
   );

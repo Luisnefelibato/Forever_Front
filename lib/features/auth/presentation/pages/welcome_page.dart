@@ -185,13 +185,13 @@ class _WelcomePageState extends State<WelcomePage> {
           
           // Content container with white rounded background - Centered but lower
           Positioned(
-            bottom: 32,
+            bottom: 120,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
-                width: 320,
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                width: 300,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
@@ -202,8 +202,8 @@ class _WelcomePageState extends State<WelcomePage> {
                   children: [
                   // Logo - Super grande
                   SizedBox(
-                    width: 250,
-                    height: 100,
+                    width: 200,
+                    height: 80,
                     child: Image.asset(
                       'assets/images/logo/Logo_For_Auth.png',
                       fit: BoxFit.contain,
@@ -223,23 +223,23 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                   ),
                   
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   
                   // Subtitle
                   const Text(
                     'Start your journey with us',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       color: Colors.black,
                       fontWeight: FontWeight.w700,
-                      height: 1.0,
+                      height: 1.1,
                       letterSpacing: 0.0,
                       fontFamily: 'Delight',
                     ),
                   ),
                   
-                  const SizedBox(height: 34),
+                  const SizedBox(height: 16),
                   
                   // Continue with your account button
                   SizedBox(
@@ -260,10 +260,12 @@ class _WelcomePageState extends State<WelcomePage> {
                       ),
                       child: const Text(
                         'Continue with your account',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
                           height: 1.0,
                           letterSpacing: 0.0,
                           fontFamily: 'Delight',
@@ -273,7 +275,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                   ),
                   
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 14),
                   
                   // Divider with "Or Sign up with" text
                   Row(
@@ -285,12 +287,12 @@ class _WelcomePageState extends State<WelcomePage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           'Or Sign up with',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w700,
                             height: 1.0,
@@ -308,7 +310,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ],
                   ),
                   
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
                   
                   // Social login buttons (Facebook and Google)
                   Row(
@@ -325,7 +327,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         ),
                       ),
                       
-                      const SizedBox(width: 24),
+                      const SizedBox(width: 16),
                       
                       // Google button
                       _buildSocialButton(
@@ -340,47 +342,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ],
                   ),
                   
-                  const SizedBox(height: 18),
-                  
-                  // Already have account text
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Already have one? ',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.normal,
-                          height: 1.0,
-                          letterSpacing: 0.0,
-                          fontFamily: 'Delight',
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/login');
-                        },
-                        child: const Text(
-                          'Log In',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w700,
-                            height: 1.0,
-                            letterSpacing: 0.0,
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.black,
-                            fontFamily: 'Delight',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
                   
                   // Terms and conditions text
                   Padding(
@@ -389,7 +351,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 14,
                           color: Colors.black87,
                           fontWeight: FontWeight.normal,
                           height: 1.0,

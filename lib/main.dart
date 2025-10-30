@@ -99,7 +99,7 @@ class MyApp extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>?;
             return MaterialPageRoute(
               builder: (context) => ForgotPasswordCodePage(
-                email: args?['email'] as String? ?? '',
+                identifier: args?['identifier'] as String? ?? '',
               ),
             );
           }
@@ -107,7 +107,8 @@ class MyApp extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>?;
             return MaterialPageRoute(
               builder: (context) => ResetPasswordPage(
-                resetToken: args?['resetToken'] as String?,
+                identifier: args?['identifier'] as String? ?? '',
+                code: args?['code'] as String? ?? '',
               ),
             );
           }

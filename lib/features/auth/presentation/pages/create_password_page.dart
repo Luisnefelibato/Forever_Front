@@ -196,10 +196,8 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
       // Register user with real API
       final result = await authRepository.register(
         email: widget.email,
+        phone: widget.phone,
         password: _passwordController.text,
-        firstName: 'User', // TODO: Get from user input
-        lastName: 'Name',  // TODO: Get from user input
-        dateOfBirth: '1990-01-01', // TODO: Get from user input
       );
       
       // Close loading dialog

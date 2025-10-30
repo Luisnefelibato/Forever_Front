@@ -24,10 +24,29 @@ abstract class AuthRemoteDataSource {
   Future<VerificationResponse> verifyPhoneCode(VerifyCodeRequest request);
   Future<VerificationResponse> resendCode(ResendCodeRequest request);
 
+  // Registration verification & profile
+  Future<bool> verifyRegisterOtp({required String identifier, required String code});
+  Future<void> submitBasicProfile({
+    String? firstName,
+    String? lastName,
+    String? dateOfBirth,
+    String? gender,
+    String? interestedInGender,
+    String? relationshipType,
+    String? location,
+  });
+
   // Password management
-  Future<void> forgotPassword(String email);
-  Future<void> resetPassword(String email, String newPassword);
+  Future<void> forgotPassword(String identifier);
+  Future<void> resetPasswordWithCode({
+    required String identifier,
+    required String code,
+    required String newPassword,
+  });
   Future<void> changePassword(String currentPassword, String newPassword);
+
+  // Password strength
+  Future<Map<String, dynamic>> checkPasswordStrength(String password);
 
   // Social authentication
   Future<AuthResponse> loginWithGoogle(String idToken);

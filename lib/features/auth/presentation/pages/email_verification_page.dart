@@ -45,12 +45,12 @@ class EmailVerificationPage extends StatefulWidget {
 
 class _EmailVerificationPageState extends State<EmailVerificationPage> {
   final List<TextEditingController> _controllers = List.generate(
-    5,
+    6,
     (index) => TextEditingController(),
   );
   
   final List<FocusNode> _focusNodes = List.generate(
-    5,
+    6,
     (index) => FocusNode(),
   );
   
@@ -181,7 +181,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       }
     } else if (value.length == 1) {
       // Move to next field
-      if (index < 4) {
+      if (index < 5) {
         _focusNodes[index + 1].requestFocus();
       } else {
         // All fields filled - validate code
@@ -193,7 +193,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   Future<void> _validateCode() async {
     final code = _controllers.map((c) => c.text).join();
     
-    if (code.length != 5) {
+    if (code.length != 6) {
       return;
     }
     
@@ -206,8 +206,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       // Get auth repository
       final authRepository = GetIt.instance<AuthRepository>();
       
-      // Verify email code with real API
-      final result = await authRepository.verifyEmailCode(code);
+      // Verify registration OTP with identifier (email)
+      final result = await authRepository.verifyRegisterOtp(
+        identifier: widget.email,
+        code: code,
+      );
       
       result.fold(
         (failure) {
@@ -327,11 +330,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               
               // OTP Input - 5 circular fields
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(5, (index) {
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(6, (index) {
                   return SizedBox(
-                    width: 60,
-                    height: 80,
+                    width: 48,
+                    height: 72,
                     child: TextField(
                       controller: _controllers[index],
                       focusNode: _focusNodes[index],
@@ -350,7 +353,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                       onChanged: (value) => _onDigitChanged(index, value),
                       decoration: InputDecoration(
                         counterText: '',
-                        contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(40),
                           borderSide: BorderSide(
