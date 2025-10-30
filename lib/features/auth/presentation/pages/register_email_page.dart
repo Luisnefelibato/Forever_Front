@@ -187,7 +187,7 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
                           }
                         },
                         decoration: InputDecoration(
-                          hintText: 'Enter your email address',
+                          hintText: 'Example@email.com',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],

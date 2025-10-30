@@ -188,7 +188,7 @@ class VerificationPromptPage extends StatelessWidget {
                   
                   // Description text
                   const Text(
-                    'Every member on ForeverUs InLove goes through a quick ID check.\nThis helps us prevent fake accounts and create a trusted community where real connections can grow.',
+                    'Every member on ForEverUs In Love goes through a quick ID check.\nThis helps us prevent fake accounts and create a trusted community where real connections can grow.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Delight',

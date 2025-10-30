@@ -210,7 +210,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       errorBuilder: (context, error, stackTrace) {
                         // Fallback text logo
                         return const Text(
-                          'ForeverUs\nIN Love',
+                          'ForEverUs\nIn Love',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 40,
@@ -241,26 +241,25 @@ class _WelcomePageState extends State<WelcomePage> {
                   
                   const SizedBox(height: 34),
                   
-                  // Continue with email button
+                  // Continue with your account button
                   SizedBox(
                     width: double.infinity,
                     height: 56,
-                    child: OutlinedButton(
+                    child: ElevatedButton(
                       onPressed: () {
-                        // TODO: Navigate to email registration
-                        Navigator.pushNamed(context, '/register-email');
+                        Navigator.pushNamed(context, '/login');
                       },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: _primaryGreen,
-                        side: const BorderSide(color: _borderGreen, width: 2),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryGreen,
+                        foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
+                          side: const BorderSide(color: _borderGreen, width: 2),
                         ),
                         elevation: 0,
                       ),
                       child: const Text(
-                        'Continue with email',
+                        'Continue with your account',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
@@ -268,40 +267,7 @@ class _WelcomePageState extends State<WelcomePage> {
                           height: 1.0,
                           letterSpacing: 0.0,
                           fontFamily: 'Delight',
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 26),
-                  
-                  // Continue with phone button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        // TODO: Navigate to phone registration
-                        Navigator.pushNamed(context, '/register-phone');
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: _primaryGreen,
-                        side: const BorderSide(color: _borderGreen, width: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Continue with phone',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400,
-                          height: 1.0,
-                          letterSpacing: 0.0,
-                          fontFamily: 'Delight',
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -309,7 +275,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   
                   const SizedBox(height: 22),
                   
-                  // Divider with "Or Log In with" text
+                  // Divider with "Or Sign up with" text
                   Row(
                     children: [
                       Expanded(
@@ -321,7 +287,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          'Or Log In with',
+                          'Or Sign up with',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,

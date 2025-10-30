@@ -355,7 +355,7 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
                                 }
                               },
                               decoration: InputDecoration(
-                                hintText: '(999) 111-0000',
+                                hintText: '+1 555-123-4567',
                                 hintStyle: TextStyle(
                                   fontFamily: 'Delight',
                                   color: Colors.grey[400],

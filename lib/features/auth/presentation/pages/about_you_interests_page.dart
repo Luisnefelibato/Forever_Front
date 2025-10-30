@@ -58,7 +58,7 @@ class _AboutYouInterestsPageState extends State<AboutYouInterestsPage> {
   final List<String> _interestOptions = [
     'Woman',
     'Man',
-    'No binary',
+    'Non binary',
     'All of them',
   ];
   

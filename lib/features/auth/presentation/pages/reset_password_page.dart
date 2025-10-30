@@ -284,7 +284,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: '********',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],
@@ -351,7 +351,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: '********',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],

@@ -335,7 +335,7 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
               
               // Description
               const Text(
-                'ForeverUs InLove is a space for adults over 18. Tell us your age to personalize your experience',
+                'ForEverUs In Love is a space for adults over 18. Tell us your age to personalize your experience',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 16,
@@ -418,7 +418,7 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Sorry! ForeverUs InLove is only available for users over 18 years old.',
+                          'Sorry! ForEverUs In Love is only available for users over 18 years old.',
                           style: TextStyle(
                             fontFamily: 'Delight',
                             fontSize: 14,

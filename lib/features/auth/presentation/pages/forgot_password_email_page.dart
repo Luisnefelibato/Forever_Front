@@ -154,7 +154,7 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                       
                       // Email address label
                       const Text(
-                        'Email address',
+                        'Email or phone number',
                         style: TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
@@ -184,7 +184,7 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                           }
                         },
                         decoration: InputDecoration(
-                          hintText: 'Enter your email address',
+                          hintText: 'Example@email.com or +1 555-123-4567',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],

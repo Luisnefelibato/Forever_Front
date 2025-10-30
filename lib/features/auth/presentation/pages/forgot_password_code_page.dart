@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 
 /// Forgot Password - Code Verification Screen
 /// 
@@ -10,13 +11,13 @@ import 'package:flutter/services.dart';
 /// - Title: "Enter code" (Bold, Black)
 /// - Subtitle: "We've sent a code to {email}, write it here to recover your account"
 /// - OTP Input: 5 circular input fields with borders
-/// - Countdown timer: "Send code again 00:20" (gray text)
+/// - Countdown timer: "Send code again 00:30" (gray text)
 /// - Error state: Red borders + "Wrong code, please try again" message
 /// - Success state: Green borders + "Approved!" message
 /// 
 /// Features:
 /// - Auto-focus next field on digit entry
-/// - Countdown timer (20 seconds)
+/// - Countdown timer (30 seconds)
 /// - Resend code button after timer expires
 /// - Auto-validation when all 5 digits entered
 class ForgotPasswordCodePage extends StatefulWidget {
@@ -43,7 +44,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
   );
   
   Timer? _timer;
-  int _remainingSeconds = 20;
+  int _remainingSeconds = 30;
   bool _canResend = false;
   
   String _validationState = 'normal'; // 'normal', 'error', 'success'
@@ -78,7 +79,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
   
   void _startCountdown() {
     setState(() {
-      _remainingSeconds = 20;
+      _remainingSeconds = 30;
       _canResend = false;
     });
     
@@ -328,24 +329,29 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
                         ),
                       ),
                     
-                    // Countdown timer or Resend button
+                    // Countdown timer or Resend CTA
                     _canResend
-                        ? TextButton(
-                            onPressed: _handleResendCode,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                            ),
-                            child: Text(
-                              'Send code again',
+                        ? RichText(
+                            text: TextSpan(
                               style: TextStyle(
                                 fontFamily: 'Delight',
                                 fontSize: 14,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
                               ),
+                              children: [
+                                const TextSpan(text: 'I didn\u2019t receive a code '),
+                                TextSpan(
+                                  text: 'Resend',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.black,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = _handleResendCode,
+                                ),
+                              ],
                             ),
                           )
                         : Text(

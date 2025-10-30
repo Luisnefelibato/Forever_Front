@@ -31,7 +31,7 @@ class VerificationApiService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return response.data;
+        return response.data as Map<String, dynamic>;
       } else {
         throw Exception('Failed to create verification session: ${response.statusCode}');
       }
@@ -54,7 +54,7 @@ class VerificationApiService {
       final response = await _dio.get('/verification/status/$sessionId');
 
       if (response.statusCode == 200) {
-        return response.data;
+        return response.data as Map<String, dynamic>;
       } else {
         throw Exception('Failed to check verification status: ${response.statusCode}');
       }
@@ -77,7 +77,7 @@ class VerificationApiService {
       final response = await _dio.get('/verification/result/$workflowRunId');
 
       if (response.statusCode == 200) {
-        return response.data;
+        return response.data as Map<String, dynamic>;
       } else {
         throw Exception('Failed to get verification result: ${response.statusCode}');
       }

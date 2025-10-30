@@ -60,7 +60,12 @@ class _VerificationProcessingPageState extends State<VerificationProcessingPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final baseTheme = Theme.of(context);
+    return Theme(
+      data: baseTheme.copyWith(
+        textTheme: baseTheme.textTheme.apply(fontFamily: 'Delight'),
+      ),
+      child: Scaffold(
       backgroundColor: Colors.white,
       body: WillPopScope(
         onWillPop: () async => false, // Prevenir que el usuario retroceda
@@ -84,7 +89,7 @@ class _VerificationProcessingPageState extends State<VerificationProcessingPage>
                           width: 120,
                           height: 120,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF34C759).withOpacity(0.1),
+                            color: const Color(0xFF2CA97B).withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Center(
@@ -92,7 +97,7 @@ class _VerificationProcessingPageState extends State<VerificationProcessingPage>
                               width: 80,
                               height: 80,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF34C759),
+                                color: Color(0xFF2CA97B),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -142,7 +147,7 @@ class _VerificationProcessingPageState extends State<VerificationProcessingPage>
                     borderRadius: BorderRadius.circular(8),
                     child: const LinearProgressIndicator(
                       backgroundColor: Color(0xFFE0E0E0),
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF34C759)),
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2CA97B)),
                       minHeight: 6,
                     ),
                   ),
@@ -185,6 +190,7 @@ class _VerificationProcessingPageState extends State<VerificationProcessingPage>
           ),
         ),
       ),
+    ),
     );
   }
 }

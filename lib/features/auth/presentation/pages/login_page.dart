@@ -244,15 +244,23 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
+                    TextFormField
+                    (
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: _validateEmail,
+                      style: const TextStyle(
+                        fontFamily: 'Delight',
+                        color: Colors.black,
+                        fontSize: 16,
+                      ),
+                      cursorColor: Colors.black,
                       decoration: InputDecoration(
-                        hintText: 'Enter your email address',
+                        hintText: 'Example@email.com or +1 555-123-4567',
                         hintStyle: TextStyle(
                           fontFamily: 'Delight',
-                          color: Colors.grey[400],
+                          color: Colors.grey[500],
+                          fontSize: 14,
                         ),
                         filled: true,
                         fillColor: Colors.white,
@@ -306,11 +314,18 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       validator: _validatePassword,
+                      style: const TextStyle(
+                        fontFamily: 'Delight',
+                        color: Colors.black,
+                        fontSize: 16,
+                      ),
+                      cursorColor: Colors.black,
                       decoration: InputDecoration(
-                        hintText: 'Password',
+                        hintText: '*********',
                         hintStyle: TextStyle(
                           fontFamily: 'Delight',
-                          color: Colors.grey[400],
+                          color: Colors.grey[500],
+                          fontSize: 14,
                         ),
                         filled: true,
                         fillColor: Colors.white,
@@ -459,7 +474,7 @@ class _LoginPageState extends State<LoginPage> {
                 
                 // Static Login button at bottom
                 Container(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
                   child: SizedBox(
                     width: double.infinity,
                     height: 56,
@@ -494,11 +509,152 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+                
+                // "Create your account" link
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                  child: GestureDetector(
+                    onTap: _showCreateAccountDialog,
+                    child: const Center(
+                      child: Text(
+                        'Create your account',
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 14,
+                          color: Colors.black,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+  
+  void _showCreateAccountDialog() {
+    showGeneralDialog(
+      context: context,
+      barrierLabel: 'create-account',
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      transitionDuration: const Duration(milliseconds: 180),
+      pageBuilder: (context, anim1, anim2) {
+        return SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  constraints: const BoxConstraints(minWidth: 320, maxWidth: 360),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(56),
+                    border: Border.all(color: Colors.black, width: 1),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1F000000),
+                        blurRadius: 18,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Small logo on top (replaces heart icon)
+                      SizedBox(
+                        height: 36,
+                        child: Image.asset(
+                          'assets/images/logo/Logo_Login.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Join our safe and genuine\nspace to meet real people',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 22,
+                          height: 1.25,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, '/register-email');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryGreen,
+                            foregroundColor: Colors.black,
+                            shape: const StadiumBorder(),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Create account with email',
+                            style: TextStyle(
+                              fontFamily: 'Delight',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, '/register-phone');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: _primaryGreen, width: 2),
+                            backgroundColor: Colors.white,
+                            foregroundColor: _primaryGreen,
+                            shape: const StadiumBorder(),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Create account with phone',
+                            style: TextStyle(
+                              fontFamily: 'Delight',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: _primaryGreen,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        final curved = CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic);
+        return Transform.scale(scale: 0.98 + 0.02 * curved.value, child: Opacity(opacity: curved.value, child: child));
+      },
     );
   }
   
