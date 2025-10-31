@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/repositories/auth_repository.dart';
 
 /// Reset Password Screen
 /// 
@@ -19,11 +22,13 @@ import 'package:flutter/material.dart';
 /// 1. Password must contain both upper and lowercase letters
 /// 2. Must include symbols like @ - _ * # and numbers
 class ResetPasswordPage extends StatefulWidget {
-  final String? resetToken;
+  final String identifier;
+  final String code;
   
   const ResetPasswordPage({
     super.key,
-    this.resetToken,
+    required this.identifier,
+    required this.code,
   });
 
   @override
@@ -182,23 +187,40 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return Colors.black;
   }
   
-  void _handleSubmit() {
+  void _handleSubmit() async {
     if (!_canCreateAccount()) {
       // Don't submit if password is invalid
       return;
     }
     
-    // TODO: Implement actual API call to reset password
-    // final response = await dio.post('/api/auth/reset-password', data: {
-    //   'resetToken': widget.resetToken,
-    //   'newPassword': _newPasswordController.text,
-    // });
-    
-    // Navigate to password changed confirmation page
-    Navigator.pushReplacementNamed(
-      context,
-      '/password-changed',
-    );
+    try {
+      final authRepository = GetIt.instance<AuthRepository>();
+      final result = await authRepository.resetPasswordWithCode(
+        identifier: widget.identifier,
+        code: widget.code,
+        newPassword: _newPasswordController.text,
+      );
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Reset failed: ${failure.message}'),
+              backgroundColor: _errorRed,
+            ),
+          );
+        },
+        (_) {
+          Navigator.pushReplacementNamed(context, '/password-changed');
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Reset error: $e'),
+          backgroundColor: _errorRed,
+        ),
+      );
+    }
   }
   
   @override
@@ -284,7 +306,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: '********',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],
@@ -351,7 +373,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: '********',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],

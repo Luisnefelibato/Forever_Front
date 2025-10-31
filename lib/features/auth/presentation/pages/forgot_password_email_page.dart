@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/repositories/auth_repository.dart';
 
 /// Forgot Password - Email Entry Screen
 /// 
@@ -39,7 +42,7 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
     super.dispose();
   }
   
-  void _handleContinue() {
+  void _handleContinue() async {
     setState(() {
       _showError = false;
     });
@@ -55,15 +58,32 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
     
     // Validate format
     if (_formKey.currentState!.validate()) {
-      final email = _emailController.text.trim();
-      
-      // TODO: Implement actual API call to send recovery code
-      // For now, navigate to code entry screen
-      Navigator.pushNamed(
-        context,
-        '/forgot-password-code',
-        arguments: {'email': email},
-      );
+      final identifier = _emailController.text.trim();
+      try {
+        // Send recovery code
+        final authRepository = GetIt.instance<AuthRepository>();
+        final result = await authRepository.forgotPassword(identifier);
+        result.fold(
+          (failure) {
+            setState(() {
+              _showError = true;
+              _errorMessage = failure.message;
+            });
+          },
+          (_) {
+            Navigator.pushNamed(
+              context,
+              '/forgot-password-code',
+              arguments: {'identifier': identifier},
+            );
+          },
+        );
+      } catch (e) {
+        setState(() {
+          _showError = true;
+          _errorMessage = 'Failed to send recovery code. Please try again.';
+        });
+      }
     } else {
       setState(() {
         _showError = true;
@@ -154,7 +174,7 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                       
                       // Email address label
                       const Text(
-                        'Email address',
+                        'Email or phone number',
                         style: TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
@@ -184,7 +204,7 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                           }
                         },
                         decoration: InputDecoration(
-                          hintText: 'Enter your email address',
+                          hintText: 'Example@email.com or +1 555-123-4567',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],

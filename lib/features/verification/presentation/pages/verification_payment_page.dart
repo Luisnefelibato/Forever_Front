@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
+import 'verification_processing_page.dart';
+import 'verification_complete_page.dart';
 import '../../data/services/onfido_service.dart';
 
 /// Verification Payment Page
@@ -22,7 +24,12 @@ class _VerificationPaymentPageState extends State<VerificationPaymentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final baseTheme = Theme.of(context);
+    return Theme(
+      data: baseTheme.copyWith(
+        textTheme: baseTheme.textTheme.apply(fontFamily: 'Delight'),
+      ),
+      child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -42,240 +49,251 @@ class _VerificationPaymentPageState extends State<VerificationPaymentPage> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              
-              // Payment Amount Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF34C759),
-                      Color(0xFF28A745),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF34C759).withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Verification Fee',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                     const SizedBox(height: 8),
-                    const Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '\$',
-                          style: TextStyle(
-                            fontSize: 28,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    
+                    // Payment Amount Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                          Color(0xFF2CA97B),
+                            Color(0xFF28A745),
+                          ],
                         ),
-                        Text(
-                          '1.99',
-                          style: TextStyle(
-                            fontSize: 48,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            height: 1.0,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2CA97B).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Verification Fee',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '\$',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '1.99',
+                                style: TextStyle(
+                                  fontSize: 48,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'One-time payment',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Payment Details
                     const Text(
-                      'One-time payment',
+                      'Payment Details',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Payment Details
-              const Text(
-                'Payment Details',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              _buildPaymentDetailRow('Service', 'Identity Verification'),
-              const Divider(height: 24),
-              _buildPaymentDetailRow('Amount', '\$1.99 USD'),
-              const Divider(height: 24),
-              _buildPaymentDetailRow('Processing Fee', 'Included'),
-              const Divider(height: 24),
-              _buildPaymentDetailRow('Total', '\$1.99 USD', isBold: true),
-              
-              const SizedBox(height: 32),
-              
-              // Payment Method Info
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.blue[200]!,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.blue[700],
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        Platform.isIOS
-                            ? 'Payment will be processed securely through Apple Pay'
-                            : 'Payment will be processed securely through Google Pay',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.blue[900],
-                          height: 1.4,
+                    
+                    const SizedBox(height: 12),
+                    
+                    _buildPaymentDetailRow('Service', 'Identity Verification'),
+                    const Divider(height: 20),
+                    _buildPaymentDetailRow('Amount', '\$1.99 USD'),
+                    const Divider(height: 20),
+                    _buildPaymentDetailRow('Processing Fee', 'Included'),
+                    const Divider(height: 20),
+                    _buildPaymentDetailRow('Total', '\$1.99 USD', isBold: true),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Payment Method Info
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.blue[200]!,
+                          width: 1,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.red[200]!,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Colors.red[700],
-                        size: 24,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.blue[700],
+                            size: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              Platform.isIOS
+                                  ? 'Payment will be processed securely through Apple Pay'
+                                  : 'Payment will be processed securely through Google Pay',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.blue[900],
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.red[900],
-                            height: 1.4,
+                    ),
+                    
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.red[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.red[200]!,
+                            width: 1,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              
-              const Spacer(),
-              
-              // Pay Button with Platform-specific icon
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isProcessing ? null : _handlePayment,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey[400],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isProcessing
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Row(
                           children: [
                             Icon(
-                              Platform.isIOS ? Icons.apple : Icons.payment,
-                              size: 24,
+                              Icons.error_outline,
+                              color: Colors.red[700],
+                              size: 22,
                             ),
                             const SizedBox(width: 12),
-                            Text(
-                              Platform.isIOS ? 'Pay with Apple Pay' : 'Pay with Google Pay',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.red[900],
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ],
                         ),
+                      ),
+                    ],
+                    
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
-              
-              const SizedBox(height: 16),
-              
-              // Security Notice
-              const Center(
-                child: Text(
-                  '🔒 Secure payment processing',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
+            ),
+            
+            // Pay Button with Platform-specific icon - Fixed at bottom
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _isProcessing ? null : _handlePayment,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey[400],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isProcessing
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Platform.isIOS ? Icons.apple : Icons.payment,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  Platform.isIOS ? 'Pay with Apple Pay' : 'Pay with Google Pay',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
                   ),
-                ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Security Notice
+                  const Center(
+                    child: Text(
+                      '🔒 Secure payment processing',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              
-              const SizedBox(height: 16),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildPaymentDetailRow(String label, String value, {bool isBold = false}) {
@@ -309,25 +327,36 @@ class _VerificationPaymentPageState extends State<VerificationPaymentPage> {
     });
 
     try {
-      // TODO: Integrar con el servicio de pago real
-      // Por ahora simulamos el proceso de pago
-      
-      // Simular procesamiento de pago
-      await Future<void>.delayed(const Duration(seconds: 2));
-      
-      // Simulación: 90% de éxito
-      final success = DateTime.now().second % 10 != 0;
-      
-      if (!success) {
-        throw Exception('Payment failed. Please try again.');
-      }
+      if (!mounted) return;
 
-      // Pago exitoso - iniciar proceso completo de verificación
-      final paymentTransactionId = 'txn_${DateTime.now().millisecondsSinceEpoch}';
+      // Ejecutar Onfido directamente desde el frontend (sin backend)
+      print('⏭️ Saltando backend - ejecutando Onfido directamente desde frontend...');
+
+      // Usar userId temporal - no se valida ni se usa en backend
+      final userId = 'temp_user_${DateTime.now().millisecondsSinceEpoch}';
+      final paymentTransactionId = 'txn_temp_${DateTime.now().millisecondsSinceEpoch}';
       
-      // Iniciar proceso completo de verificación (sin backend)
+      print('🚀 Iniciando Onfido SDK desde frontend...');
+      
+      // OPcional: Si el token en OnfidoConfig no funciona, puedes usar uno personalizado aquí:
+      // OnfidoService.setCustomApiToken('TU_TOKEN_AQUI');
+      
+      // TEST: Primero probar la conexión con Onfido
+      print('\n🧪 Ejecutando test de conexión con Onfido...');
+      final testResult = await OnfidoService.testOnfidoConnection();
+      
+      if (!testResult['success']) {
+        print('❌ Test de conexión falló, pero continuando...');
+        print('   Error: ${testResult['error']}');
+      } else {
+        print('✅ Test de conexión exitoso, continuando con verificación...');
+      }
+      
+      // Ejecutar Onfido directamente usando el servicio
+      // Este método obtiene credenciales reales de Onfido y lanza el SDK
+      print('\n🚀 Iniciando verificación completa...');
       final verificationSuccess = await OnfidoService.startCompleteVerification(
-        userId: 'current_user_id', // TODO: Obtener del estado de autenticación
+        userId: userId,
         paymentTransactionId: paymentTransactionId,
       );
 
@@ -335,9 +364,23 @@ class _VerificationPaymentPageState extends State<VerificationPaymentPage> {
 
       if (verificationSuccess) {
         // Verificación completada exitosamente
+        print('✅ Verificación de Onfido completada exitosamente');
+        // Mostrar pantalla de confirmación de verificación completada
+        try {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const VerificationCompletePage(),
+            ),
+          );
+        } catch (e) {
+          print('Navegación a complete falló: $e');
+        }
+        if (!mounted) return;
         Navigator.pop(context, true);
       } else {
-        // Usuario canceló o hubo un error
+        // Usuario canceló o hubo un error en Onfido
+        print('⚠️ Verificación cancelada o falló');
         Navigator.pop(context, false);
       }
     } catch (e) {
@@ -349,7 +392,10 @@ class _VerificationPaymentPageState extends State<VerificationPaymentPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Payment failed: $_errorMessage'),
+            content: Text(
+              'Error: $_errorMessage',
+              style: const TextStyle(fontFamily: 'Delight'),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),

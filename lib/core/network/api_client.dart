@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../config/app_config.dart';
+import '../storage/secure_storage_service.dart';
 
 /// Creates and configures the Dio HTTP client
 class ApiClient {
@@ -39,11 +40,11 @@ class ApiClient {
 class _AuthInterceptor extends Interceptor {
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    // TODO: Get token from secure storage
-    // final token = await secureStorage.read(key: 'auth_token');
-    // if (token != null) {
-    //   options.headers['Authorization'] = 'Bearer $token';
-    // }
+    // Read token from secure storage and attach Authorization header
+    final token = await SecureStorageService().getToken();
+    if (token != null && token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
     
     // Add API key if available
     if (AppConfig.apiKey.isNotEmpty) {

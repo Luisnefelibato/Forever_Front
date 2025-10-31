@@ -25,14 +25,38 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final baseTheme = Theme.of(context);
+    return Theme(
+      data: baseTheme.copyWith(
+        textTheme: baseTheme.textTheme.apply(fontFamily: 'Delight'),
+      ),
+      child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF2CA97B), // mismo verde que AboutYouBirthdatePage
+                  width: 2,
+                ),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Color(0xFF2CA97B),
+                size: 24,
+              ),
+            ),
+          ),
         ),
         actions: [
           TextButton(
@@ -40,6 +64,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
             child: const Text(
               'Skip',
               style: TextStyle(
+                fontFamily: 'Delight',
                 color: Colors.black,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -49,128 +74,142 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              
-              // Title
-              const Text(
-                'Why Verification\nMatters',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                  color: Colors.black,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Description
-              const Text(
-                'To make ForeverUs In Love a real, trustworthy community, every member completes a secure identity check.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Benefits Section
-              const Text(
-                'What this means for you',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              _buildBenefit('Protection from fake profiles'),
-              const SizedBox(height: 12),
-              _buildBenefit('Safer and more respectful interactions'),
-              const SizedBox(height: 12),
-              _buildBenefit('A verified, trustworthy community'),
-              
-              const SizedBox(height: 32),
-              
-              // Fee Explanation Section
-              const Text(
-                'Why there\'s a small fee',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              
-              const SizedBox(height: 12),
-              
-              const Text(
-                'The 1.99 USD one-time verification fee helps us keep our community safe using advanced biometric technology and human moderation.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-              
-              const Spacer(),
-              
-              // Privacy Notice
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Title
+                    const Text(
+                      'Why Verification\nMatters',
+                      style: TextStyle(
+                        fontFamily: 'Delight',
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                        color: Colors.black,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // Description
+                    const Text(
+                      'To make ForeverUs In Love a real, trustworthy community, every member completes a secure identity check.',
+                      style: TextStyle(
+                        fontFamily: 'Delight',
+                        fontSize: 16,
+                        color: Colors.black87,
+                        height: 1.5,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Benefits Section
+                    const Text(
+                      'What this means for you',
+                      style: TextStyle(
+                        fontFamily: 'Delight',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    _buildBenefit('Protection from fake profiles'),
+                    const SizedBox(height: 10),
+                    _buildBenefit('Safer and more respectful interactions'),
+                    const SizedBox(height: 10),
+                    _buildBenefit('A verified, trustworthy community'),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Fee Explanation Section
+                    const Text(
+                      'Why there\'s a small fee',
+                      style: TextStyle(
+                        fontFamily: 'Delight',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 8),
+                    
+                    const Text(
+                      'The 1.99 USD one-time verification fee helps us keep our community safe using advanced biometric technology and human moderation.',
+                      style: TextStyle(
+                        fontFamily: 'Delight',
+                        fontSize: 14,
+                        color: Colors.black87,
+                        height: 1.5,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Privacy Notice
                     Container(
-                      width: 40,
-                      height: 40,
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        shape: BoxShape.circle,
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(28),
                       ),
-                      child: const Icon(
-                        Icons.info_outline,
-                        color: Colors.black54,
-                        size: 24,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.info_outline,
+                              color: Colors.black54,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Your privacy is protected — your data is encrypted and never shared.',
+                              style: TextStyle(
+                                fontFamily: 'Delight',
+                                fontSize: 13,
+                                color: Colors.black87,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'Your privacy is protected — your data is encrypted and never shared.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.black87,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
+                    
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 20),
-              
-              // Proceed Button
-              SizedBox(
+            ),
+            
+            // Proceed Button - Fixed at bottom
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _isProcessing ? null : _handleProceedToPay,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF34C759),
+                    backgroundColor: const Color(0xFF2CA97B),
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.grey[400],
                     shape: RoundedRectangleBorder(
@@ -178,7 +217,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
                     ),
                     elevation: 0,
                   ),
-                  child: _isProcessing
+              child: _isProcessing
                       ? const SizedBox(
                           height: 20,
                           width: 20,
@@ -190,18 +229,19 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
                       : const Text(
                           'Proceed to pay verification',
                           style: TextStyle(
+                            fontFamily: 'Delight',
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: Colors.black,
                           ),
                         ),
                 ),
               ),
-              
-              const SizedBox(height: 16),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    ),
     );
   }
 
@@ -218,7 +258,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
           ),
           child: const Icon(
             Icons.check,
-            color: Color(0xFF34C759),
+            color: Color(0xFF2CA97B),
             size: 16,
           ),
         ),
@@ -227,6 +267,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
           child: Text(
             text,
             style: const TextStyle(
+              fontFamily: 'Delight',
               fontSize: 16,
               color: Colors.black87,
               height: 1.3,
@@ -248,6 +289,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
         title: const Text(
           'Skip Verification?',
           style: TextStyle(
+            fontFamily: 'Delight',
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -255,6 +297,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
         content: const Text(
           'Without verification, you may have limited access to features and other verified members may not trust your profile.\n\nAre you sure you want to skip?',
           style: TextStyle(
+            fontFamily: 'Delight',
             fontSize: 15,
             height: 1.5,
           ),
@@ -265,6 +308,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
             child: const Text(
               'Cancel',
               style: TextStyle(
+                fontFamily: 'Delight',
                 color: Colors.black54,
                 fontSize: 16,
               ),
@@ -277,7 +321,10 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
               
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('You can verify your identity later from settings'),
+                  content: Text(
+                    'You can verify your identity later from settings',
+                    style: TextStyle(fontFamily: 'Delight'),
+                  ),
                   backgroundColor: Colors.orange,
                   duration: Duration(seconds: 3),
                 ),
@@ -286,6 +333,7 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
             child: const Text(
               'Skip Anyway',
               style: TextStyle(
+                fontFamily: 'Delight',
                 color: Colors.red,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -302,26 +350,51 @@ class _VerificationIntroPageState extends State<VerificationIntroPage> {
 
     try {
       // Navegar a la pantalla de pago
+      // La pantalla de pago manejará todo: pago -> Onfido SDK -> resultado
       final result = await Navigator.pushNamed(
         context,
         '/verification/payment',
       );
 
-      if (result == true && mounted) {
-        // El pago fue exitoso, proceder a Onfido
-        // Esto se manejará en la pantalla de pago
+      if (!mounted) return;
+
+      if (result == true) {
+        // La verificación se completó exitosamente
+        // Mostrar mensaje de éxito y regresar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Verification completed successfully!',
+              style: TextStyle(fontFamily: 'Delight'),
+            ),
+            backgroundColor: Color(0xFF2CA97B),
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        // Regresar a la pantalla anterior con resultado exitoso
+        Navigator.pop(context, true);
+      } else if (result == false) {
+        // La verificación fue cancelada o falló
+        // Ya se mostró un mensaje en la pantalla de pago
+        // Solo regresamos a esta pantalla para que el usuario pueda intentar de nuevo
+        setState(() => _isProcessing = false);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(
+              'Error: ${e.toString()}',
+              style: const TextStyle(fontFamily: 'Delight'),
+            ),
             backgroundColor: Colors.red,
           ),
         );
+        setState(() => _isProcessing = false);
       }
     } finally {
-      if (mounted) {
+      if (mounted && _isProcessing) {
         setState(() => _isProcessing = false);
       }
     }

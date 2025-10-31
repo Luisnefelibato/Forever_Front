@@ -19,7 +19,17 @@ abstract class AuthApiClient {
   // ============================================================================
 
   @POST("/auth/register/simple-register")
-  Future<AuthResponse> register(@Body() RegisterRequest request);
+  Future<Map<String, dynamic>> register(@Body() RegisterRequest request);
+
+  /// Verify registration OTP (email or phone)
+  /// Body: { "identifier": "email_or_phone", "code": "123456" }
+  @POST("/auth/register/verify-otp")
+  Future<Map<String, dynamic>> verifyRegisterOtp(@Body() Map<String, dynamic> request);
+
+  /// Submit basic profile after verification
+  /// Body: { first_name, last_name, date_of_birth, gender, interested_in_gender, relationship_type, location }
+  @POST("/auth/register/basic-profile")
+  Future<Map<String, dynamic>> submitBasicProfile(@Body() Map<String, dynamic> request);
 
   @GET("/auth/register/check-username")
   Future<Map<String, dynamic>> checkUsername(@Query("username") String username);
@@ -36,7 +46,7 @@ abstract class AuthApiClient {
 
   /// Login with email/phone/username
   @POST("/auth/login")
-  Future<AuthResponse> login(@Body() LoginRequest request);
+  Future<Map<String, dynamic>> login(@Body() LoginRequest request);
 
   /// Logout current session
   @POST("/auth/logout")
@@ -114,6 +124,10 @@ abstract class AuthApiClient {
   @PUT("/auth/password/change")
   Future<Map<String, dynamic>> changePassword(@Body() Map<String, dynamic> request);
 
+  /// Check password strength
+  @POST("/auth/password/strength")
+  Future<Map<String, dynamic>> checkPasswordStrength(@Body() Map<String, dynamic> request);
+
   // ============================================================================
   // SOCIAL AUTH (2 endpoints)
   // ============================================================================
@@ -125,6 +139,10 @@ abstract class AuthApiClient {
   /// Apple OAuth login/register
   @POST("/auth/social/apple")
   Future<AuthResponse> appleLogin(@Body() Map<String, dynamic> request);
+
+  /// Facebook OAuth login/register
+  @POST("/auth/social/facebook")
+  Future<AuthResponse> facebookLogin(@Body() Map<String, dynamic> request);
 
   // ============================================================================
   // IDENTITY VERIFICATION (Onfido)

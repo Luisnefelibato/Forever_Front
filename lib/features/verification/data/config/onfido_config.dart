@@ -1,11 +1,16 @@
 /// Configuración de Onfido para la aplicación ForeverUsInLove
 class OnfidoConfig {
   // Información del Workflow
-  static const String workflowName = 'flutter_new';
-  static const String workflowId = '2e849672-bc5e-449a-9feb-c40ccde8b575';
+  static const String workflowName = 'test';
+  static const String workflowId = 'a8a1dd1a-b9a7-4c25-affb-88ae6ec67a88';
   
   // Token de API (LIVE - Producción)
-  static const String apiToken = 'EYFA0st4yuXDVrldNshBRtj4zfIgAoAlw89BsvnZ4IE';
+  // NOTA: Configurar usando variable de entorno o definir aquí en producción
+  // En desarrollo, usar: OnfidoService.setCustomApiToken('tu_token_aqui')
+  static const String apiToken = String.fromEnvironment(
+    'ONFIDO_API_TOKEN',
+    defaultValue: 'YOUR_ONFIDO_API_TOKEN_HERE',
+  );
   
   // Entorno actual
   static const String environment = 'live';
@@ -19,7 +24,7 @@ class OnfidoConfig {
   
   // Configuración de la apariencia
   static const Map<String, dynamic> appearance = {
-    'primaryColor': 0xFF34C759, // Verde de la app
+    'primaryColor': 0xFF2CA97B, // Verde verificación
     'secondaryColor': 0xFF28A745, // Verde más oscuro
     'supportDarkMode': true,
   };

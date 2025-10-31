@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'login_request.g.dart';
 
 /// Request model for user login
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class LoginRequest {
   /// Can be email, phone, or username
   final String login;
@@ -12,7 +12,7 @@ class LoginRequest {
   
   final bool remember;
   
-  @JsonKey(name: 'device_token')
+  @JsonKey(name: 'device_token', includeIfNull: false)
   final String? deviceToken;
 
   LoginRequest({

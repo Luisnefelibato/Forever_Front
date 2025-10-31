@@ -56,7 +56,7 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
   final List<String> _genderOptions = [
     'Woman',
     'Man',
-    'No binary',
+    'Non binary',
   ];
   
   void _selectGender(String gender) {

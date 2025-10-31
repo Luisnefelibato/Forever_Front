@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 
 /// Forgot Password - Code Verification Screen
 /// 
@@ -10,21 +11,21 @@ import 'package:flutter/services.dart';
 /// - Title: "Enter code" (Bold, Black)
 /// - Subtitle: "We've sent a code to {email}, write it here to recover your account"
 /// - OTP Input: 5 circular input fields with borders
-/// - Countdown timer: "Send code again 00:20" (gray text)
+/// - Countdown timer: "Send code again 00:30" (gray text)
 /// - Error state: Red borders + "Wrong code, please try again" message
 /// - Success state: Green borders + "Approved!" message
 /// 
 /// Features:
 /// - Auto-focus next field on digit entry
-/// - Countdown timer (20 seconds)
+/// - Countdown timer (30 seconds)
 /// - Resend code button after timer expires
 /// - Auto-validation when all 5 digits entered
 class ForgotPasswordCodePage extends StatefulWidget {
-  final String email;
+  final String identifier;
   
   const ForgotPasswordCodePage({
     super.key,
-    required this.email,
+    required this.identifier,
   });
 
   @override
@@ -33,17 +34,17 @@ class ForgotPasswordCodePage extends StatefulWidget {
 
 class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
   final List<TextEditingController> _controllers = List.generate(
-    5,
+    6,
     (index) => TextEditingController(),
   );
   
   final List<FocusNode> _focusNodes = List.generate(
-    5,
+    6,
     (index) => FocusNode(),
   );
   
   Timer? _timer;
-  int _remainingSeconds = 20;
+  int _remainingSeconds = 30;
   bool _canResend = false;
   
   String _validationState = 'normal'; // 'normal', 'error', 'success'
@@ -78,7 +79,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
   
   void _startCountdown() {
     setState(() {
-      _remainingSeconds = 20;
+      _remainingSeconds = 30;
       _canResend = false;
     });
     
@@ -126,7 +127,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
       }
     } else if (value.length == 1) {
       // Move to next field
-      if (index < 4) {
+      if (index < 5) {
         _focusNodes[index + 1].requestFocus();
       } else {
         // All fields filled - validate code
@@ -138,38 +139,19 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
   void _validateCode() {
     final code = _controllers.map((c) => c.text).join();
     
-    if (code.length != 5) {
+    if (code.length != 6) {
       return;
     }
     
-    // TODO: Implement actual API call to validate code
-    // For now, simulate validation
-    // Correct code: 15304
-    // Any other: Wrong code
-    
-    if (code == '15304') {
-      setState(() {
-        _validationState = 'success';
-        _errorMessage = '';
-      });
-      
-      // Navigate to reset password screen after a delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          // TODO: Pass actual reset token from API response
-          Navigator.pushReplacementNamed(
-            context,
-            '/reset-password',
-            arguments: {'resetToken': 'mock_token_12345'},
-          );
-        }
-      });
-    } else {
-      setState(() {
-        _validationState = 'error';
-        _errorMessage = 'Wrong code, please try again';
-      });
-    }
+    // Navigate to reset password screen (verification occurs on reset)
+    Navigator.pushReplacementNamed(
+      context,
+      '/reset-password',
+      arguments: {
+        'identifier': widget.identifier,
+        'code': code,
+      },
+    );
   }
   
   String _formatTime(int seconds) {
@@ -232,7 +214,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               // Subtitle with email
               Text(
-                'We\'ve sent a code to ${widget.email}, write it here to recover your account',
+                'We\'ve sent a code to ${widget.identifier}, write it here to recover your account',
                 style: const TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 14,
@@ -243,13 +225,13 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               const SizedBox(height: 40),
               
-              // OTP Input - 5 circular fields
+              // OTP Input - 6 circular fields
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(5, (index) {
+                children: List.generate(6, (index) {
                   return SizedBox(
-                    width: 60,
-                    height: 80,
+                    width: 48,
+                    height: 72,
                     child: TextField(
                       controller: _controllers[index],
                       focusNode: _focusNodes[index],
@@ -268,7 +250,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
                       onChanged: (value) => _onDigitChanged(index, value),
                       decoration: InputDecoration(
                         counterText: '',
-                        contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(40),
                           borderSide: BorderSide(
@@ -328,24 +310,29 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
                         ),
                       ),
                     
-                    // Countdown timer or Resend button
+                    // Countdown timer or Resend CTA
                     _canResend
-                        ? TextButton(
-                            onPressed: _handleResendCode,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                            ),
-                            child: Text(
-                              'Send code again',
+                        ? RichText(
+                            text: TextSpan(
                               style: TextStyle(
                                 fontFamily: 'Delight',
                                 fontSize: 14,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
                               ),
+                              children: [
+                                const TextSpan(text: 'I didn\u2019t receive a code '),
+                                TextSpan(
+                                  text: 'Resend',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.black,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = _handleResendCode,
+                                ),
+                              ],
                             ),
                           )
                         : Text(

@@ -2,6 +2,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/config/app_config.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 
@@ -12,8 +13,9 @@ class SocialAuthService {
   final AuthRepository _authRepository;
   
   // Google Sign In instance
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
+  late final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
+    serverClientId: AppConfig.googleClientId.isNotEmpty ? AppConfig.googleClientId : null,
   );
 
   SocialAuthService({required AuthRepository authRepository}) 

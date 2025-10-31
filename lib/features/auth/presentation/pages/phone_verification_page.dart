@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:flutter/gestures.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/repositories/auth_repository.dart';
 
@@ -13,13 +14,13 @@ import '../../domain/repositories/auth_repository.dart';
 /// - Title: "Enter code" (Bold, Black)
 /// - Subtitle: "We've sent a code to {phone}, write it here to verify your account"
 /// - OTP Input: 5 circular input fields with borders
-/// - Countdown timer: "Send code again 00:20" (gray text)
+/// - Countdown timer: "Send code again 00:30" (gray text)
 /// - Error state: Red borders + "Wrong code, please try again" message
 /// - Success state: Green borders + "Approved!" message
 /// 
 /// Features:
 /// - Auto-focus next field on digit entry
-/// - Countdown timer (20 seconds)
+/// - Countdown timer (30 seconds)
 /// - Resend code button after timer expires
 /// - Auto-validation when all 5 digits entered
 /// - Integration with AuthRepository for verification
@@ -45,17 +46,17 @@ class PhoneVerificationPage extends StatefulWidget {
 
 class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   final List<TextEditingController> _controllers = List.generate(
-    5,
+    6,
     (index) => TextEditingController(),
   );
   
   final List<FocusNode> _focusNodes = List.generate(
-    5,
+    6,
     (index) => FocusNode(),
   );
   
   Timer? _timer;
-  int _remainingSeconds = 20;
+  int _remainingSeconds = 30;
   bool _canResend = false;
   
   String _validationState = 'normal'; // 'normal', 'error', 'success'
@@ -91,7 +92,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   
   void _startCountdown() {
     setState(() {
-      _remainingSeconds = 20;
+      _remainingSeconds = 30;
       _canResend = false;
     });
     
@@ -181,7 +182,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
       }
     } else if (value.length == 1) {
       // Move to next field
-      if (index < 4) {
+      if (index < 5) {
         _focusNodes[index + 1].requestFocus();
       } else {
         // All fields filled - validate code
@@ -193,7 +194,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   Future<void> _validateCode() async {
     final code = _controllers.map((c) => c.text).join();
     
-    if (code.length != 5) {
+    if (code.length != 6) {
       return;
     }
     
@@ -327,11 +328,11 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               
               // OTP Input - 5 circular fields
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(5, (index) {
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(6, (index) {
                   return SizedBox(
-                    width: 60,
-                    height: 80,
+                    width: 48,
+                    height: 72,
                     child: TextField(
                       controller: _controllers[index],
                       focusNode: _focusNodes[index],
@@ -350,7 +351,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                       onChanged: (value) => _onDigitChanged(index, value),
                       decoration: InputDecoration(
                         counterText: '',
-                        contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(40),
                           borderSide: BorderSide(
@@ -410,24 +411,29 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                         ),
                       ),
                     
-                    // Countdown timer or Resend button
+                    // Countdown timer or Resend CTA
                     _canResend
-                        ? TextButton(
-                            onPressed: _handleResendCode,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                            ),
-                            child: Text(
-                              'Send code again',
+                        ? RichText(
+                            text: TextSpan(
                               style: TextStyle(
                                 fontFamily: 'Delight',
                                 fontSize: 14,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
                               ),
+                              children: [
+                                const TextSpan(text: 'I didn\u2019t receive a code '),
+                                TextSpan(
+                                  text: 'Resend',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.black,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = _handleResendCode,
+                                ),
+                              ],
                             ),
                           )
                         : Text(

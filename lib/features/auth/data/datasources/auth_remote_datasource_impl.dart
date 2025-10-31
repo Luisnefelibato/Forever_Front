@@ -5,6 +5,7 @@ import 'package:forever_us_in_love/features/auth/data/models/requests/resend_cod
 import 'package:forever_us_in_love/features/auth/data/models/requests/verify_code_request.dart';
 import 'package:forever_us_in_love/features/auth/data/models/responses/auth_response.dart';
 import 'package:forever_us_in_love/features/auth/data/models/responses/verification_response.dart';
+import 'package:forever_us_in_love/features/auth/data/models/responses/user_model.dart';
 import 'package:forever_us_in_love/features/auth/domain/datasources/auth_remote_datasource.dart' as domain;
 
 class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
@@ -17,14 +18,33 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   Future<AuthResponse> login(LoginRequest request) async {
     try {
       // Use Laravel native authentication
-      final response = await _apiClient.login(request);
-      
-      // Check if response is successful
-      if (response is! AuthResponse) {
-        throw Exception('Invalid response format');
-      }
-      
-      return response;
+      final map = await _apiClient.login(request);
+
+      // Token may be at top-level or inside data
+      final token = (map['token'] ?? map['data']?['token'] ?? '').toString();
+
+      // User object may be at top-level or inside data
+      final userJson = (map['user'] ?? map['data']?['user']) as Map<String, dynamic>? ?? {};
+
+      final userModel = UserModel(
+        id: userJson['id']?.toString() ?? '',
+        email: userJson['email'] as String?,
+        phone: userJson['phone']?.toString(),
+        firstName: userJson['first_name']?.toString() ?? 'User',
+        lastName: userJson['last_name']?.toString() ?? 'User',
+        dateOfBirth: userJson['date_of_birth']?.toString(),
+        gender: userJson['gender']?.toString(),
+        emailVerified: (userJson['email_verified'] as bool?) ?? false,
+        phoneVerified: (userJson['phone_verified'] as bool?) ?? false,
+        createdAt: (userJson['created_at']?.toString() ?? DateTime.now().toIso8601String()),
+      );
+
+      return AuthResponse(
+        token: token,
+        user: userModel,
+        message: map['message']?.toString(),
+        isNewUser: map['is_new_user'] as bool?,
+      );
     } catch (e) {
       throw Exception('Login failed: $e');
     }
@@ -33,14 +53,28 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   @override
   Future<AuthResponse> register(RegisterRequest request) async {
     try {
-      final response = await _apiClient.register(request);
-      
-      // Check if response is successful
-      if (response is! AuthResponse) {
-        throw Exception('Invalid response format');
-      }
-      
-      return response;
+      final map = await _apiClient.register(request);
+      // Backend returns: { success, message, data: { user: {...}, ... } }
+      final userJson = (map['data']?['user'] as Map<String, dynamic>?) ?? {};
+      // Build minimal UserModel and AuthResponse without token
+      final userModel = UserModel(
+        id: userJson['id']?.toString() ?? '',
+        email: userJson['email'] as String?,
+        phone: userJson['phone']?.toString(),
+        firstName: userJson['first_name']?.toString() ?? 'User',
+        lastName: userJson['last_name']?.toString() ?? 'User',
+        dateOfBirth: userJson['date_of_birth']?.toString(),
+        gender: userJson['gender']?.toString(),
+        emailVerified: (userJson['email_verified'] as bool?) ?? false,
+        phoneVerified: (userJson['phone_verified'] as bool?) ?? false,
+        createdAt: (userJson['created_at']?.toString() ?? DateTime.now().toIso8601String()),
+      );
+      return AuthResponse(
+        token: '',
+        user: userModel,
+        message: map['message']?.toString(),
+        isNewUser: true,
+      );
     } catch (e) {
       throw Exception('Registration failed: $e');
     }
@@ -88,7 +122,12 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   @override
   Future<VerificationResponse> resendCode(ResendCodeRequest request) async {
     try {
-      final response = await _apiClient.resendCode(request);
+      Map<String, dynamic> response;
+      if (request.type.toLowerCase().contains('email')) {
+        response = await _apiClient.resendEmailCode();
+      } else {
+        response = await _apiClient.resendPhoneCode();
+      }
       return VerificationResponse(
         message: response['message'] ?? 'Code sent successfully',
         verified: false,
@@ -99,20 +138,69 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   }
 
   @override
-  Future<void> forgotPassword(String email) async {
+  Future<bool> verifyRegisterOtp({
+    required String identifier,
+    required String code,
+  }) async {
     try {
-      await _apiClient.forgotPassword({'email': email});
+      final response = await _apiClient.verifyRegisterOtp({
+        'identifier': identifier,
+        'code': code,
+      });
+      // Consider success true when backend returns success flag
+      return (response['success'] == true) || (response['verified'] == true);
+    } catch (e) {
+      throw Exception('Verify OTP failed: $e');
+    }
+  }
+
+  @override
+  Future<void> submitBasicProfile({
+    String? firstName,
+    String? lastName,
+    String? dateOfBirth,
+    String? gender,
+    String? interestedInGender,
+    String? relationshipType,
+    String? location,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (firstName != null) body['first_name'] = firstName;
+      if (lastName != null) body['last_name'] = lastName;
+      if (dateOfBirth != null) body['date_of_birth'] = dateOfBirth;
+      if (gender != null) body['gender'] = gender;
+      if (interestedInGender != null) body['interested_in_gender'] = interestedInGender;
+      if (relationshipType != null) body['relationship_type'] = relationshipType;
+      if (location != null) body['location'] = location;
+
+      await _apiClient.submitBasicProfile(body);
+    } catch (e) {
+      throw Exception('Submit basic profile failed: $e');
+    }
+  }
+
+  @override
+  Future<void> forgotPassword(String identifier) async {
+    try {
+      await _apiClient.forgotPassword({'identifier': identifier});
     } catch (e) {
       throw Exception('Forgot password failed: $e');
     }
   }
 
   @override
-  Future<void> resetPassword(String email, String newPassword) async {
+  Future<void> resetPasswordWithCode({
+    required String identifier,
+    required String code,
+    required String newPassword,
+  }) async {
     try {
-      await _apiClient.changePassword({
-        'email': email,
-        'new_password': newPassword,
+      await _apiClient.resetPassword({
+        'identifier': identifier,
+        'reset_token': code,
+        'password': newPassword,
+        'password_confirmation': newPassword,
       });
     } catch (e) {
       throw Exception('Reset password failed: $e');
@@ -125,9 +213,19 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
       await _apiClient.changePassword({
         'current_password': currentPassword,
         'new_password': newPassword,
+        'new_password_confirmation': newPassword,
       });
     } catch (e) {
       throw Exception('Change password failed: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> checkPasswordStrength(String password) async {
+    try {
+      return await _apiClient.checkPasswordStrength({'password': password});
+    } catch (e) {
+      throw Exception('Check password strength failed: $e');
     }
   }
 
@@ -143,7 +241,7 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   @override
   Future<void> logoutAllDevices() async {
     try {
-      await _apiClient.logoutAll();
+      await _apiClient.logoutAllDevices();
     } catch (e) {
       throw Exception('Logout all devices failed: $e');
     }
@@ -202,7 +300,7 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   @override
   Future<AuthResponse> loginWithGoogle(String idToken) async {
     try {
-      final response = await _apiClient.googleLogin({'id_token': idToken});
+      final response = await _apiClient.googleLogin({'token': idToken});
       return response;
     } catch (e) {
       throw Exception('Google login failed: $e');
@@ -212,7 +310,7 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   @override
   Future<AuthResponse> loginWithFacebook(String idToken) async {
     try {
-      final response = await _apiClient.facebookLogin({'id_token': idToken});
+      final response = await _apiClient.facebookLogin({'token': idToken});
       return response;
     } catch (e) {
       throw Exception('Facebook login failed: $e');
@@ -222,7 +320,7 @@ class AuthRemoteDataSourceImpl implements domain.AuthRemoteDataSource {
   @override
   Future<AuthResponse> loginWithApple(String idToken) async {
     try {
-      final response = await _apiClient.facebookLogin({'id_token': idToken});
+      final response = await _apiClient.appleLogin({'id_token': idToken});
       return response;
     } catch (e) {
       throw Exception('Apple login failed: $e');

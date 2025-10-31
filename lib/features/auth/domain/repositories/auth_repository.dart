@@ -9,9 +9,6 @@ abstract class AuthRepository {
     String? email,
     String? phone,
     required String password,
-    required String firstName,
-    required String lastName,
-    required String dateOfBirth,
   });
 
   /// Login with email/phone/username and password
@@ -55,14 +52,41 @@ abstract class AuthRepository {
   /// Resend verification code
   Future<Either<Failure, void>> resendVerificationCode(String type);
 
+  /// Verify registration OTP with identifier (email or phone)
+  Future<Either<Failure, bool>> verifyRegisterOtp({
+    required String identifier,
+    required String code,
+  });
+
+  /// Submit basic profile after verification
+  Future<Either<Failure, void>> submitBasicProfile({
+    required String firstName,
+    required String lastName,
+    required String dateOfBirth,
+    String? gender,
+    String? interestedInGender,
+    String? relationshipType,
+    String? location,
+  });
+
   /// Request password reset
   Future<Either<Failure, void>> forgotPassword(String identifier);
 
-  /// Change password
-  Future<Either<Failure, void>> changePassword(
-    String newPassword,
-    String confirmation,
-  );
+  /// Reset password using code sent to identifier
+  Future<Either<Failure, void>> resetPasswordWithCode({
+    required String identifier,
+    required String code,
+    required String newPassword,
+  });
+
+  /// Change password (authenticated user)
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  /// Check password strength
+  Future<Either<Failure, Map<String, dynamic>>> checkPasswordStrength(String password);
 
   /// Login with Google
   Future<Either<Failure, User>> googleLogin(String token);

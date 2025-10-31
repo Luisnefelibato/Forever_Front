@@ -209,7 +209,12 @@ class _OnfidoVerificationPageState extends State<OnfidoVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final baseTheme = Theme.of(context);
+    return Theme(
+      data: baseTheme.copyWith(
+        textTheme: baseTheme.textTheme.apply(fontFamily: 'Delight'),
+      ),
+      child: Scaffold(
       backgroundColor: Colors.white,
       body: WillPopScope(
         onWillPop: () async {
@@ -274,7 +279,7 @@ class _OnfidoVerificationPageState extends State<OnfidoVerificationPage> {
                     height: 60,
                     child: CircularProgressIndicator(
                       strokeWidth: 4,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF34C759)),
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2CA97B)),
                     ),
                   ),
                   
@@ -308,7 +313,7 @@ class _OnfidoVerificationPageState extends State<OnfidoVerificationPage> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

@@ -10,8 +10,6 @@ import 'package:forever_us_in_love/features/auth/data/models/requests/login_requ
     as _i7;
 import 'package:forever_us_in_love/features/auth/data/models/requests/register_request.dart'
     as _i6;
-import 'package:forever_us_in_love/features/auth/data/models/requests/resend_code_request.dart'
-    as _i9;
 import 'package:forever_us_in_love/features/auth/data/models/requests/verify_code_request.dart'
     as _i8;
 import 'package:forever_us_in_love/features/auth/data/models/responses/auth_response.dart'
@@ -133,9 +131,9 @@ class MockAuthApiClient extends _i1.Mock implements _i4.AuthApiClient {
       ) as _i5.Future<void>);
 
   @override
-  _i5.Future<void> logoutAll() => (super.noSuchMethod(
+  _i5.Future<void> logoutAllDevices() => (super.noSuchMethod(
         Invocation.method(
-          #logoutAll,
+          #logoutAllDevices,
           [],
         ),
         returnValue: _i5.Future<void>.value(),
@@ -188,14 +186,15 @@ class MockAuthApiClient extends _i1.Mock implements _i4.AuthApiClient {
       ) as _i5.Future<_i2.AuthResponse>);
 
   @override
-  _i5.Future<void> sendEmailVerification() => (super.noSuchMethod(
+  _i5.Future<Map<String, dynamic>> sendEmailVerification() =>
+      (super.noSuchMethod(
         Invocation.method(
           #sendEmailVerification,
           [],
         ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
+        returnValue:
+            _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i5.Future<Map<String, dynamic>>);
 
   @override
   _i5.Future<_i3.VerificationResponse> verifyEmailCode(
@@ -216,14 +215,36 @@ class MockAuthApiClient extends _i1.Mock implements _i4.AuthApiClient {
       ) as _i5.Future<_i3.VerificationResponse>);
 
   @override
-  _i5.Future<void> sendPhoneVerification() => (super.noSuchMethod(
+  _i5.Future<Map<String, dynamic>> resendEmailCode() => (super.noSuchMethod(
+        Invocation.method(
+          #resendEmailCode,
+          [],
+        ),
+        returnValue:
+            _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i5.Future<Map<String, dynamic>>);
+
+  @override
+  _i5.Future<Map<String, dynamic>> getEmailVerificationStatus() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getEmailVerificationStatus,
+          [],
+        ),
+        returnValue:
+            _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i5.Future<Map<String, dynamic>>);
+
+  @override
+  _i5.Future<Map<String, dynamic>> sendPhoneVerification() =>
+      (super.noSuchMethod(
         Invocation.method(
           #sendPhoneVerification,
           [],
         ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
+        returnValue:
+            _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i5.Future<Map<String, dynamic>>);
 
   @override
   _i5.Future<_i3.VerificationResponse> verifyPhoneCode(
@@ -244,11 +265,10 @@ class MockAuthApiClient extends _i1.Mock implements _i4.AuthApiClient {
       ) as _i5.Future<_i3.VerificationResponse>);
 
   @override
-  _i5.Future<Map<String, dynamic>> resendCode(_i9.ResendCodeRequest? request) =>
-      (super.noSuchMethod(
+  _i5.Future<Map<String, dynamic>> resendPhoneCode() => (super.noSuchMethod(
         Invocation.method(
-          #resendCode,
-          [request],
+          #resendPhoneCode,
+          [],
         ),
         returnValue:
             _i5.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
@@ -267,11 +287,11 @@ class MockAuthApiClient extends _i1.Mock implements _i4.AuthApiClient {
       ) as _i5.Future<Map<String, dynamic>>);
 
   @override
-  _i5.Future<Map<String, dynamic>> changePassword(
+  _i5.Future<Map<String, dynamic>> resetPassword(
           Map<String, dynamic>? request) =>
       (super.noSuchMethod(
         Invocation.method(
-          #changePassword,
+          #resetPassword,
           [request],
         ),
         returnValue:
@@ -279,11 +299,11 @@ class MockAuthApiClient extends _i1.Mock implements _i4.AuthApiClient {
       ) as _i5.Future<Map<String, dynamic>>);
 
   @override
-  _i5.Future<Map<String, dynamic>> checkPasswordStrength(
+  _i5.Future<Map<String, dynamic>> changePassword(
           Map<String, dynamic>? request) =>
       (super.noSuchMethod(
         Invocation.method(
-          #checkPasswordStrength,
+          #changePassword,
           [request],
         ),
         returnValue:
@@ -307,16 +327,16 @@ class MockAuthApiClient extends _i1.Mock implements _i4.AuthApiClient {
       ) as _i5.Future<_i2.AuthResponse>);
 
   @override
-  _i5.Future<_i2.AuthResponse> facebookLogin(Map<String, dynamic>? request) =>
+  _i5.Future<_i2.AuthResponse> appleLogin(Map<String, dynamic>? request) =>
       (super.noSuchMethod(
         Invocation.method(
-          #facebookLogin,
+          #appleLogin,
           [request],
         ),
         returnValue: _i5.Future<_i2.AuthResponse>.value(_FakeAuthResponse_0(
           this,
           Invocation.method(
-            #facebookLogin,
+            #appleLogin,
             [request],
           ),
         )),

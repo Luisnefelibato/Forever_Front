@@ -25,9 +25,6 @@ class AuthRepositoryImpl implements AuthRepository {
     String? email,
     String? phone,
     required String password,
-    required String firstName,
-    required String lastName,
-    required String dateOfBirth,
   }) async {
     try {
       final request = RegisterRequest(
@@ -35,15 +32,14 @@ class AuthRepositoryImpl implements AuthRepository {
         phone: phone,
         password: password,
         passwordConfirmation: password, // Use same password for confirmation
-        firstName: firstName,
-        lastName: lastName,
-        dateOfBirth: dateOfBirth,
       );
 
       final response = await remoteDataSource.register(request);
 
-      // Save token and user data
-      await storageService.saveToken(response.token);
+      // Save token and user data (token may be empty in simple-register)
+      if (response.token.isNotEmpty) {
+        await storageService.saveToken(response.token);
+      }
       await storageService.saveUserId(response.user.id);
       
       if (email != null) {
@@ -259,6 +255,52 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, bool>> verifyRegisterOtp({
+    required String identifier,
+    required String code,
+  }) async {
+    try {
+      final verified = await remoteDataSource.verifyRegisterOtp(
+        identifier: identifier,
+        code: code,
+      );
+      return Right(verified);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> submitBasicProfile({
+    required String firstName,
+    required String lastName,
+    required String dateOfBirth,
+    String? gender,
+    String? interestedInGender,
+    String? relationshipType,
+    String? location,
+  }) async {
+    try {
+      await remoteDataSource.submitBasicProfile(
+        firstName: firstName,
+        lastName: lastName,
+        dateOfBirth: dateOfBirth,
+        gender: gender,
+        interestedInGender: interestedInGender,
+        relationshipType: relationshipType,
+        location: location,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> forgotPassword(String identifier) async {
     try {
       await remoteDataSource.forgotPassword(identifier);
@@ -271,13 +313,45 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> changePassword(
-    String newPassword,
-    String confirmation,
-  ) async {
+  Future<Either<Failure, void>> resetPasswordWithCode({
+    required String identifier,
+    required String code,
+    required String newPassword,
+  }) async {
     try {
-      await remoteDataSource.changePassword(newPassword, confirmation);
+      await remoteDataSource.resetPasswordWithCode(
+        identifier: identifier,
+        code: code,
+        newPassword: newPassword,
+      );
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await remoteDataSource.changePassword(currentPassword, newPassword);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> checkPasswordStrength(String password) async {
+    try {
+      final res = await remoteDataSource.checkPasswordStrength(password);
+      return Right(res);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.code));
     } catch (e) {

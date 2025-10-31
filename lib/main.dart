@@ -36,28 +36,16 @@ import 'features/verification/presentation/pages/pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Load environment variables
   await dotenv.load().catchError((_) {
-    // If .env doesn't exist, continue without it
     debugPrint('Warning: .env file not found, using default values');
   });
-  
-  // Configure dependency injection
   await configureDependencies();
-  
-  // Start token refresh service
   final tokenRefreshService = getIt<TokenRefreshService>();
   await tokenRefreshService.start();
-  
-  // Lock screen orientation to portrait only
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
-  // Laravel native authentication - no Firebase needed
-  
   runApp(const MyApp());
 }
 
@@ -66,225 +54,215 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-      title: 'ForeverUsInLove',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      // Start with Splash Screen
-      home: const SplashPage(),
-      // Define routes
-      routes: {
-        '/splash': (context) => const SplashPage(),
-        '/onboarding-intro-1': (context) => const IntroPage1(),
-        '/onboarding-intro-2': (context) => const IntroPage2(),
-        '/onboarding-intro-3': (context) => const IntroPage3(),
-        '/permissions': (context) => const PermissionsPage(),
-        '/welcome': (context) => const WelcomePage(),
-        '/login': (context) => const LoginPage(),
-        '/register-email': (context) => const RegisterEmailPage(),
-        '/register-phone': (context) => const RegisterPhonePage(),
-        '/forgot-password': (context) => const ForgotPasswordEmailPage(),
-        '/password-changed': (context) => const PasswordChangedPage(),
-        '/account-created': (context) => const AccountCreatedPage(),
-        '/about-you': (context) => const PlaceholderScreen(), // TODO: Replace with actual AboutYouPage
-        '/home': (context) => const PlaceholderScreen(),
-      },
-      onGenerateRoute: (settings) {
-        // Handle routes with arguments
-        if (settings.name == '/create-password') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => CreatePasswordPage(
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-              registrationType: args?['registrationType'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/forgot-password-code') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => ForgotPasswordCodePage(
-              email: args?['email'] as String? ?? '',
-            ),
-          );
-        }
-        if (settings.name == '/reset-password') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => ResetPasswordPage(
-              resetToken: args?['resetToken'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/about-you-name') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => AboutYouNamePage(
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/about-you-birthdate') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => AboutYouBirthdatePage(
-              firstName: args?['firstName'] as String?,
-              lastName: args?['lastName'] as String?,
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/about-you-gender') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => AboutYouGenderPage(
-              firstName: args?['firstName'] as String?,
-              lastName: args?['lastName'] as String?,
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-              birthDay: args?['birthDay'] as int?,
-              birthMonth: args?['birthMonth'] as int?,
-              birthYear: args?['birthYear'] as int?,
-            ),
-          );
-        }
-        if (settings.name == '/about-you-interests') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => AboutYouInterestsPage(
-              firstName: args?['firstName'] as String?,
-              lastName: args?['lastName'] as String?,
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-              birthDay: args?['birthDay'] as int?,
-              birthMonth: args?['birthMonth'] as int?,
-              birthYear: args?['birthYear'] as int?,
-              gender: args?['gender'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/about-you-looking-for') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => AboutYouLookingForPage(
-              firstName: args?['firstName'] as String?,
-              lastName: args?['lastName'] as String?,
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-              birthDay: args?['birthDay'] as int?,
-              birthMonth: args?['birthMonth'] as int?,
-              birthYear: args?['birthYear'] as int?,
-              gender: args?['gender'] as String?,
-              interests: args?['interests'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/about-you-location') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => AboutYouLocationPage(
-              firstName: args?['firstName'] as String?,
-              lastName: args?['lastName'] as String?,
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-              birthDay: args?['birthDay'] as int?,
-              birthMonth: args?['birthMonth'] as int?,
-              birthYear: args?['birthYear'] as int?,
-              gender: args?['gender'] as String?,
-              interests: args?['interests'] as String?,
-              lookingFor: args?['lookingFor'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/phone-verification') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => PhoneVerificationPage(
-              phone: args?['phone'] as String? ?? '',
-              firstName: args?['firstName'] as String? ?? '',
-              lastName: args?['lastName'] as String? ?? '',
-              dateOfBirth: args?['dateOfBirth'] as String? ?? '',
-              password: args?['password'] as String? ?? '',
-            ),
-          );
-        }
-        if (settings.name == '/email-verification') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => EmailVerificationPage(
-              email: args?['email'] as String? ?? '',
-              firstName: args?['firstName'] as String? ?? '',
-              lastName: args?['lastName'] as String? ?? '',
-              dateOfBirth: args?['dateOfBirth'] as String? ?? '',
-              password: args?['password'] as String? ?? '',
-            ),
-          );
-        }
-        if (settings.name == '/verification-prompt') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => VerificationPromptPage(
-              firstName: args?['firstName'] as String?,
-              lastName: args?['lastName'] as String?,
-              email: args?['email'] as String?,
-              phone: args?['phone'] as String?,
-              countryCode: args?['countryCode'] as String?,
-              birthDay: args?['birthDay'] as int?,
-              birthMonth: args?['birthMonth'] as int?,
-              birthYear: args?['birthYear'] as int?,
-              gender: args?['gender'] as String?,
-              interests: args?['interests'] as String?,
-              lookingFor: args?['lookingFor'] as String?,
-              location: args?['location'] as String?,
-            ),
-          );
-        }
-        if (settings.name == '/active-sessions') {
-          return MaterialPageRoute(
-            builder: (context) => const ActiveSessionsPage(),
-          );
-        }
-        // ============================================================================
-        // VERIFICATION ROUTES
-        // ============================================================================
-        if (settings.name == '/verification/intro') {
-          return MaterialPageRoute(
-            builder: (context) => const VerificationIntroPage(),
-          );
-        }
-        if (settings.name == '/verification/payment') {
-          return MaterialPageRoute(
-            builder: (context) => const VerificationPaymentPage(),
-          );
-        }
-        if (settings.name == '/verification/processing') {
-          return MaterialPageRoute(
-            builder: (context) => const VerificationProcessingPage(),
-          );
-        }
-        if (settings.name == '/verification/onfido') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => OnfidoVerificationPage(
-              sdkToken: args?['sdk_token'] as String? ?? '',
-              workflowRunId: args?['workflow_run_id'] as String? ?? '',
-            ),
-          );
-        }
-        return null;
-      },
-    );
+        title: 'ForeverUsInLove',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        // Start with Splash Screen
+        home: const SplashPage(),
+        // Define routes
+        routes: {
+          '/splash': (context) => const SplashPage(),
+          '/onboarding-intro-1': (context) => const IntroPage1(),
+          '/onboarding-intro-2': (context) => const IntroPage2(),
+          '/onboarding-intro-3': (context) => const IntroPage3(),
+          '/permissions': (context) => const PermissionsPage(),
+          '/welcome': (context) => const WelcomePage(),
+          '/login': (context) => const LoginPage(),
+          '/register-email': (context) => const RegisterEmailPage(),
+          '/register-phone': (context) => const RegisterPhonePage(),
+          '/forgot-password': (context) => const ForgotPasswordEmailPage(),
+          '/password-changed': (context) => const PasswordChangedPage(),
+          '/account-created': (context) => const AccountCreatedPage(),
+          '/about-you': (context) => const PlaceholderScreen(),
+          '/home': (context) => const PlaceholderScreen(),
+          // Verification static routes (no args)
+          '/verification/intro': (context) => const VerificationIntroPage(),
+          '/verification/payment': (context) => const VerificationPaymentPage(),
+          '/verification/processing': (context) => const VerificationProcessingPage(),
+          '/verification/complete': (context) => const VerificationCompletePage(),
+        },
+        onGenerateRoute: (settings) {
+          if (settings.name == '/create-password') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => CreatePasswordPage(
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+                registrationType: args?['registrationType'] as String?,
+              ),
+            );
+          }
+          if (settings.name == '/forgot-password-code') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => ForgotPasswordCodePage(
+                identifier: args?['identifier'] as String? ?? '',
+              ),
+            );
+          }
+          if (settings.name == '/reset-password') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => ResetPasswordPage(
+                identifier: args?['identifier'] as String? ?? '',
+                code: args?['code'] as String? ?? '',
+              ),
+            );
+          }
+          if (settings.name == '/about-you-name') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => AboutYouNamePage(
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+              ),
+            );
+          }
+          if (settings.name == '/about-you-birthdate') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => AboutYouBirthdatePage(
+                firstName: args?['firstName'] as String?,
+                lastName: args?['lastName'] as String?,
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+              ),
+            );
+          }
+          if (settings.name == '/about-you-gender') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => AboutYouGenderPage(
+                firstName: args?['firstName'] as String?,
+                lastName: args?['lastName'] as String?,
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+                birthDay: args?['birthDay'] as int?,
+                birthMonth: args?['birthMonth'] as int?,
+                birthYear: args?['birthYear'] as int?,
+              ),
+            );
+          }
+          if (settings.name == '/about-you-interests') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => AboutYouInterestsPage(
+                firstName: args?['firstName'] as String?,
+                lastName: args?['lastName'] as String?,
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+                birthDay: args?['birthDay'] as int?,
+                birthMonth: args?['birthMonth'] as int?,
+                birthYear: args?['birthYear'] as int?,
+                gender: args?['gender'] as String?,
+              ),
+            );
+          }
+          if (settings.name == '/about-you-looking-for') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => AboutYouLookingForPage(
+                firstName: args?['firstName'] as String?,
+                lastName: args?['lastName'] as String?,
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+                birthDay: args?['birthDay'] as int?,
+                birthMonth: args?['birthMonth'] as int?,
+                birthYear: args?['birthYear'] as int?,
+                gender: args?['gender'] as String?,
+                interests: args?['interests'] as String?,
+              ),
+            );
+          }
+          if (settings.name == '/about-you-location') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => AboutYouLocationPage(
+                firstName: args?['firstName'] as String?,
+                lastName: args?['lastName'] as String?,
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+                birthDay: args?['birthDay'] as int?,
+                birthMonth: args?['birthMonth'] as int?,
+                birthYear: args?['birthYear'] as int?,
+                gender: args?['gender'] as String?,
+                interests: args?['interests'] as String?,
+                lookingFor: args?['lookingFor'] as String?,
+              ),
+            );
+          }
+          if (settings.name == '/phone-verification') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => PhoneVerificationPage(
+                phone: args?['phone'] as String? ?? '',
+                firstName: args?['firstName'] as String? ?? '',
+                lastName: args?['lastName'] as String? ?? '',
+                dateOfBirth: args?['dateOfBirth'] as String? ?? '',
+                password: args?['password'] as String? ?? '',
+              ),
+            );
+          }
+          if (settings.name == '/email-verification') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => EmailVerificationPage(
+                email: args?['email'] as String? ?? '',
+                firstName: args?['firstName'] as String? ?? '',
+                lastName: args?['lastName'] as String? ?? '',
+                dateOfBirth: args?['dateOfBirth'] as String? ?? '',
+                password: args?['password'] as String? ?? '',
+              ),
+            );
+          }
+          if (settings.name == '/verification-prompt') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => VerificationPromptPage(
+                firstName: args?['firstName'] as String?,
+                lastName: args?['lastName'] as String?,
+                email: args?['email'] as String?,
+                phone: args?['phone'] as String?,
+                countryCode: args?['countryCode'] as String?,
+                birthDay: args?['birthDay'] as int?,
+                birthMonth: args?['birthMonth'] as int?,
+                birthYear: args?['birthYear'] as int?,
+                gender: args?['gender'] as String?,
+                interests: args?['interests'] as String?,
+                lookingFor: args?['lookingFor'] as String?,
+                location: args?['location'] as String?,
+              ),
+            );
+          }
+          if (settings.name == '/active-sessions') {
+            return MaterialPageRoute(
+              builder: (context) => const ActiveSessionsPage(),
+            );
+          }
+          // ============================================================================
+          // VERIFICATION ROUTES WITH ARGS
+          // ============================================================================
+          if (settings.name == '/verification/onfido') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => OnfidoVerificationPage(
+                sdkToken: args?['sdk_token'] as String? ?? '',
+                workflowRunId: args?['workflow_run_id'] as String? ?? '',
+              ),
+            );
+          }
+          return null;
+        },
+      );
 }
 
 /// Placeholder screen until UI/UX is approved
@@ -293,38 +271,38 @@ class PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite,
-              size: 100,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'ForeverUsInLove',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Awaiting UI/UX Approval',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'v1.0.0',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[400],
-                  ),
-            ),
-          ],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.favorite,
+                size: 100,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'ForeverUsInLove',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Awaiting UI/UX Approval',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'v1.0.0',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[400],
+                    ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 }
