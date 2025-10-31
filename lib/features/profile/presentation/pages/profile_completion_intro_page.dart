@@ -23,6 +23,8 @@ class ProfileCompletionIntroPage extends StatelessWidget {
       body: Stack(
         children: [
           // Background image (pareja mayor)
+          // TODO: Agregar imagen profile_intro_couple.jpg en assets/images/onboarding/
+          // La imagen debe mostrar una pareja mayor sonriendo (similar a las pantallas de diseño)
           Positioned.fill(
             child: Image.asset(
               'assets/images/onboarding/profile_intro_couple.jpg',
