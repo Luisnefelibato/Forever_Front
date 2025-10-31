@@ -89,8 +89,8 @@ class _VerificationCompletePageState extends State<VerificationCompletePage> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Cerrar todas las pantallas y volver al inicio
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    // Navegar a profile completion intro
+                    Navigator.pushReplacementNamed(context, '/profile-intro');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2CA97B), // Verde verificación

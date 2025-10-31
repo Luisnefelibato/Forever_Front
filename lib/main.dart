@@ -33,6 +33,7 @@ import 'features/auth/presentation/pages/phone_verification_page.dart';
 import 'features/auth/presentation/pages/active_sessions_page.dart';
 import 'features/auth/presentation/pages/email_verification_page.dart';
 import 'features/verification/presentation/pages/pages.dart';
+import 'features/profile/presentation/pages/pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +78,10 @@ class MyApp extends StatelessWidget {
           '/account-created': (context) => const AccountCreatedPage(),
           '/about-you': (context) => const PlaceholderScreen(),
           '/home': (context) => const PlaceholderScreen(),
+          // Profile completion routes
+          '/profile-intro': (context) => const ProfileCompletionIntroPage(),
+          '/profile-bio': (context) => const ProfileBioPage(),
+          '/profile-interests': (context) => const ProfileInterestsPage(),
           // Verification static routes (no args)
           '/verification/intro': (context) => const VerificationIntroPage(),
           '/verification/payment': (context) => const VerificationPaymentPage(),
