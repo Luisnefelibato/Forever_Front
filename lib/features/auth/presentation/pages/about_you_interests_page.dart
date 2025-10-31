@@ -110,6 +110,18 @@ class _AboutYouInterestsPageState extends State<AboutYouInterestsPage> {
             children: [
               const SizedBox(height: 24),
               
+              // Step indicator
+              Text(
+                'Step 3/3 - Account settings',
+                style: TextStyle(
+                  fontFamily: 'Delight',
+                  fontSize: 14,
+                  color: _primaryGreen,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              
               // Back button
               InkWell(
                 onTap: () => Navigator.pop(context),
@@ -136,6 +148,19 @@ class _AboutYouInterestsPageState extends State<AboutYouInterestsPage> {
               
               // Progress bar
               _buildProgressBar(),
+              
+              const SizedBox(height: 16),
+              
+              // Step indicator
+              Text(
+                'Step 3/3 - Account settings',
+                style: TextStyle(
+                  fontFamily: 'Delight',
+                  fontSize: 14,
+                  color: _primaryGreen,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               
               const SizedBox(height: 48),
               

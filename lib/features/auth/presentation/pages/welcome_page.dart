@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/di/injection.dart';
 import '../../data/services/social_auth_service.dart';
 
@@ -200,26 +201,21 @@ class _WelcomePageState extends State<WelcomePage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                  // Logo - Super grande
+                  // Logo - Super grande (PNG con zoom/crop para evitar espacios en blanco)
                   SizedBox(
-                    width: 200,
-                    height: 80,
-                    child: Image.asset(
-                      'assets/images/logo/Logo_For_Auth.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Fallback text logo
-                        return const Text(
-                          'ForEverUs\nIn Love',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
-                            fontFamily: 'Delight',
-                          ),
-                        );
-                      },
+                    width: double.infinity,
+                    height: 140,
+                    child: ClipRect(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        alignment: Alignment.center,
+                        child: Image.asset(
+                          'assets/images/logo/Logo_for_welcome.png',
+                          width: 850, // zoom mucho más grande
+                          height: 400,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                   ),
                   
