@@ -242,6 +242,17 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
                           padding: EdgeInsets.zero,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      // Step indicator
+                      Text(
+                        'Step 1/3 - Account settings',
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 14,
+                          color: _primaryGreen,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       
                       const SizedBox(height: 32),
                       

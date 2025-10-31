@@ -317,6 +317,19 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
               // Progress bar
               _buildProgressBar(),
               
+              const SizedBox(height: 16),
+              
+              // Step indicator
+              Text(
+                'Step 3/3 - Account settings',
+                style: TextStyle(
+                  fontFamily: 'Delight',
+                  fontSize: 14,
+                  color: _primaryGreen,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              
               const SizedBox(height: 48),
               
               // Title

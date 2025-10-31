@@ -298,6 +298,17 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   padding: EdgeInsets.zero,
                 ),
               ),
+              const SizedBox(height: 16),
+              // Step indicator
+              Text(
+                'Step 2/3 - Account settings',
+                style: TextStyle(
+                  fontFamily: 'Delight',
+                  fontSize: 14,
+                  color: _primaryGreen,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               
               const SizedBox(height: 32),
               
