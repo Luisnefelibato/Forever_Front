@@ -85,7 +85,7 @@ class ProfileCompletionIntroPage extends StatelessWidget {
                   // Main title
                   const Text(
                     'Love starts with\nunderstanding.',
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                     style: TextStyle(
                       fontFamily: 'Delight',
                       fontSize: 36,
@@ -101,7 +101,7 @@ class ProfileCompletionIntroPage extends StatelessWidget {
                   // Subtitle
                   const Text(
                     'Complete your profile and start connecting\nwith people who share your energy and\ndesires.',
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                     style: TextStyle(
                       fontFamily: 'Delight',
                       fontSize: 16,

@@ -139,7 +139,7 @@ class _ProfileBioPageState extends State<ProfileBioPage> {
                       'Let others know the person behind the smile.',
                       style: TextStyle(
                         fontFamily: 'Delight',
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.normal,
                         color: Colors.black87,
                         height: 1.4,
@@ -167,7 +167,7 @@ class _ProfileBioPageState extends State<ProfileBioPage> {
                           height: 1.5,
                         ),
                         decoration: InputDecoration(
-                          hintText: '"I\'m a cheerful soul who loves good conversations, cozy afternoons, and sharing laughter with kind people.',
+                          hintText: 'Write a little bit about you...',
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             fontSize: 16,
@@ -178,6 +178,8 @@ class _ProfileBioPageState extends State<ProfileBioPage> {
                           border: InputBorder.none,
                           counterText: '', // Hide default counter
                           contentPadding: EdgeInsets.zero,
+                          fillColor: Colors.white,
+                          filled: true,
                         ),
                       ),
                     ),
