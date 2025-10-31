@@ -2,15 +2,11 @@
 class OnfidoConfig {
   // Información del Workflow
   static const String workflowName = 'test';
-  static const String workflowId = 'a8a1dd1a-b9a7-4c25-affb-88ae6ec67a88';
+  static const String workflowId = '2e849672-bc5e-449a-9feb-c40ccde8b575';
   
-  // Token de API (LIVE - Producción)
-  // NOTA: Configurar usando variable de entorno o definir aquí en producción
-  // En desarrollo, usar: OnfidoService.setCustomApiToken('tu_token_aqui')
-  static const String apiToken = String.fromEnvironment(
-    'ONFIDO_API_TOKEN',
-    defaultValue: 'YOUR_ONFIDO_API_TOKEN_HERE',
-  );
+  // Token de API (LIVE - Producción US)
+  // NOTA: Token requerido para autenticación con Onfido API
+  static const String apiToken = 'api_live_us.qFZWNOoxwLg.gCX69DkmPrEtAMfS7xFH1igeUKJAi2TK';
   
   // Entorno actual
   static const String environment = 'live';

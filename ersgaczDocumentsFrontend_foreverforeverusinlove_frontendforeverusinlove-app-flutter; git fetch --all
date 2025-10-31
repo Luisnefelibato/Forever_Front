@@ -1,0 +1,20 @@
+[33m9a4da4f[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/develop[m[33m, [m[1;31mgithub/feature/github-pr[m[33m)[m feat: agregar indicadores de progreso Step X/3 y mejoras en logo welcome page
+[33md8f74a0[m fix: remover token hardcodeado de Onfido por seguridad
+[33m648004d[m Update: cambios en autenticaciÃ³n y endpoints
+[33md561914[m UI auth flow tweaks: unified welcome CTA, login modal, placeholders, 30s resend with CTA, brand fix 'ForEverUs In Love'; restore routes/init; Onfido verification integration and Android packaging excludes; update verification pages and forgot/reset flows
+[33mffeab23[m[33m ([m[1;31mgithub/main[m[33m)[m feat: Implement complete Onfido identity verification system
+[33m13ae7d8[m docs: Agregar resumen completo de implementación
+[33m4ac4e92[m Merge branch 'genspark_ai_developer'
+[33medb8b92[m[33m ([m[1;31mgithub/genspark_ai_developer[m[33m)[m fix: Corregir endpoints de API y agregar rutas de verificación
+[33m155789b[m Merge pull request #12 from Luisnefelibato/maya_ai_developer
+[33mf020a0c[m feat: Implementar pantalla de verificación con integración de pagos
+[33m1f2f2e6[m feat: Implementar refresh token automático y autenticación Laravel nativa
+[33m7356728[m feat: Complete backend integration and test suite
+[33m0c04394[m fix(tests): Fix all test compilation errors and simplify test suite
+[33m364c6ae[m Merge pull request #11 from Luisnefelibato/maya_ai_developer
+[33md97cc48[m docs: Add comprehensive TEST_SUMMARY.md
+[33m2e28cd2[m docs: Add QUICK_START.md for rapid setup
+[33mbe65622[m test(auth): Add comprehensive test suite for all 21 API endpoints
+[33mce952f1[m Merge pull request #10 from Luisnefelibato/maya_ai_developer
+[33mcad6455[m feat(backend): Complete backend integration with 21 API endpoints
+[33m8306c11[m Merge pull request #9 from Luisnefelibato/develop

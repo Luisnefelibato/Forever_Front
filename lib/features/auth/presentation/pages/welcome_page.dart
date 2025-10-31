@@ -192,7 +192,7 @@ class _WelcomePageState extends State<WelcomePage> {
             child: Center(
               child: Container(
                 width: 300,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
@@ -204,22 +204,22 @@ class _WelcomePageState extends State<WelcomePage> {
                   // Logo - Super grande (PNG con zoom/crop para evitar espacios en blanco)
                   SizedBox(
                     width: double.infinity,
-                    height: 140,
+                    height: 120,
                     child: ClipRect(
                       child: FittedBox(
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
                         child: Image.asset(
-                          'assets/images/logo/Logo_for_welcome.png',
-                          width: 850, // zoom mucho más grande
-                          height: 400,
+                          'assets/images/logo/Logo_super_big.jpeg',
+                          width: 650, // zoom más grande para compensar altura reducida
+                          height: 270,
                           fit: BoxFit.contain,
                         ),
                       ),
                     ),
                   ),
                   
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   
                   // Subtitle
                   const Text(
@@ -235,7 +235,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                   ),
                   
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   
                   // Continue with your account button
                   SizedBox(
@@ -271,7 +271,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                   ),
                   
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   
                   // Divider with "Or Sign up with" text
                   Row(
@@ -306,7 +306,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ],
                   ),
                   
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   
                   // Social login buttons (Facebook and Google)
                   Row(
