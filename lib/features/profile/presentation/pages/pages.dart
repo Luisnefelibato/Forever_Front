@@ -1,3 +1,8 @@
 export 'profile_completion_intro_page.dart';
 export 'profile_bio_page.dart';
 export 'profile_interests_page.dart';
+export 'profile_lifestyle_page.dart';
+export 'profile_photos_page.dart';
+export 'profile_height_page.dart';
+export 'profile_job_page.dart';
+export 'profile_review_page.dart';
