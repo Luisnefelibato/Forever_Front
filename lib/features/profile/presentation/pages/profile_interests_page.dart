@@ -152,8 +152,8 @@ class _ProfileInterestsPageState extends State<ProfileInterestsPage> {
     }
 
     // TODO: Save selected interests
-    // Navigate to next page or home
-    Navigator.pushReplacementNamed(context, '/home');
+    // Navigate to lifestyle page
+    Navigator.pushNamed(context, '/profile-lifestyle');
   }
 
   @override

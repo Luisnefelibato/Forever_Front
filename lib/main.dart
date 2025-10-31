@@ -82,6 +82,11 @@ class MyApp extends StatelessWidget {
           '/profile-intro': (context) => const ProfileCompletionIntroPage(),
           '/profile-bio': (context) => const ProfileBioPage(),
           '/profile-interests': (context) => const ProfileInterestsPage(),
+          '/profile-lifestyle': (context) => const ProfileLifestylePage(),
+          '/profile-photos': (context) => const ProfilePhotosPage(),
+          '/profile-height': (context) => const ProfileHeightPage(),
+          '/profile-job': (context) => const ProfileJobPage(),
+          '/profile-review': (context) => const ProfileReviewPage(),
           // Verification static routes (no args)
           '/verification/intro': (context) => const VerificationIntroPage(),
           '/verification/payment': (context) => const VerificationPaymentPage(),
