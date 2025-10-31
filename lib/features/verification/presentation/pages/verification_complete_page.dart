@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../profile/presentation/pages/pages.dart';
 
 /// Verification Complete Page
 /// 
@@ -75,28 +74,15 @@ class _VerificationCompletePageState extends State<VerificationCompletePage> {
                       height: 56,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Navegar a profile completion intro
-                          debugPrint('🔄 Navegando a ProfileCompletionIntroPage...');
-                          try {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (context) {
-                                  debugPrint('✅ Builder ejecutado, creando ProfileCompletionIntroPage');
-                                  return ProfileCompletionIntroPage();
-                                },
-                              ),
-                            );
-                          } catch (e, stackTrace) {
-                            debugPrint('❌ Error en navegación: $e');
-                            debugPrint('❌ Stack trace: $stackTrace');
-                            // Fallback: intentar con la ruta nombrada
-                            try {
-                              Navigator.pushReplacementNamed(context, '/profile-intro');
-                            } catch (e2) {
-                              debugPrint('❌ Error con ruta nombrada: $e2');
-                            }
-                          }
+                          debugPrint('🔄 [VERIFICATION_COMPLETE] Botón Finish presionado');
+                          debugPrint('🔄 [VERIFICATION_COMPLETE] Navegando a /profile-intro...');
+                          
+                          // Usar ruta nombrada directamente
+                          Navigator.pushReplacementNamed(context, '/profile-intro').then((_) {
+                            debugPrint('✅ [VERIFICATION_COMPLETE] Navegación completada exitosamente');
+                          }).catchError((error) {
+                            debugPrint('❌ [VERIFICATION_COMPLETE] Error en navegación: $error');
+                          });
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2CA97B), // Verde verificación
