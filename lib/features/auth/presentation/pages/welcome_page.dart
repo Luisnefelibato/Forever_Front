@@ -316,24 +316,16 @@ class _WelcomePageState extends State<WelcomePage> {
                       _buildSocialButton(
                         onPressed: _isLoadingFacebook ? null : _handleFacebookSignIn,
                         isLoading: _isLoadingFacebook,
-                        child: const Icon(
-                          Icons.facebook,
-                          color: Color(0xFF1877F2),
-                          size: 20,
-                        ),
+                        iconPath: 'assets/images/icons/facebook.png',
                       ),
                       
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 20),
                       
-                      // Google button
+                      // Google/Gmail button
                       _buildSocialButton(
                         onPressed: _isLoadingGoogle ? null : _handleGoogleSignIn,
                         isLoading: _isLoadingGoogle,
-                        child: const Icon(
-                          Icons.g_mobiledata,
-                          color: Color(0xFF4285F4),
-                          size: 20,
-                        ),
+                        iconPath: 'assets/images/icons/gmail.png',
                       ),
                     ],
                   ),
@@ -397,30 +389,52 @@ class _WelcomePageState extends State<WelcomePage> {
   
   Widget _buildSocialButton({
     required VoidCallback? onPressed,
-    required Widget child,
+    required String iconPath,
     bool isLoading = false,
   }) {
     return Container(
-      width: 48,
-      height: 48,
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: _borderGreen, width: 2),
         color: Colors.white,
       ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: isLoading 
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(_primaryGreen),
-              ),
-            )
-          : child,
-        padding: EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(28),
+          child: Center(
+            child: isLoading 
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(_primaryGreen),
+                  ),
+                )
+              : SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: Image.asset(
+                    iconPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback to icon if image not found
+                      return Icon(
+                        iconPath.contains('facebook') ? Icons.facebook : Icons.g_mobiledata,
+                        color: iconPath.contains('facebook') 
+                          ? const Color(0xFF1877F2) 
+                          : const Color(0xFF4285F4),
+                        size: 16,
+                      );
+                    },
+                  ),
+                ),
+          ),
+        ),
       ),
     );
   }

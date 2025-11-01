@@ -37,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _showError = false;
   bool _isLoading = false;
   String _errorMessage = '';
+  bool _isFormValid = false;
   
   late final AuthRepository _authRepository;
   
@@ -52,6 +53,10 @@ class _LoginPageState extends State<LoginPage> {
     configureDependencies();
     // Initialize auth repository
     _authRepository = GetIt.instance<AuthRepository>();
+    
+    // Listen to input changes to validate form
+    _emailController.addListener(_validateForm);
+    _passwordController.addListener(_validateForm);
   }
   
   @override
@@ -61,9 +66,22 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
   
+  void _validateForm() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final isValid = email.isNotEmpty && password.isNotEmpty && password.length >= 8;
+    
+    if (_isFormValid != isValid) {
+      setState(() {
+        _isFormValid = isValid;
+      });
+    }
+  }
+  
   Future<void> _handleLogin() async {
     setState(() {
       _showError = false;
+      _errorMessage = '';
       _isLoading = true;
     });
     
@@ -92,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
           (failure) {
             setState(() {
               _showError = true;
-              _errorMessage = failure.message;
+              _errorMessage = 'Invalid credentials. Please check your email/number and password and try again.';
               _isLoading = false;
             });
           },
@@ -110,14 +128,13 @@ class _LoginPageState extends State<LoginPage> {
       } catch (e) {
         setState(() {
           _showError = true;
-          _errorMessage = 'An unexpected error occurred. Please try again.';
+          _errorMessage = 'Invalid credentials. Please check your email/number and password and try again.';
           _isLoading = false;
         });
       }
     } else {
       setState(() {
-        _showError = true;
-        _errorMessage = 'Please fill in all required fields correctly.';
+        _showError = false;
         _isLoading = false;
       });
     }
@@ -125,50 +142,22 @@ class _LoginPageState extends State<LoginPage> {
   
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email address / Phone number is required';
+      return 'This field can\'t be empty';
     }
-    
-    // Check if it's a phone number (10 digits for Colombian format)
-    final phoneRegex = RegExp(r'^\d{10}$');
-    if (phoneRegex.hasMatch(value)) {
-      return null; // Valid phone number
-    }
-    
-    // Check if it's a valid email
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email or phone number';
-    }
-    
     return null;
   }
   
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return 'This field can\'t be empty';
     }
-    
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-    
-    // Check for password requirements (matching server validation)
-    bool hasLowercase = value.contains(RegExp(r'[a-z]'));
-    bool hasUppercase = value.contains(RegExp(r'[A-Z]'));
-    bool hasNumber = value.contains(RegExp(r'[0-9]'));
-    bool hasSpecialChar = value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-    
-    if (!hasLowercase || !hasUppercase || !hasNumber || !hasSpecialChar) {
-      return 'Password must contain: lowercase, uppercase, number, and special character';
-    }
-    
     return null;
   }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // Soft background color
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
           children: [
@@ -178,10 +167,14 @@ class _LoginPageState extends State<LoginPage> {
             // Main content
             Column(
               children: [
-                // Scrollable content
+                // Scrollable content with transparent background to show logo
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.transparent, // Transparent to show background logo
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -196,7 +189,15 @@ class _LoginPageState extends State<LoginPage> {
                         border: Border.all(color: _primaryGreen, width: 2),
                       ),
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                        icon: Image.asset(
+                          'assets/images/icons/back.png',
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                          },
+                        ),
                         onPressed: () {
                           // Always navigate to welcome page to avoid going back to forgot password flow
                           Navigator.pushReplacementNamed(context, '/welcome');
@@ -223,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
                     
                     // Subtitle
                     const Text(
-                      'With your ForEverUs In Love account',
+                      'With your ForEverUs In Love account.',
                       style: TextStyle(
                         fontFamily: 'Delight',
                         fontSize: 14,
@@ -235,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                     
                     // Email/Phone input
                     const Text(
-                      'Email address / Phone number',
+                      'Email address. / Phone number.',
                       style: TextStyle(
                         fontFamily: 'Delight',
                         fontSize: 14,
@@ -249,12 +250,13 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: _validateEmail,
+                      onChanged: (_) => _validateForm(),
                       style: const TextStyle(
                         fontFamily: 'Delight',
                         color: Colors.black,
                         fontSize: 16,
                       ),
-                      cursorColor: Colors.black,
+                      cursorColor: _primaryGreen,
                       decoration: InputDecoration(
                         hintText: 'Example@email.com or +1 555-123-4567',
                         hintStyle: TextStyle(
@@ -314,12 +316,13 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       validator: _validatePassword,
+                      onChanged: (_) => _validateForm(),
                       style: const TextStyle(
                         fontFamily: 'Delight',
                         color: Colors.black,
                         fontSize: 16,
                       ),
-                      cursorColor: Colors.black,
+                      cursorColor: _primaryGreen,
                       decoration: InputDecoration(
                         hintText: '*********',
                         hintStyle: TextStyle(
@@ -433,101 +436,129 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     
-                    const SizedBox(height: 40),
-                    
-                    // Error message (if validation fails)
-                    if (_showError)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 24),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: _errorBackground,
-                          border: Border.all(color: _errorRed, width: 1),
-                          borderRadius: BorderRadius.circular(36),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              color: _errorRed,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _errorMessage,
-                                style: TextStyle(
-                                  fontFamily: 'Delight',
-                                  fontSize: 14,
-                                  color: Colors.red[900],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                         ],
                       ),
                     ),
+                    ),
                   ),
                 ),
                 
-                // Static Login button at bottom
+                // Bottom section - transparent to show logo
                 Container(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primaryGreen,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
+                  color: Colors.transparent, // Transparent to show background logo
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Warning message at bottom - Only shown when credentials are invalid
+                      if (_showError)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: _errorBackground,
+                              border: Border.all(color: _errorRed, width: 1),
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/icons/warning.png',
+                                  width: 24,
+                                  height: 24,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: _errorRed,
+                                      size: 24,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage,
+                                    style: TextStyle(
+                                      fontFamily: 'Delight',
+                                      fontSize: 14,
+                                      color: Colors.red[900],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        elevation: 0,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      
+                      // Static Login button at bottom
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: (_isLoading || !_isFormValid) ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: (_isLoading || !_isFormValid) 
+                                ? Colors.grey[400] 
+                                : _primaryGreen,
+                              foregroundColor: (_isLoading || !_isFormValid)
+                                ? Colors.grey[600]
+                                : Colors.white,
+                              disabledBackgroundColor: Colors.grey[300],
+                              disabledForegroundColor: Colors.grey[600],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
                               ),
-                            )
-                          : const Text(
-                              'Log In',
-                              style: TextStyle(
-                                fontFamily: 'Delight',
-                                fontSize: 16,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
+                              elevation: 0,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Log In',
+                                    style: TextStyle(
+                                      fontFamily: 'Delight',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      
+                      // "Create your account" link - Fixed to prevent cutoff with keyboard
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                          child: GestureDetector(
+                            onTap: _showCreateAccountDialog,
+                            child: const Center(
+                              child: Text(
+                                'Create your account',
+                                style: TextStyle(
+                                  fontFamily: 'Delight',
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                    ),
-                  ),
-                ),
-                
-                // "Create your account" link
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-                  child: GestureDetector(
-                    onTap: _showCreateAccountDialog,
-                    child: const Center(
-                      child: Text(
-                        'Create your account',
-                        style: TextStyle(
-                          fontFamily: 'Delight',
-                          fontSize: 14,
-                          color: Colors.black,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.black,
-                          fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],
@@ -557,7 +588,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(56),
+                    borderRadius: BorderRadius.circular(30),
                     border: Border.all(color: Colors.black, width: 1),
                     boxShadow: const [
                       BoxShadow(
@@ -570,24 +601,24 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Small logo on top (replaces heart icon)
+                      // Heart lock icon
                       SizedBox(
                         height: 56,
                         child: Image.asset(
-                          'assets/images/logo/Logo_Login.png',
+                          'assets/images/icons/heart.png',
                           fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 18),
                       const Text(
-                        'Join our safe and genuine\nspace to meet real people',
+                        'Join our safe and genuine\nspace to meet real people.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'Delight',
-                          fontSize: 15,
+                          fontSize: 17,
                           height: 1.25,
                           color: Colors.black,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -667,7 +698,7 @@ class _LoginPageState extends State<LoginPage> {
       top: -370,
       right: -400,
       child: Opacity(
-        opacity: 0.15, // Slightly more visible
+        opacity: 0.20, // Slightly more visible
         child: Image.asset(
           'assets/images/logo/Logo_Login.png',
           width: 1000,

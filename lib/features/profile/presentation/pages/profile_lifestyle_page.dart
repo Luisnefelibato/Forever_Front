@@ -12,6 +12,7 @@ class ProfileLifestylePage extends StatefulWidget {
 }
 
 class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
+  Map<String, dynamic> _accumulatedData = {};
   final Set<String> _selectedLifestyles = {};
   final Map<String, bool> _expandedCategories = {
     'exercise': true,
@@ -22,6 +23,16 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
   static const int maxSelections = 10;
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _purpleIcon = Color(0xFF8B5CF6);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtener datos acumulados de arguments
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic> && _accumulatedData.isEmpty) {
+      _accumulatedData = Map<String, dynamic>.from(args);
+    }
+  }
 
   final Map<String, Map<String, dynamic>> _categories = {
     'exercise': {
@@ -101,14 +112,18 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
   }
 
   void _handleSkip() {
-    Navigator.pushNamed(context, '/profile-photos');
+    Navigator.pushNamed(
+      context,
+      '/profile-photos',
+      arguments: _accumulatedData,
+    );
   }
 
   void _handleContinue() {
-    if (_selectedLifestyles.length < 10) {
+    if (_selectedLifestyles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please select 10 options to continue'),
+          content: const Text('Please select at least one option'),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -120,8 +135,15 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
       return;
     }
     
+    // Añadir lifestyle a datos acumulados
+    _accumulatedData['lifestyles'] = _selectedLifestyles.toList();
+    
     // Navigate to photos page
-    Navigator.pushNamed(context, '/profile-photos');
+    Navigator.pushNamed(
+      context,
+      '/profile-photos',
+      arguments: _accumulatedData,
+    );
   }
 
   @override
@@ -207,8 +229,9 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
                 // Icon placeholders
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(3, (index) {
-                    return Container(
+                  children: [
+                    // Gym icon
+                    Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
                       width: 80,
                       height: 80,
@@ -221,12 +244,50 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
                         ),
                       ),
                       child: Icon(
-                        Icons.image_outlined,
+                        Icons.fitness_center,
                         color: Colors.grey[400],
                         size: 32,
                       ),
-                    );
-                  }),
+                    ),
+                    // Donut icon
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.grey[400]!,
+                          width: 2,
+                          style: BorderStyle.solid,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.donut_large,
+                        color: Colors.grey[400],
+                        size: 32,
+                      ),
+                    ),
+                    // Wine icon
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.grey[400]!,
+                          width: 2,
+                          style: BorderStyle.solid,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.wine_bar,
+                        color: Colors.grey[400],
+                        size: 32,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -266,7 +327,7 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
                               children: [
                                 Icon(
                                   category['icon'] as IconData,
-                                  color: _purpleIcon,
+                                  color: _primaryGreen,
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),
@@ -304,39 +365,33 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
                               children: (category['options'] as List<String>)
                                   .map((option) {
                                 final isSelected = _selectedLifestyles.contains(option);
-                                return InkWell(
-                                  onTap: () => _toggleSelection(option),
-                                  borderRadius: BorderRadius.circular(28),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
+                                return FilterChip(
+                                  label: Text(option),
+                                  selected: isSelected,
+                                  onSelected: (_) => _toggleSelection(option),
+                                  backgroundColor: Colors.grey[100],
+                                  selectedColor: _primaryGreen.withOpacity(0.2),
+                                  checkmarkColor: _primaryGreen,
+                                  labelStyle: TextStyle(
+                                    color: isSelected
+                                        ? _primaryGreen
+                                        : Colors.grey[700],
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                    fontFamily: 'Delight',
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                    side: BorderSide(
                                       color: isSelected
-                                          ? Colors.white
-                                          : Colors.grey[100],
-                                      borderRadius: BorderRadius.circular(28),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? _primaryGreen
-                                            : Colors.transparent,
-                                        width: 2,
-                                      ),
+                                          ? _primaryGreen
+                                          : Colors.transparent,
                                     ),
-                                    child: Text(
-                                      option,
-                                      style: TextStyle(
-                                        color: isSelected
-                                            ? _primaryGreen
-                                            : Colors.grey[700],
-                                        fontWeight: isSelected
-                                            ? FontWeight.w600
-                                            : FontWeight.normal,
-                                        fontFamily: 'Delight',
-                                        fontSize: 14,
-                                      ),
-                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
                                   ),
                                 );
                               }).toList(),
@@ -351,35 +406,30 @@ class _ProfileLifestylePageState extends State<ProfileLifestylePage> {
           ),
         ],
       ),
-      floatingActionButton: _selectedLifestyles.length == maxSelections
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _handleContinue,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryGreen,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+      floatingActionButton: _selectedLifestyles.isNotEmpty
+          ? FloatingActionButton.extended(
+              onPressed: _handleContinue,
+              backgroundColor: _primaryGreen,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              label: Row(
+                children: [
+                  Text(
+                    'Continue (${_selectedLifestyles.length}/$maxSelections)',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       fontFamily: 'Delight',
+                      color: Colors.white,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward, color: Colors.white),
+                ],
               ),
             )
           : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

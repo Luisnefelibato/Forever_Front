@@ -6,3 +6,4 @@ export 'profile_photos_page.dart';
 export 'profile_height_page.dart';
 export 'profile_job_page.dart';
 export 'profile_review_page.dart';
+export 'profile_ready_page.dart';

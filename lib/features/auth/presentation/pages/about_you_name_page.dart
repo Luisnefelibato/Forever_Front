@@ -45,6 +45,7 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
   static const Color _errorRed = Color(0xFFE53935);
   static const Color _progressGray = Color(0xFFE0E0E0);
   static const Color _placeholderGray = Color(0xFF9E9E9E);
+  static const Color _disabledGray = Color(0xFF9E9E9E);
   
   @override
   void initState() {
@@ -62,13 +63,18 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
     super.dispose();
   }
   
+  bool get _areFieldsValid {
+    return _firstNameController.text.trim().isNotEmpty &&
+           _lastNameController.text.trim().isNotEmpty;
+  }
+  
   void _onFieldChanged() {
-    if (_hasAttemptedSubmit) {
-      setState(() {
+    setState(() {
+      if (_hasAttemptedSubmit) {
         _showFirstNameError = _firstNameController.text.trim().isEmpty;
         _showLastNameError = _lastNameController.text.trim().isEmpty;
-      });
-    }
+      }
+    });
   }
   
   void _validateAndContinue() {
@@ -104,7 +110,7 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: 48),
               
               // Progress bar
               _buildProgressBar(),
@@ -113,7 +119,7 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
               
               // Step indicator
               Text(
-                'Step 3/3 - Account settings',
+                'Step 3/3 - Basic Info',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 14,
@@ -122,7 +128,7 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
                 ),
               ),
               
-              const SizedBox(height: 48),
+              const SizedBox(height: 24),
               
               // Title
               const Text(
@@ -140,7 +146,7 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
               
               // Subtitle
               const Text(
-                'It\'s how others will recognize you',
+                'It\'s how others will recognize you.',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 16,
@@ -178,13 +184,36 @@ class _AboutYouNamePageState extends State<AboutYouNamePage> {
       
       // Floating action button
       floatingActionButton: FloatingActionButton(
-        onPressed: _validateAndContinue,
-        backgroundColor: _primaryGreen,
-        child: const Icon(
-          Icons.arrow_forward,
-          color: Colors.black,
-          size: 28,
-        ),
+        onPressed: _areFieldsValid ? _validateAndContinue : null,
+        backgroundColor: _areFieldsValid ? _primaryGreen : _disabledGray,
+        shape: const CircleBorder(),
+        child: _areFieldsValid
+            ? Image.asset(
+                'assets/images/icons/next_black.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.arrow_forward,
+                    color: _primaryGreen,
+                    size: 28,
+                  );
+                },
+              )
+            : Image.asset(
+                'assets/images/icons/next_white.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.arrow_forward,
+                    color: _progressGray,
+                    size: 28,
+                  );
+                },
+              ),
       ),
     );
   }

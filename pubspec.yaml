@@ -86,6 +86,7 @@ dev_dependencies:
   bloc_test: ^9.1.7
   mocktail: ^1.0.3
   http_mock_adapter: ^0.6.1
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -105,4 +106,13 @@ flutter:
   assets:
     - assets/images/logo/
     - assets/images/onboarding/
+    - assets/images/icons/
     - .env
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo/Logo_app.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/logo/Logo_app.png"

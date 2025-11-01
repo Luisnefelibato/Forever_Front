@@ -8,9 +8,7 @@ import 'core/di/injection.dart';
 import 'core/services/token_refresh_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/onboarding/presentation/pages/splash_page.dart';
-import 'features/onboarding/presentation/pages/intro_page_1.dart';
-import 'features/onboarding/presentation/pages/intro_page_2.dart';
-import 'features/onboarding/presentation/pages/intro_page_3.dart';
+import 'features/onboarding/presentation/pages/onboarding_intro_page.dart';
 import 'features/onboarding/presentation/pages/permissions_page.dart';
 import 'features/auth/presentation/pages/welcome_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
@@ -65,9 +63,8 @@ class MyApp extends StatelessWidget {
         // Define routes
         routes: {
           '/splash': (context) => const SplashPage(),
-          '/onboarding-intro-1': (context) => const IntroPage1(),
-          '/onboarding-intro-2': (context) => const IntroPage2(),
-          '/onboarding-intro-3': (context) => const IntroPage3(),
+          '/onboarding-intro': (context) => const OnboardingIntroPage(),
+          '/onboarding-intro-1': (context) => const OnboardingIntroPage(),
           '/permissions': (context) => const PermissionsPage(),
           '/welcome': (context) => const WelcomePage(),
           '/login': (context) => const LoginPage(),
@@ -87,6 +84,7 @@ class MyApp extends StatelessWidget {
           '/profile-height': (context) => const ProfileHeightPage(),
           '/profile-job': (context) => const ProfileJobPage(),
           '/profile-review': (context) => const ProfileReviewPage(),
+          '/profile-ready': (context) => const ProfileReadyPage(),
           // Verification static routes (no args)
           '/verification/intro': (context) => const VerificationIntroPage(),
           '/verification/payment': (context) => const VerificationPaymentPage(),

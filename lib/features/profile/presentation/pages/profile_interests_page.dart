@@ -8,6 +8,7 @@ class ProfileInterestsPage extends StatefulWidget {
 }
 
 class _ProfileInterestsPageState extends State<ProfileInterestsPage> {
+  Map<String, dynamic> _accumulatedData = {};
   final Set<String> _selectedInterests = {};
   final Map<String, bool> _expandedCategories = {
     'hobbies': true,
@@ -19,6 +20,16 @@ class _ProfileInterestsPageState extends State<ProfileInterestsPage> {
   };
 
   static const int maxInterests = 10;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtener datos acumulados de arguments
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic> && _accumulatedData.isEmpty) {
+      _accumulatedData = Map<String, dynamic>.from(args);
+    }
+  }
 
   // Category data with icons and interests
   final Map<String, Map<String, dynamic>> _categories = {
@@ -151,9 +162,15 @@ class _ProfileInterestsPageState extends State<ProfileInterestsPage> {
       return;
     }
 
-    // TODO: Save selected interests
-    // Navigate to lifestyle page
-    Navigator.pushNamed(context, '/profile-lifestyle');
+    // Añadir intereses a datos acumulados
+    _accumulatedData['interests'] = _selectedInterests.toList();
+    
+    // Navegar a lifestyle pasando los datos acumulados
+    Navigator.pushNamed(
+      context,
+      '/profile-lifestyle',
+      arguments: _accumulatedData,
+    );
   }
 
   @override

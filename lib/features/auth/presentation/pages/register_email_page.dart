@@ -32,17 +32,39 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
   
   bool _showError = false;
   String _errorMessage = '';
+  bool _isEmailComplete = false;
   
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
   static const Color _errorBackground = Color(0xFFFFEBEE);
-  static const Color _infoBackground = Color(0xFFE0E0E0);
+  static const Color _infoBackgroundGray = Color(0xFFE0E0E0);
+  static const Color _infoBackgroundGreen = Color(0xFFE8F5E9);
+  
+  @override
+  void initState() {
+    super.initState();
+    // Listen to email changes to check if email has valid domain extension
+    _emailController.addListener(_checkEmailCompletion);
+  }
   
   @override
   void dispose() {
+    _emailController.removeListener(_checkEmailCompletion);
     _emailController.dispose();
     super.dispose();
+  }
+  
+  void _checkEmailCompletion() {
+    final email = _emailController.text.trim();
+    // Check if email has a valid domain extension (.com, .net, .org, etc.)
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final isComplete = email.isNotEmpty && emailRegex.hasMatch(email) && email.length <= 100;
+    if (_isEmailComplete != isComplete) {
+      setState(() {
+        _isEmailComplete = isComplete;
+      });
+    }
   }
   
   void _handleContinue() {
@@ -120,7 +142,15 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
                           border: Border.all(color: _primaryGreen, width: 2),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                          icon: Image.asset(
+                            'assets/images/icons/back.png',
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                            },
+                          ),
                           onPressed: () => Navigator.pop(context),
                           padding: EdgeInsets.zero,
                         ),
@@ -196,6 +226,8 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
                               _showError = false;
                             });
                           }
+                          // Update email completion status
+                          _checkEmailCompletion();
                         },
                         decoration: InputDecoration(
                           hintText: 'Example@email.com',
@@ -278,42 +310,59 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
                         ),
                       
                       if (_showError) const SizedBox(height: 24),
-                      
-                      // Info message box
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _infoBackground,
-                          borderRadius: BorderRadius.circular(36),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.grey[700],
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'We require it only to verify your account, it will never be displayed on your profile.',
-                                style: TextStyle(
-                                  fontFamily: 'Delight',
-                                  fontSize: 14,
-                                  color: Colors.grey[800],
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
+                ),
+              ),
+            ),
+            
+            // Info message box - Above Continue button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: _isEmailComplete ? _infoBackgroundGreen : _infoBackgroundGray,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: _isEmailComplete ? _primaryGreen : Colors.grey[600]!,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      _isEmailComplete 
+                        ? 'assets/images/icons/check.png'
+                        : 'assets/images/icons/exclamation.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          _isEmailComplete ? Icons.check_circle : Icons.info_outline,
+                          color: _isEmailComplete ? _primaryGreen : Colors.grey[700],
+                          size: 24,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'We require it only to verify your account, it will never be displayed on your profile.',
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 14,
+                          color: Colors.black,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -325,10 +374,12 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _handleContinue,
+                  onPressed: _isEmailComplete ? _handleContinue : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryGreen,
+                    backgroundColor: _isEmailComplete ? _primaryGreen : Colors.grey[400],
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey[400],
+                    disabledForegroundColor: Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),

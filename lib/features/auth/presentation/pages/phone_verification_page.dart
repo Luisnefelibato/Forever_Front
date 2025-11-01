@@ -121,6 +121,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
       
       result.fold(
         (failure) {
+          // Only show error message if there's actually a failure
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -131,17 +132,11 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
           }
         },
         (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Verification code sent to your phone'),
-                backgroundColor: _primaryGreen,
-              ),
-            );
-          }
+          // Success - code sent silently, no need to show message
         },
       );
     } catch (e) {
+      // Only show error if there's an exception
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -153,12 +148,11 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
     }
   }
   
-  void _handleResendCode() {
+  Future<void> _handleResendCode() async {
     if (!_canResend) return;
     
     // Restart timer and send new code
     _startCountdown();
-    _sendVerificationCode();
     
     // Clear all fields
     for (var controller in _controllers) {
@@ -169,6 +163,50 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
       _validationState = 'normal';
       _errorMessage = '';
     });
+    
+    // Send verification code and show success message
+    try {
+      // Get auth repository
+      final authRepository = GetIt.instance<AuthRepository>();
+      
+      // Send phone verification code
+      final result = await authRepository.sendPhoneVerification();
+      
+      result.fold(
+        (failure) {
+          // Show error if sending fails
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error sending code: ${failure.message}'),
+                backgroundColor: _errorRed,
+              ),
+            );
+          }
+        },
+        (_) {
+          // Show success message
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('We\'ve sent you a new verification code via SMS/OTP.'),
+                backgroundColor: _primaryGreen,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      // Show error if exception occurs
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sending code: $e'),
+            backgroundColor: _errorRed,
+          ),
+        );
+      }
+    }
     
     // Focus first field
     _focusNodes[0].requestFocus();
@@ -212,9 +250,19 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
       
       result.fold(
         (failure) {
+          // Map error messages to specific user-friendly messages
+          String errorMsg;
+          final failureMsgLower = failure.message.toLowerCase();
+          
+          if (failureMsgLower.contains('expired') || failureMsgLower.contains('expir')) {
+            errorMsg = 'The code has expired. Please request a new one to continue.';
+          } else {
+            errorMsg = 'Wrong code, please try again';
+          }
+          
           setState(() {
             _validationState = 'error';
-            _errorMessage = failure.message;
+            _errorMessage = errorMsg;
           });
         },
         (verified) {
@@ -242,15 +290,25 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
           } else {
             setState(() {
               _validationState = 'error';
-              _errorMessage = 'Invalid verification code';
+              _errorMessage = 'Wrong code, please try again';
             });
           }
         },
       );
     } catch (e) {
+      // Map exception to user-friendly message
+      String errorMsg;
+      final errorMsgLower = e.toString().toLowerCase();
+      
+      if (errorMsgLower.contains('expired') || errorMsgLower.contains('expir')) {
+        errorMsg = 'The code has expired. Please request a new one to continue.';
+      } else {
+        errorMsg = 'Wrong code, please try again';
+      }
+      
       setState(() {
         _validationState = 'error';
-        _errorMessage = 'Verification failed. Please try again.';
+        _errorMessage = errorMsg;
       });
     }
   }
@@ -291,7 +349,15 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                   border: Border.all(color: _primaryGreen, width: 2),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                  icon: Image.asset(
+                    'assets/images/icons/back.png',
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                    },
+                  ),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                 ),
@@ -299,7 +365,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               const SizedBox(height: 16),
               // Step indicator
               Text(
-                'Step 2/3 - Account settings',
+                'Step 2/3 - Activate account',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 14,
@@ -312,7 +378,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               
               // Title
               const Text(
-                'Enter code',
+                'Verify your account',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 32,
@@ -325,13 +391,22 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               const SizedBox(height: 16),
               
               // Subtitle with phone
-              Text(
-                'We\'ve sent a code to ${widget.phone}, write it here to verify your account',
-                style: const TextStyle(
-                  fontFamily: 'Delight',
-                  fontSize: 14,
-                  color: Colors.black54,
-                  height: 1.5,
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontFamily: 'Delight',
+                    fontSize: 14,
+                    color: Colors.black54,
+                    height: 1.5,
+                  ),
+                  children: [
+                    TextSpan(text: 'We\'ve sent a code to ${widget.phone}, write it here '),
+                    const TextSpan(
+                      text: 'to activate',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: ' your account.'),
+                  ],
                 ),
               ),
               

@@ -56,11 +56,28 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
   static const Color _errorBackground = Color(0xFFFFEBEE);
   static const Color _progressGray = Color(0xFFE0E0E0);
   static const Color _placeholderGray = Color(0xFF9E9E9E);
+  static const Color _disabledGray = Color(0xFF9E9E9E);
   
   final List<String> _monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+  
+  bool get _isDateValid {
+    if (_selectedDay == null || _selectedMonth == null || _selectedYear == null) {
+      return false;
+    }
+    
+    // Validate age (must be 18+)
+    final now = DateTime.now();
+    final birthDate = DateTime(_selectedYear!, _selectedMonth!, _selectedDay!);
+    final age = now.year - birthDate.year - 
+                ((now.month > birthDate.month || 
+                 (now.month == birthDate.month && now.day >= birthDate.day)) 
+                 ? 0 : 1);
+    
+    return age >= 18;
+  }
   
   @override
   void dispose() {
@@ -291,24 +308,25 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
               const SizedBox(height: 24),
               
               // Back button
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _primaryGreen,
-                      width: 2,
-                    ),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: _primaryGreen, width: 2),
+                ),
+                child: IconButton(
+                  icon: Image.asset(
+                    'assets/images/icons/back.png',
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                    },
                   ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: _primaryGreen,
-                    size: 24,
-                  ),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
                 ),
               ),
               
@@ -321,7 +339,7 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
               
               // Step indicator
               Text(
-                'Step 3/3 - Account settings',
+                'Step 3/3 - Basic Info',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 14,
@@ -330,7 +348,7 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
                 ),
               ),
               
-              const SizedBox(height: 48),
+              const SizedBox(height: 24),
               
               // Title
               const Text(
@@ -348,7 +366,7 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
               
               // Description
               const Text(
-                'ForEverUs In Love is a space for adults over 18. Tell us your age to personalize your experience',
+                'ForEverUs In Love is a space for adults over 18. Tell us your age to personalize your experience.',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 16,
@@ -397,7 +415,7 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: _errorBackground,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(100),
                     border: Border.all(
                       color: _errorRed,
                       width: 1.5,
@@ -405,28 +423,36 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
                   ),
                   child: Row(
                     children: [
-                      Container(
+                      Image.asset(
+                        'assets/images/icons/warning.png',
                         width: 32,
                         height: 32,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _errorRed,
-                            width: 2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '!',
-                            style: TextStyle(
-                              fontFamily: 'Delight',
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: _errorRed,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _errorRed,
+                                width: 2,
+                              ),
                             ),
-                          ),
-                        ),
+                            child: Center(
+                              child: Text(
+                                '!',
+                                style: TextStyle(
+                                  fontFamily: 'Delight',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: _errorRed,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -453,13 +479,36 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
       
       // Floating action button
       floatingActionButton: FloatingActionButton(
-        onPressed: _validateAndContinue,
-        backgroundColor: _primaryGreen,
-        child: const Icon(
-          Icons.arrow_forward,
-          color: Colors.white,
-          size: 28,
-        ),
+        onPressed: _isDateValid ? _validateAndContinue : null,
+        backgroundColor: _isDateValid ? _primaryGreen : _disabledGray,
+        shape: const CircleBorder(),
+        child: _isDateValid
+            ? Image.asset(
+                'assets/images/icons/next_black.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.arrow_forward,
+                    color: _primaryGreen,
+                    size: 28,
+                  );
+                },
+              )
+            : Image.asset(
+                'assets/images/icons/next_white.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.arrow_forward,
+                    color: _progressGray,
+                    size: 28,
+                  );
+                },
+              ),
       ),
     );
   }
@@ -493,7 +542,7 @@ class _AboutYouBirthdatePageState extends State<AboutYouBirthdatePage> {
         ),
         decoration: BoxDecoration(
           color: Colors.white, // White background
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(100),
           border: Border.all(
             color: showError ? _errorRed : Colors.black,
             width: 1.5,

@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/repositories/auth_repository.dart';
 
 /// Forgot Password - Code Verification Screen
 /// 
@@ -62,7 +65,45 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
     // Auto-focus first field
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNodes[0].requestFocus();
+      _sendVerificationCode();
     });
+  }
+  
+  Future<void> _sendVerificationCode() async {
+    try {
+      // Get auth repository
+      final authRepository = GetIt.instance<AuthRepository>();
+      
+      // Send forgot password code
+      final result = await authRepository.forgotPassword(widget.identifier);
+      
+      result.fold(
+        (failure) {
+          // Only show error message if there's actually a failure
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error sending code: ${failure.message}'),
+                backgroundColor: _errorRed,
+              ),
+            );
+          }
+        },
+        (_) {
+          // Success - code sent silently, no need to show message
+        },
+      );
+    } catch (e) {
+      // Only show error if there's an exception
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sending code: $e'),
+            backgroundColor: _errorRed,
+          ),
+        );
+      }
+    }
   }
   
   @override
@@ -98,11 +139,10 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
     });
   }
   
-  void _handleResendCode() {
+  Future<void> _handleResendCode() async {
     if (!_canResend) return;
     
-    // TODO: Implement actual API call to resend code
-    // For now, just restart the timer
+    // Restart timer
     _startCountdown();
     
     // Clear all fields
@@ -114,6 +154,56 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
       _validationState = 'normal';
       _errorMessage = '';
     });
+    
+    // Send verification code and show success message
+    try {
+      // Get auth repository
+      final authRepository = GetIt.instance<AuthRepository>();
+      
+      // Send forgot password code
+      final result = await authRepository.forgotPassword(widget.identifier);
+      
+      result.fold(
+        (failure) {
+          // Show error if sending fails
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error sending code: ${failure.message}'),
+                backgroundColor: _errorRed,
+              ),
+            );
+          }
+        },
+        (_) {
+          // Show success message
+          if (mounted) {
+            // Determine if identifier is email or phone
+            final isEmail = widget.identifier.contains('@');
+            final message = isEmail
+                ? 'We\'ve sent you a new verification code via Email'
+                : 'We\'ve sent you a new verification code via SMS/OTP.';
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                backgroundColor: _primaryGreen,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      // Show error if exception occurs
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sending code: $e'),
+            backgroundColor: _errorRed,
+          ),
+        );
+      }
+    }
     
     // Focus first field
     _focusNodes[0].requestFocus();
@@ -136,22 +226,30 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
     }
   }
   
-  void _validateCode() {
+  Future<void> _validateCode() async {
     final code = _controllers.map((c) => c.text).join();
     
     if (code.length != 6) {
       return;
     }
     
+    setState(() {
+      _validationState = 'normal';
+      _errorMessage = '';
+    });
+    
     // Navigate to reset password screen (verification occurs on reset)
-    Navigator.pushReplacementNamed(
-      context,
-      '/reset-password',
-      arguments: {
-        'identifier': widget.identifier,
-        'code': code,
-      },
-    );
+    // For now, we just navigate with the code - validation happens in reset_password_page
+    if (mounted) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/reset-password',
+        arguments: {
+          'identifier': widget.identifier,
+          'code': code,
+        },
+      );
+    }
   }
   
   String _formatTime(int seconds) {
@@ -190,9 +288,28 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
                   border: Border.all(color: _primaryGreen, width: 2),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                  icon: Image.asset(
+                    'assets/images/icons/back.png',
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                    },
+                  ),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Step indicator
+              Text(
+                'Step 1/2 - Recover account',
+                style: TextStyle(
+                  fontFamily: 'Delight',
+                  fontSize: 14,
+                  color: _primaryGreen,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               
@@ -200,7 +317,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               // Title
               const Text(
-                'Enter code',
+                'Verify your account',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 32,
@@ -212,14 +329,23 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               const SizedBox(height: 16),
               
-              // Subtitle with email
-              Text(
-                'We\'ve sent a code to ${widget.identifier}, write it here to recover your account',
-                style: const TextStyle(
-                  fontFamily: 'Delight',
-                  fontSize: 14,
-                  color: Colors.black54,
-                  height: 1.5,
+              // Subtitle with identifier
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontFamily: 'Delight',
+                    fontSize: 14,
+                    color: Colors.black54,
+                    height: 1.5,
+                  ),
+                  children: [
+                    TextSpan(text: 'We\'ve sent a code to ${widget.identifier}, write it here '),
+                    const TextSpan(
+                      text: 'to recover',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: ' your account.'),
+                  ],
                 ),
               ),
               
@@ -227,7 +353,7 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               // OTP Input - 6 circular fields
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(6, (index) {
                   return SizedBox(
                     width: 48,

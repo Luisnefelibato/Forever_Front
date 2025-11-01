@@ -48,20 +48,19 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
   bool _obscureConfirmPassword = true;
   
   // Validation state
+  bool _hasMinLength = false;
   bool _hasUppercase = false;
   bool _hasLowercase = false;
-  bool _hasSymbolsOrNumbers = false;
+  bool _hasNumbers = false;
+  bool _hasSpecialChars = false;
   bool _passwordsMatch = false;
-  bool _hasStartedTyping = false;
+  bool _agreeToTerms = false;
   
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
-  static const Color _successGreen = Color(0xFF4CAF50);
-  static const Color _lightGreen = Color(0xFFE8F5E9);
-  static const Color _lightRed = Color(0xFFFFEBEE);
-  static const Color _lightGray = Color(0xFFEEEEEE);
-  static const Color _infoBackground = Color(0xFFE0E0E0);
+  static const Color _infoBackgroundGray = Color(0xFFE0E0E0);
+  static const Color _infoBackgroundGreen = Color(0xFFE8F5E9);
   
   @override
   void initState() {
@@ -84,14 +83,20 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
     final confirm = _confirmPasswordController.text;
     
     setState(() {
-      _hasStartedTyping = password.isNotEmpty;
+      // Check minimum length (8 characters) and maximum length (25 characters)
+      _hasMinLength = password.length >= 8 && password.length <= 25;
       
-      // Rule 1: Check for uppercase and lowercase letters
+      // Check for uppercase letters
       _hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      
+      // Check for lowercase letters
       _hasLowercase = password.contains(RegExp(r'[a-z]'));
       
-      // Rule 2: Check for symbols and numbers
-      _hasSymbolsOrNumbers = password.contains(RegExp(r'[@\-_*#0-9]'));
+      // Check for numbers
+      _hasNumbers = password.contains(RegExp(r'[0-9]'));
+      
+      // Check for special characters (@ - _ * #)
+      _hasSpecialChars = password.contains(RegExp(r'[@\-_*#]'));
       
       // Check if passwords match
       _passwordsMatch = password.isNotEmpty && 
@@ -101,62 +106,18 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
   }
   
   bool _isPasswordValid() {
-    return _hasUppercase && 
+    return _hasMinLength && 
+           _hasUppercase && 
            _hasLowercase && 
-           _hasSymbolsOrNumbers;
+           _hasNumbers && 
+           _hasSpecialChars;
   }
   
   bool _canCreateAccount() {
-    return _isPasswordValid() && _passwordsMatch;
-  }
-  
-  Color _getValidationBoxColor() {
-    if (!_hasStartedTyping) {
-      return _lightGray;
-    } else if (_isPasswordValid()) {
-      return _lightGreen;
-    } else {
-      return _lightRed;
-    }
-  }
-  
-  Color _getValidationBorderColor() {
-    if (!_hasStartedTyping) {
-      return Colors.grey.shade300;
-    } else if (_isPasswordValid()) {
-      return _successGreen;
-    } else {
-      return _errorRed;
-    }
-  }
-  
-  Widget _getValidationIcon() {
-    if (!_hasStartedTyping) {
-      return Icon(
-        Icons.error_outline,
-        color: Colors.grey.shade600,
-        size: 32,
-      );
-    } else if (_isPasswordValid()) {
-      return Icon(
-        Icons.check_circle,
-        color: _successGreen,
-        size: 32,
-      );
-    } else {
-      return Icon(
-        Icons.error_outline,
-        color: _errorRed,
-        size: 32,
-      );
-    }
+    return _isPasswordValid() && _passwordsMatch && _agreeToTerms;
   }
   
   Color _getFieldBorderColor(bool isConfirmField) {
-    if (!_hasStartedTyping) {
-      return Colors.black;
-    }
-    
     if (isConfirmField) {
       // Confirm field turns red if doesn't match
       if (_confirmPasswordController.text.isNotEmpty && !_passwordsMatch) {
@@ -278,17 +239,36 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
                           border: Border.all(color: _primaryGreen, width: 2),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                          icon: Image.asset(
+                            'assets/images/icons/back.png',
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                            },
+                          ),
                           onPressed: () => Navigator.pop(context),
                           padding: EdgeInsets.zero,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      // Step indicator
+                      Text(
+                        'Step 1/3 - Account settings',
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 14,
+                          color: _primaryGreen,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
                       
                       // Title
                       const Text(
-                        'Let\'s get started',
+                        'Create Password',
                         style: TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 32,
@@ -298,11 +278,11 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
                         ),
                       ),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       
                       // Subtitle
                       const Text(
-                        'Create your account to join ForEverUs In Love',
+                        'Please enter a password in the input field below.',
                         style: TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
@@ -330,13 +310,15 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
+                        maxLength: 25,
                         style: const TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: '*******',
+                          counterText: '', // Hide character counter
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],
@@ -397,13 +379,15 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
                       TextField(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
+                        maxLength: 25,
                         style: const TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: '*******',
+                          counterText: '', // Hide character counter
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],
@@ -447,100 +431,125 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
                       
                       const SizedBox(height: 24),
                       
-                      // Validation box
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: _getValidationBoxColor(),
-                          border: Border.all(
-                            color: _getValidationBorderColor(),
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(32),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: _getValidationIcon(),
+                      // Terms & Privacy Policy checkbox
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Checkbox
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: _agreeToTerms ? _primaryGreen : Colors.white,
+                              border: Border.all(
+                                color: _primaryGreen,
+                                width: 2,
+                              ),
+                              shape: BoxShape.circle,
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Checkbox(
+                              value: _agreeToTerms,
+                              onChanged: (value) {
+                                setState(() {
+                                  _agreeToTerms = value ?? false;
+                                });
+                              },
+                              activeColor: Colors.transparent,
+                              checkColor: Colors.black,
+                              side: BorderSide.none,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  fontFamily: 'Delight',
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                  height: 1.4,
+                                ),
                                 children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      style: TextStyle(
-                                        fontFamily: 'Delight',
-                                        fontSize: 14,
-                                        color: Colors.grey[800],
-                                        height: 1.5,
+                                  const TextSpan(text: 'I agree to the '),
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.baseline,
+                                    baseline: TextBaseline.alphabetic,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        // TODO: Navigate to Terms & Privacy Policy page
+                                      },
+                                      child: const Text(
+                                        'Terms & Privacy Policy',
+                                        style: TextStyle(
+                                          fontFamily: 'Delight',
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      children: const [
-                                        TextSpan(
-                                          text: '1. Ensure the password contain both upper and lowercase letter\n',
-                                        ),
-                                        TextSpan(
-                                          text: '2. Include symbols like ',
-                                        ),
-                                        TextSpan(
-                                          text: '@ - _ * #',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: ' and numbers',
-                                        ),
-                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Info message box
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _infoBackground,
-                          borderRadius: BorderRadius.circular(36),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.grey[700],
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'We require it only to verify your account, it will never be displayed on your profile.',
-                                style: TextStyle(
-                                  fontFamily: 'Delight',
-                                  fontSize: 14,
-                                  color: Colors.grey[800],
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                ),
+              ),
+            ),
+            
+            // Warning box - Above Create account button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: _isPasswordValid() ? _infoBackgroundGreen : _infoBackgroundGray,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: _isPasswordValid() ? _primaryGreen : Colors.grey[600]!,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      _isPasswordValid() 
+                        ? 'assets/images/icons/check.png'
+                        : 'assets/images/icons/exclamation.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          _isPasswordValid() ? Icons.check_circle : Icons.info_outline,
+                          color: _isPasswordValid() ? _primaryGreen : Colors.grey[700],
+                          size: 24,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Ensure your password has at least 8 characters, includes both uppercase and lowercase letters, and contains symbols like @ - _ * # and numbers.',
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 14,
+                          color: Colors.black,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -554,9 +563,10 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
                 child: ElevatedButton(
                   onPressed: _canCreateAccount() ? _handleSubmit : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryGreen,
+                    backgroundColor: _canCreateAccount() ? _primaryGreen : Colors.grey[400],
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey[300],
+                    disabledBackgroundColor: Colors.grey[400],
+                    disabledForegroundColor: Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),

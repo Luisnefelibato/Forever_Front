@@ -14,6 +14,7 @@ class ProfilePhotosPage extends StatefulWidget {
 }
 
 class _ProfilePhotosPageState extends State<ProfilePhotosPage> {
+  Map<String, dynamic> _accumulatedData = {};
   final List<XFile?> _photos = List.filled(6, null);
   final ImagePicker _picker = ImagePicker();
   
@@ -21,6 +22,16 @@ class _ProfilePhotosPageState extends State<ProfilePhotosPage> {
   static const Color _purpleAccent = Color(0xFF8B5CF6);
   static const int minPhotos = 2;
   static const int maxPhotos = 6;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtener datos acumulados de arguments
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic> && _accumulatedData.isEmpty) {
+      _accumulatedData = Map<String, dynamic>.from(args);
+    }
+  }
 
   Future<void> _pickImage(int index) async {
     try {
@@ -63,7 +74,11 @@ class _ProfilePhotosPageState extends State<ProfilePhotosPage> {
   int get _photoCount => _photos.where((photo) => photo != null).length;
 
   void _handleSkip() {
-    Navigator.pushNamed(context, '/profile-height');
+    Navigator.pushNamed(
+      context,
+      '/profile-height',
+      arguments: _accumulatedData,
+    );
   }
 
   void _handleNext() {
@@ -82,8 +97,19 @@ class _ProfilePhotosPageState extends State<ProfilePhotosPage> {
       return;
     }
     
+    // Añadir fotos a datos acumulados (guardar paths)
+    final photoPaths = _photos
+        .where((photo) => photo != null)
+        .map((photo) => photo!.path)
+        .toList();
+    _accumulatedData['photos'] = photoPaths;
+    
     // Navigate to height page
-    Navigator.pushNamed(context, '/profile-height');
+    Navigator.pushNamed(
+      context,
+      '/profile-height',
+      arguments: _accumulatedData,
+    );
   }
 
   @override
@@ -273,9 +299,11 @@ class _ProfilePhotosPageState extends State<ProfilePhotosPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Tap to add, drag to reorganize',
+                  textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -285,6 +313,7 @@ class _ProfilePhotosPageState extends State<ProfilePhotosPage> {
                 const SizedBox(height: 4),
                 Text(
                   '$minPhotos photos minimum required',
+                  textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],

@@ -39,12 +39,14 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
   
   bool _showError = false;
   String _errorMessage = '';
+  bool _isPhoneComplete = false;
   
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
   static const Color _errorBackground = Color(0xFFFFEBEE);
-  static const Color _infoBackground = Color(0xFFE0E0E0);
+  static const Color _infoBackgroundGray = Color(0xFFE0E0E0);
+  static const Color _infoBackgroundGreen = Color(0xFFE8F5E9);
   
   // Country codes list (can be expanded in the future)
   final List<Map<String, String>> _countries = [
@@ -66,9 +68,27 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
   ];
   
   @override
+  void initState() {
+    super.initState();
+    // Listen to phone changes to check if 10 digits are entered
+    _phoneController.addListener(_checkPhoneCompletion);
+  }
+  
+  @override
   void dispose() {
+    _phoneController.removeListener(_checkPhoneCompletion);
     _phoneController.dispose();
     super.dispose();
+  }
+  
+  void _checkPhoneCompletion() {
+    final digitsOnly = _phoneController.text.replaceAll(RegExp(r'\D'), '');
+    final isComplete = digitsOnly.length == 10;
+    if (_isPhoneComplete != isComplete) {
+      setState(() {
+        _isPhoneComplete = isComplete;
+      });
+    }
   }
   
   void _showCountryPicker() {
@@ -237,7 +257,15 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
                           border: Border.all(color: _primaryGreen, width: 2),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                          icon: Image.asset(
+                            'assets/images/icons/back.png',
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                            },
+                          ),
                           onPressed: () => Navigator.pop(context),
                           padding: EdgeInsets.zero,
                         ),
@@ -272,7 +300,7 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
                       
                       // Subtitle
                       const Text(
-                        'Create your account to join ForEverUs In Love',
+                        'Create your account to join ForEverUs In Love.',
                         style: TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
@@ -285,7 +313,7 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
                       
                       // Mobile Number label
                       const Text(
-                        'Mobile Number',
+                        'Phone Number',
                         style: TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
@@ -364,6 +392,8 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
                                     _showError = false;
                                   });
                                 }
+                                // Update phone completion status
+                                _checkPhoneCompletion();
                               },
                               decoration: InputDecoration(
                                 hintText: '+1 555-123-4567',
@@ -449,64 +479,83 @@ class _RegisterPhonePageState extends State<RegisterPhonePage> {
                         ),
                       
                       if (_showError) const SizedBox(height: 24),
-                      
-                      // Info message box
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _infoBackground,
-                          borderRadius: BorderRadius.circular(36),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.grey[700],
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'We require it only to verify your account, it will never be displayed on your profile.',
-                                style: TextStyle(
-                                  fontFamily: 'Delight',
-                                  fontSize: 14,
-                                  color: Colors.grey[800],
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ),
             ),
             
-            // Create account button - Fixed at bottom
+            // Info message box - Above Continue button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: _isPhoneComplete ? _infoBackgroundGreen : _infoBackgroundGray,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: _isPhoneComplete ? _primaryGreen : Colors.grey[600]!,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      _isPhoneComplete 
+                        ? 'assets/images/icons/check.png'
+                        : 'assets/images/icons/exclamation.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          _isPhoneComplete ? Icons.check_circle : Icons.info_outline,
+                          color: _isPhoneComplete ? _primaryGreen : Colors.grey[700],
+                          size: 24,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'We require it only to verify your account, it will never be displayed on your profile.',
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 14,
+                          color: Colors.black,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Continue button - Fixed at bottom
             Container(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
               child: SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _handleContinue,
+                  onPressed: _isPhoneComplete ? _handleContinue : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryGreen,
+                    backgroundColor: _isPhoneComplete ? _primaryGreen : Colors.grey[400],
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey[400],
+                    disabledForegroundColor: Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'Create account',
+                    'Continue',
                     style: TextStyle(
                       fontFamily: 'Delight',
                       fontSize: 16,

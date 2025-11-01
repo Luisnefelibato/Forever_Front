@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 /// Profile Height Page
 /// 
@@ -11,6 +12,7 @@ class ProfileHeightPage extends StatefulWidget {
 }
 
 class _ProfileHeightPageState extends State<ProfileHeightPage> {
+  Map<String, dynamic> _accumulatedData = {};
   int _selectedFeet = 6;
   int _selectedInches = 6;
   
@@ -19,13 +21,27 @@ class _ProfileHeightPageState extends State<ProfileHeightPage> {
   final List<int> _feetOptions = List.generate(5, (index) => index + 4); // 4ft to 8ft
   final List<int> _inchesOptions = List.generate(12, (index) => index); // 0in to 11in
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtener datos acumulados de arguments
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic> && _accumulatedData.isEmpty) {
+      _accumulatedData = Map<String, dynamic>.from(args);
+    }
+  }
+
   void _handleSkip() {
-    Navigator.pushNamed(context, '/profile-job');
+    Navigator.pushNamed(
+      context,
+      '/profile-job',
+      arguments: _accumulatedData,
+    );
   }
 
   void _handleNext() {
-    // Save height data
-    final heightData = {
+    // Añadir altura a datos acumulados
+    _accumulatedData['height'] = {
       'feet': _selectedFeet,
       'inches': _selectedInches,
     };
@@ -36,7 +52,7 @@ class _ProfileHeightPageState extends State<ProfileHeightPage> {
     Navigator.pushNamed(
       context,
       '/profile-job',
-      arguments: heightData,
+      arguments: _accumulatedData,
     );
   }
 
@@ -126,39 +142,43 @@ class _ProfileHeightPageState extends State<ProfileHeightPage> {
           
           // Height pickers
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Feet picker
-                Expanded(
-                  child: _buildHeightPicker(
-                    options: _feetOptions,
-                    selectedValue: _selectedFeet,
-                    suffix: 'ft',
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedFeet = value;
-                      });
-                    },
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Feet picker
+                  SizedBox(
+                    width: 100,
+                    child: _buildHeightPicker(
+                      options: _feetOptions,
+                      selectedValue: _selectedFeet,
+                      suffix: 'ft',
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedFeet = value;
+                        });
+                      },
+                    ),
                   ),
-                ),
-                
-                const SizedBox(width: 32),
-                
-                // Inches picker
-                Expanded(
-                  child: _buildHeightPicker(
-                    options: _inchesOptions,
-                    selectedValue: _selectedInches,
-                    suffix: 'in',
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedInches = value;
-                      });
-                    },
+                  
+                  const SizedBox(width: 24),
+                  
+                  // Inches picker
+                  SizedBox(
+                    width: 100,
+                    child: _buildHeightPicker(
+                      options: _inchesOptions,
+                      selectedValue: _selectedInches,
+                      suffix: 'in',
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedInches = value;
+                        });
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           
@@ -202,39 +222,36 @@ class _ProfileHeightPageState extends State<ProfileHeightPage> {
     required String suffix,
     required ValueChanged<int> onChanged,
   }) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: options.map((value) {
-        final isSelected = value == selectedValue;
-        return GestureDetector(
-          onTap: () => onChanged(value),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: isSelected ? _primaryGreen : Colors.transparent,
-                width: 2,
-              ),
-            ),
+    final selectedIndex = options.indexOf(selectedValue);
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: CupertinoPicker(
+        scrollController: FixedExtentScrollController(
+          initialItem: selectedIndex >= 0 ? selectedIndex : 0,
+        ),
+        itemExtent: 50,
+        onSelectedItemChanged: (index) {
+          onChanged(options[index]);
+        },
+        backgroundColor: Colors.transparent,
+        children: options.map((value) {
+          return Center(
             child: Text(
               '$value $suffix',
-              style: TextStyle(
-                fontSize: isSelected ? 20 : 16,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.black : Colors.grey[400],
+              style: const TextStyle(
                 fontFamily: 'Delight',
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
               ),
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 }

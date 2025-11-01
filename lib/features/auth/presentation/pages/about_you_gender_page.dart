@@ -51,13 +51,17 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
+  static const Color _errorBackground = Color(0xFFFFEBEE);
   static const Color _progressGray = Color(0xFFE0E0E0);
+  static const Color _disabledGray = Color(0xFF9E9E9E);
   
   final List<String> _genderOptions = [
-    'Woman',
-    'Man',
+    'Female',
+    'Male',
     'Non binary',
   ];
+  
+  bool get _isGenderSelected => _selectedGender != null;
   
   void _selectGender(String gender) {
     setState(() {
@@ -105,38 +109,27 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-              
-              // Step indicator
-              Text(
-                'Step 3/3 - Account settings',
-                style: TextStyle(
-                  fontFamily: 'Delight',
-                  fontSize: 14,
-                  color: _primaryGreen,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
+
               // Back button
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _primaryGreen,
-                      width: 2,
-                    ),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: _primaryGreen, width: 2),
+                ),
+                child: IconButton(
+                  icon: Image.asset(
+                    'assets/images/icons/back.png',
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                    },
                   ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: _primaryGreen,
-                    size: 24,
-                  ),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
                 ),
               ),
               
@@ -149,7 +142,7 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
               
               // Step indicator
               Text(
-                'Step 3/3 - Account settings',
+                'Step 3/3 - Basic Info',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 14,
@@ -158,7 +151,7 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
                 ),
               ),
               
-              const SizedBox(height: 48),
+              const SizedBox(height: 24),
               
               // Title
               const Text(
@@ -176,7 +169,7 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
               
               // Subtitle
               const Text(
-                'Choose the option that best represents you. This helps us create a respectful and inclusive space',
+                'Choose the option that best represents you. This helps us create a respectful and inclusive space.',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 16,
@@ -197,17 +190,41 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
               // Error message
               if (_showError) ...[
                 const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.only(left: 24),
-                  child: Text(
-                    'Required to select',
-                    style: TextStyle(
-                      fontFamily: 'Delight',
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _errorBackground,
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(
                       color: _errorRed,
-                      height: 1.4,
+                      width: 1.5,
                     ),
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'assets/images/icons/warning.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Required to select',
+                          style: TextStyle(
+                            fontFamily: 'Delight',
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            color: _errorRed,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -220,13 +237,35 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
       
       // Floating action button
       floatingActionButton: FloatingActionButton(
-        onPressed: _validateAndContinue,
-        backgroundColor: _primaryGreen,
-        child: const Icon(
-          Icons.arrow_forward,
-          color: Colors.white,
-          size: 28,
-        ),
+        onPressed: _isGenderSelected ? _validateAndContinue : null,
+        backgroundColor: _isGenderSelected ? _primaryGreen : _disabledGray,
+        child: _isGenderSelected
+            ? Image.asset(
+                'assets/images/icons/next_black.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.arrow_forward,
+                    color: _primaryGreen,
+                    size: 28,
+                  );
+                },
+              )
+            : Image.asset(
+                'assets/images/icons/next_white.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.arrow_forward,
+                    color: _progressGray,
+                    size: 28,
+                  );
+                },
+              ),
       ),
     );
   }
@@ -253,11 +292,12 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 24,
-          vertical: 20,
+          vertical: 12,
         ),
         decoration: BoxDecoration(
           color: isSelected ? _primaryGreen : Colors.white,
-          borderRadius: BorderRadius.circular(28),
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(100),
           border: Border.all(
             color: isSelected ? _primaryGreen : Colors.black,
             width: 1.5,
@@ -283,18 +323,21 @@ class _AboutYouGenderPageState extends State<AboutYouGenderPage> {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? Colors.black : Colors.transparent,
+                color: Colors.transparent,
                 border: Border.all(
                   color: Colors.black,
                   width: 2,
                 ),
               ),
               child: isSelected
-                  ? const Center(
-                      child: Icon(
-                        Icons.circle,
-                        size: 14,
-                        color: Colors.black,
+                  ? Center(
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black,
+                        ),
                       ),
                     )
                   : null,

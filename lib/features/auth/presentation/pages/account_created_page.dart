@@ -32,23 +32,16 @@ class _AccountCreatedPageState extends State<AccountCreatedPage> {
   static const Color _goldenYellow = Color(0xFFFFD700);
   static const Color _darkBrown = Color(0xFF8B4513);
   
-  @override
-  void initState() {
-    super.initState();
-    // Auto-navigate to about you name screen after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacementNamed(
-          context,
-          '/about-you-name',
-          arguments: {
-            'email': widget.email,
-            'phone': widget.phone,
-            'countryCode': widget.countryCode,
-          },
-        );
-      }
-    });
+  void _handleContinue() {
+    Navigator.pushReplacementNamed(
+      context,
+      '/about-you-name',
+      arguments: {
+        'email': widget.email,
+        'phone': widget.phone,
+        'countryCode': widget.countryCode,
+      },
+    );
   }
   
   @override
@@ -72,17 +65,36 @@ class _AccountCreatedPageState extends State<AccountCreatedPage> {
                     Positioned(
                       top: 4,
                       left: 4,
-                      child: Icon(
-                        Icons.star,
-                        size: 80,
-                        color: _darkBrown.withOpacity(0.6),
+                      child: Opacity(
+                        opacity: 0.6,
+                        child: Image.asset(
+                          'assets/images/icons/star.png',
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.star,
+                              size: 80,
+                              color: _darkBrown.withOpacity(0.6),
+                            );
+                          },
+                        ),
                       ),
                     ),
                     // Main star
-                    Icon(
-                      Icons.star,
-                      size: 80,
-                      color: _goldenYellow,
+                    Image.asset(
+                      'assets/images/icons/star.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.star,
+                          size: 80,
+                          color: _goldenYellow,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -106,7 +118,7 @@ class _AccountCreatedPageState extends State<AccountCreatedPage> {
                 
                 // Subtitle
                 const Text(
-                  'Your account has been\nsuccessfully created, let\'s\ncomplete your profile.',
+                  'Time to know a little bit about you',
                   style: TextStyle(
                     fontFamily: 'Delight',
                     fontSize: 16,
@@ -119,6 +131,34 @@ class _AccountCreatedPageState extends State<AccountCreatedPage> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _handleContinue,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _successGreen,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Continue',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Delight',
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

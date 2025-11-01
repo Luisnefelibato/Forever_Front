@@ -11,28 +11,42 @@ class ProfileJobPage extends StatefulWidget {
 }
 
 class _ProfileJobPageState extends State<ProfileJobPage> {
+  Map<String, dynamic> _accumulatedData = {};
   final TextEditingController _jobController = TextEditingController();
   final TextEditingController _industryController = TextEditingController();
   
   static const Color _primaryGreen = Color(0xFF2CA97B);
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtener datos acumulados de arguments
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic> && _accumulatedData.isEmpty) {
+      _accumulatedData = Map<String, dynamic>.from(args);
+    }
+  }
+
   void _handleSkip() {
-    Navigator.pushNamed(context, '/profile-review');
+    Navigator.pushNamed(
+      context,
+      '/profile-review',
+      arguments: _accumulatedData,
+    );
   }
 
   void _handleNext() {
-    final jobData = {
-      'job': _jobController.text.trim(),
-      'industry': _industryController.text.trim(),
-    };
+    // Añadir job a datos acumulados
+    _accumulatedData['job'] = _jobController.text.trim();
+    _accumulatedData['industry'] = _industryController.text.trim();
     
-    debugPrint('Job: ${jobData['job']}, Industry: ${jobData['industry']}');
+    debugPrint('Job: ${_accumulatedData['job']}, Industry: ${_accumulatedData['industry']}');
     
     // Navigate to review page
     Navigator.pushNamed(
       context,
       '/profile-review',
-      arguments: jobData,
+      arguments: _accumulatedData,
     );
   }
 

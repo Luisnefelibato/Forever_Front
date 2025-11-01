@@ -210,7 +210,7 @@ class _AboutYouLocationPageState extends State<AboutYouLocationPage> {
               
               // Step indicator
               Text(
-                'Step 3/3 - Account settings',
+                'Step 3/3 - Basic Info',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 14,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Permissions Screen
 /// 
@@ -35,6 +36,24 @@ class _PermissionsPageState extends State<PermissionsPage> {
   static const Color _activeToggleColor = Color(0xFF2CA97B);
   static const Color _inactiveToggleColor = Colors.white;
   static const Color _borderColor = Colors.black;
+  
+  static const String _permissionsRequestedKey = 'permissions_requested';
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermissionsStatus();
+  }
+
+  Future<void> _checkPermissionsStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final permissionsRequested = prefs.getBool(_permissionsRequestedKey) ?? false;
+    
+    if (permissionsRequested && mounted) {
+      // Permissions were already requested, navigate directly to welcome
+      Navigator.pushReplacementNamed(context, '/welcome');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,16 +100,22 @@ class _PermissionsPageState extends State<PermissionsPage> {
                   ),
                   // Skip button
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      // Save flag that permissions screen was seen
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool(_permissionsRequestedKey, true);
                       // Navigate to welcome page
-                      Navigator.pushReplacementNamed(context, '/welcome');
+                      if (mounted) {
+                        Navigator.pushReplacementNamed(context, '/welcome');
+                      }
                     },
                     child: Text(
-                      'skip',
+                      'skip.',
                       style: TextStyle(
+                        fontFamily: 'Delight',
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
-                        color: Colors.black, // TODO: Update with design color
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -106,11 +131,11 @@ class _PermissionsPageState extends State<PermissionsPage> {
               child: Text(
                 'Allow access to\npersonalize\nyour experience.',
                 style: TextStyle(
-                  // TODO: Update font-family
+                  fontFamily: 'Delight',
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
                   height: 1.2,
-                  color: Colors.black, // TODO: Update with design color
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -124,7 +149,7 @@ class _PermissionsPageState extends State<PermissionsPage> {
                 children: [
                     _buildPermissionItem(
                       icon: Icons.location_on_outlined,
-                      title: 'Location',
+                      title: 'Location.',
                       description:
                           'So we can show people near you, safely and respectfully.',
                       isEnabled: _locationEnabled,
@@ -135,9 +160,9 @@ class _PermissionsPageState extends State<PermissionsPage> {
                     const SizedBox(height: 16),
                     _buildPermissionItem(
                       icon: Icons.camera_alt_outlined,
-                      title: 'Camera',
+                      title: 'Camera.',
                       description:
-                          'We’ll use your camera to verify your ID  ',
+                          'We\'ll use your camera to verify your ID.',
                       isEnabled: _cameraEnabled,
                       onToggle: (value) {
                         setState(() => _cameraEnabled = value);
@@ -146,9 +171,9 @@ class _PermissionsPageState extends State<PermissionsPage> {
                     const SizedBox(height: 16),
                     _buildPermissionItem(
                       icon: Icons.notifications_outlined,
-                      title: 'Notifications',
+                      title: 'Notifications.',
                       description:
-                          'Get gentle reminders when someone special connects',
+                          'Get gentle reminders when someone special connects.',
                       isEnabled: _notificationsEnabled,
                       onToggle: (value) {
                         setState(() => _notificationsEnabled = value);
@@ -182,8 +207,9 @@ class _PermissionsPageState extends State<PermissionsPage> {
                         elevation: 0,
                       ),
                       child: const Text(
-                        'Allow',
+                        'Allow all',
                         style: TextStyle(
+                          fontFamily: 'Delight',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -203,9 +229,12 @@ class _PermissionsPageState extends State<PermissionsPage> {
                       child: Text(
                         'Go to Settings',
                         style: TextStyle(
+                          fontFamily: 'Delight',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black, // TODO: Update with design color
+                          color: Colors.black,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.black,
                         ),
                       ),
                     ),
@@ -256,17 +285,19 @@ class _PermissionsPageState extends State<PermissionsPage> {
               Text(
                 title,
                 style: TextStyle(
+                  fontFamily: 'Delight',
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black, // TODO: Update with design color
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 description,
                 style: TextStyle(
+                  fontFamily: 'Delight',
                   fontSize: 14,
-                  color: Colors.grey[600], // TODO: Update with design color
+                  color: Colors.grey[600],
                 ),
               ),
             ],
@@ -306,6 +337,10 @@ class _PermissionsPageState extends State<PermissionsPage> {
       Permission.camera,
       Permission.notification,
     ].request();
+
+    // Save flag that permissions were requested
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_permissionsRequestedKey, true);
 
     // Navigate to welcome page
     if (mounted) {

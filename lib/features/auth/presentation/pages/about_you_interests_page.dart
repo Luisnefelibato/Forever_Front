@@ -109,19 +109,7 @@ class _AboutYouInterestsPageState extends State<AboutYouInterestsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-              
-              // Step indicator
-              Text(
-                'Step 3/3 - Account settings',
-                style: TextStyle(
-                  fontFamily: 'Delight',
-                  fontSize: 14,
-                  color: _primaryGreen,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
+
               // Back button
               InkWell(
                 onTap: () => Navigator.pop(context),
@@ -153,7 +141,7 @@ class _AboutYouInterestsPageState extends State<AboutYouInterestsPage> {
               
               // Step indicator
               Text(
-                'Step 3/3 - Account settings',
+                'Step 3/3 - Basic Info',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 14,

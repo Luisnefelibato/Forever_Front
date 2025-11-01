@@ -62,7 +62,7 @@ class _SplashPageState extends State<SplashPage>
   void _navigateToOnboarding() {
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/onboarding-intro-1');
+        Navigator.pushReplacementNamed(context, '/onboarding-intro');
       }
     });
   }

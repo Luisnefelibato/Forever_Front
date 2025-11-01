@@ -42,8 +42,16 @@ class _ProfileBioPageState extends State<ProfileBioPage> {
   }
 
   void _handleContinue() {
-    // Guardar bio y navegar a intereses
-    Navigator.pushNamed(context, '/profile-interests');
+    final bioData = {
+      'bio': _bioController.text.trim(),
+    };
+    
+    // Navegar a intereses pasando los datos acumulados
+    Navigator.pushNamed(
+      context,
+      '/profile-interests',
+      arguments: bioData,
+    );
   }
 
   @override
