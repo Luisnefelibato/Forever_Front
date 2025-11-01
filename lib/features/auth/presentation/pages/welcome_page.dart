@@ -416,8 +416,8 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                 )
               : SizedBox(
-                  width: 16,
-                  height: 16,
+                  width: 24,
+                  height: 24,
                   child: Image.asset(
                     iconPath,
                     fit: BoxFit.contain,
@@ -428,7 +428,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         color: iconPath.contains('facebook') 
                           ? const Color(0xFF1877F2) 
                           : const Color(0xFF4285F4),
-                        size: 16,
+                        size: 24,
                       );
                     },
                   ),

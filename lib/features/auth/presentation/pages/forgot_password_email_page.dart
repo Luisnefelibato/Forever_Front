@@ -30,25 +30,65 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
   
   bool _showError = false;
   String _errorMessage = '';
+  bool _isInputValid = false;
+  bool _showFormatError = false;
   
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
   static const Color _errorBackground = Color(0xFFFFEBEE);
+  static const Color _disabledGray = Color(0xFFE0E0E0);
+  
+  // TEST DATA - Remove in production
+  static const String _testEmail = 'test@example.com';
+  static const String _testPhone = '1234567890'; // 10 dígitos para pruebas
+  
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_validateInput);
+  }
   
   @override
   void dispose() {
+    _emailController.removeListener(_validateInput);
     _emailController.dispose();
     super.dispose();
+  }
+  
+  void _validateInput() {
+    final value = _emailController.text.trim();
+    final isValid = _isValidFormat(value);
+    setState(() {
+      _isInputValid = isValid;
+      _showFormatError = false; // Clear format error when user types
+    });
+  }
+  
+  bool _isValidFormat(String value) {
+    if (value.isEmpty) return false;
+    
+    // Check if it's a phone number (10 digits)
+    final phoneRegex = RegExp(r'^\d{10}$');
+    if (phoneRegex.hasMatch(value)) {
+      return true;
+    }
+    
+    // Check if it's a valid email
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(value);
   }
   
   void _handleContinue() async {
     setState(() {
       _showError = false;
+      _showFormatError = false;
     });
     
+    final identifier = _emailController.text.trim();
+    
     // Check if field is empty
-    if (_emailController.text.trim().isEmpty) {
+    if (identifier.isEmpty) {
       setState(() {
         _showError = true;
         _errorMessage = 'Complete one of the fields to continue';
@@ -57,37 +97,55 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
     }
     
     // Validate format
-    if (_formKey.currentState!.validate()) {
-      final identifier = _emailController.text.trim();
-      try {
-        // Send recovery code
-        final authRepository = GetIt.instance<AuthRepository>();
-        final result = await authRepository.forgotPassword(identifier);
-        result.fold(
-          (failure) {
-            setState(() {
-              _showError = true;
-              _errorMessage = failure.message;
-            });
-          },
-          (_) {
-            Navigator.pushNamed(
-              context,
-              '/forgot-password-code',
-              arguments: {'identifier': identifier},
-            );
-          },
-        );
-      } catch (e) {
-        setState(() {
-          _showError = true;
-          _errorMessage = 'Failed to send recovery code. Please try again.';
-        });
-      }
-    } else {
+    if (!_isValidFormat(identifier)) {
       setState(() {
-        _showError = true;
-        _errorMessage = 'Please enter a valid email or phone number';
+        _showFormatError = true;
+      });
+      return;
+    }
+    
+    // TEST MODE - Backend call commented for testing
+    // TODO: Uncomment in production
+    // try {
+    //   final authRepository = GetIt.instance<AuthRepository>();
+    //   final result = await authRepository.forgotPassword(identifier);
+    //   result.fold(
+    //     (failure) {
+    //       setState(() {
+    //         _showError = true;
+    //         _errorMessage = failure.message;
+    //       });
+    //     },
+    //     (_) {
+    //       Navigator.pushNamed(
+    //     context,
+    //         '/forgot-password-code',
+    //         arguments: {'identifier': identifier},
+    //       );
+    //     },
+    //   );
+    // } catch (e) {
+    //   setState(() {
+    //     _showError = true;
+    //     _errorMessage = 'Failed to send recovery code. Please try again.';
+    //   });
+    // }
+    
+    // TEST MODE - Only allow access with test email or test phone
+    // Valid test identifiers:
+    // - Email: test@example.com
+    // - Phone: 1234567890 (10 digits)
+    if (identifier == _testEmail || identifier == _testPhone) {
+      print('TEST MODE: Valid identifier: $identifier');
+      Navigator.pushNamed(
+        context,
+        '/forgot-password-code',
+        arguments: {'identifier': identifier},
+      );
+    } else {
+      print('TEST MODE: Invalid identifier: $identifier (Valid: $_testEmail or $_testPhone)');
+      setState(() {
+        _showFormatError = true;
       });
     }
   }
@@ -137,7 +195,15 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                           border: Border.all(color: _primaryGreen, width: 2),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                          icon: Image.asset(
+                            'assets/images/icons/back.png',
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.arrow_back, color: _primaryGreen);
+                            },
+                          ),
                           onPressed: () => Navigator.pop(context),
                           padding: EdgeInsets.zero,
                         ),
@@ -196,10 +262,11 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                           fontSize: 14,
                         ),
                         onChanged: (value) {
-                          // Clear error when user starts typing
-                          if (_showError) {
+                          // Clear errors when user starts typing
+                          if (_showError || _showFormatError) {
                             setState(() {
                               _showError = false;
+                              _showFormatError = false;
                             });
                           }
                         },
@@ -218,19 +285,22 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(28),
-                            borderSide: const BorderSide(color: Colors.black, width: 1),
+                            borderSide: BorderSide(
+                              color: _showFormatError ? _errorRed : Colors.black,
+                              width: 1,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(28),
                             borderSide: BorderSide(
-                              color: _showError ? _errorRed : Colors.black,
+                              color: _showFormatError || _showError ? _errorRed : Colors.black,
                               width: 1,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(28),
                             borderSide: BorderSide(
-                              color: _showError ? _errorRed : _primaryGreen,
+                              color: _showFormatError || _showError ? _errorRed : _primaryGreen,
                               width: 2,
                             ),
                           ),
@@ -245,6 +315,20 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                           errorStyle: const TextStyle(height: 0, fontSize: 0),
                         ),
                       ),
+                      
+                      // Format error message below input
+                      if (_showFormatError)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Please enter a valid phone number or email address',
+                            style: TextStyle(
+                              fontFamily: 'Delight',
+                              fontSize: 14,
+                              color: _errorRed,
+                            ),
+                          ),
+                        ),
                       
                       const SizedBox(height: 16),
                       
@@ -295,10 +379,12 @@ class _ForgotPasswordEmailPageState extends State<ForgotPasswordEmailPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _handleContinue,
+                  onPressed: _isInputValid ? _handleContinue : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryGreen,
+                    backgroundColor: _isInputValid ? _primaryGreen : _disabledGray,
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: _disabledGray,
+                    disabledForegroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),

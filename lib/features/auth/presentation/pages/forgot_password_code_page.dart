@@ -47,15 +47,26 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
   );
   
   Timer? _timer;
+  Timer? _errorTimer;
+  Timer? _expirationTimer;
   int _remainingSeconds = 30;
   bool _canResend = false;
   
   String _validationState = 'normal'; // 'normal', 'error', 'success'
   String _errorMessage = '';
+  bool _showWrongCodeError = false;
+  bool _showExpirationWarning = false;
+  bool _showExpirationMessage = false;
+  bool _codeExpired = false;
   
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
+  
+  // TEST DATA - Remove in production
+  static const String _testEmail = 'test@example.com';
+  static const String _testPhone = '1234567890'; // 10 dígitos para pruebas
+  static const String _testCorrectCode = '123456'; // Código correcto para pruebas
   
   @override
   void initState() {
@@ -70,45 +81,49 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
   }
   
   Future<void> _sendVerificationCode() async {
-    try {
-      // Get auth repository
-      final authRepository = GetIt.instance<AuthRepository>();
-      
-      // Send forgot password code
-      final result = await authRepository.forgotPassword(widget.identifier);
-      
-      result.fold(
-        (failure) {
-          // Only show error message if there's actually a failure
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error sending code: ${failure.message}'),
-                backgroundColor: _errorRed,
-              ),
-            );
-          }
-        },
-        (_) {
-          // Success - code sent silently, no need to show message
-        },
-      );
-    } catch (e) {
-      // Only show error if there's an exception
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error sending code: $e'),
-            backgroundColor: _errorRed,
-          ),
-        );
-      }
-    }
+    // TEST MODE - Backend call commented for testing
+    // TODO: Uncomment in production
+    // try {
+    //   final authRepository = GetIt.instance<AuthRepository>();
+    //   final result = await authRepository.forgotPassword(widget.identifier);
+    //   
+    //   result.fold(
+    //     (failure) {
+    //       if (mounted) {
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(
+    //             content: Text('Error sending code: ${failure.message}'),
+    //             backgroundColor: _errorRed,
+    //           ),
+    //         );
+    //       }
+    //     },
+    //     (_) {
+    //       // Success - code sent silently
+    //     },
+    //   );
+    // } catch (e) {
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text('Error sending code: $e'),
+    //         backgroundColor: _errorRed,
+    //       ),
+    //     );
+    //   }
+    // }
+    
+    // TEST MODE - Simulate code sent successfully
+    // In test mode, the code is always: 123456
+    print('TEST MODE: Code would be sent to ${widget.identifier}');
+    print('TEST MODE: Use code: $_testCorrectCode to test success scenario');
   }
   
   @override
   void dispose() {
     _timer?.cancel();
+    _errorTimer?.cancel();
+    _expirationTimer?.cancel();
     for (var controller in _controllers) {
       controller.dispose();
     }
@@ -122,18 +137,47 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
     setState(() {
       _remainingSeconds = 30;
       _canResend = false;
+      _codeExpired = false;
+      _showExpirationWarning = false;
+      _showExpirationMessage = false;
     });
     
     _timer?.cancel();
+    _expirationTimer?.cancel();
+    
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingSeconds > 0) {
         setState(() {
           _remainingSeconds--;
         });
       } else {
+        // Timer reached 0 - start expiration sequence
         setState(() {
-          _canResend = true;
+          _codeExpired = true;
+          _showExpirationWarning = true;
+          _canResend = false; // Will be true after expiration sequence
         });
+        
+        // After 2 seconds, show expiration message
+        _expirationTimer = Timer(const Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() {
+              _showExpirationWarning = false;
+              _showExpirationMessage = true;
+            });
+            
+            // After another 2 seconds, hide expiration message and show resend option
+            _expirationTimer = Timer(const Duration(seconds: 2), () {
+              if (mounted) {
+                setState(() {
+                  _showExpirationMessage = false;
+                  _canResend = true;
+                });
+              }
+            });
+          }
+        });
+        
         timer.cancel();
       }
     });
@@ -153,56 +197,72 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
     setState(() {
       _validationState = 'normal';
       _errorMessage = '';
+      _showWrongCodeError = false;
+      _codeExpired = false;
+      _showExpirationWarning = false;
+      _showExpirationMessage = false;
     });
     
-    // Send verification code and show success message
-    try {
-      // Get auth repository
-      final authRepository = GetIt.instance<AuthRepository>();
+    // TEST MODE - Backend call commented for testing
+    // TODO: Uncomment in production
+    // try {
+    //   final authRepository = GetIt.instance<AuthRepository>();
+    //   final result = await authRepository.forgotPassword(widget.identifier);
+    //   
+    //   result.fold(
+    //     (failure) {
+    //       if (mounted) {
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(
+    //             content: Text('Error sending code: ${failure.message}'),
+    //             backgroundColor: _errorRed,
+    //           ),
+    //         );
+    //       }
+    //     },
+    //     (_) {
+    //       if (mounted) {
+    //         final isEmail = widget.identifier.contains('@');
+    //         final message = isEmail
+    //             ? 'We\'ve sent you a new verification code via Email'
+    //             : 'We\'ve sent you a new verification code via SMS/OTP.';
+    //         
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(
+    //             content: Text(message),
+    //             backgroundColor: _primaryGreen,
+    //           ),
+    //         );
+    //       }
+    //     },
+    //   );
+    // } catch (e) {
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text('Error sending code: $e'),
+    //         backgroundColor: _errorRed,
+    //       ),
+    //     );
+    //   }
+    // }
+    
+    // TEST MODE - Simulate resend code
+    if (mounted) {
+      final isEmail = widget.identifier.contains('@');
+      final message = isEmail
+          ? 'We\'ve sent you a new verification code via Email'
+          : 'We\'ve sent you a new verification code via SMS/OTP.';
       
-      // Send forgot password code
-      final result = await authRepository.forgotPassword(widget.identifier);
-      
-      result.fold(
-        (failure) {
-          // Show error if sending fails
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error sending code: ${failure.message}'),
-                backgroundColor: _errorRed,
-              ),
-            );
-          }
-        },
-        (_) {
-          // Show success message
-          if (mounted) {
-            // Determine if identifier is email or phone
-            final isEmail = widget.identifier.contains('@');
-            final message = isEmail
-                ? 'We\'ve sent you a new verification code via Email'
-                : 'We\'ve sent you a new verification code via SMS/OTP.';
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: _primaryGreen,
-              ),
-            );
-          }
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: _primaryGreen,
+        ),
       );
-    } catch (e) {
-      // Show error if exception occurs
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error sending code: $e'),
-            backgroundColor: _errorRed,
-          ),
-        );
-      }
+      
+      print('TEST MODE: Resend code to ${widget.identifier}');
+      print('TEST MODE: Use code: $_testCorrectCode to test success scenario');
     }
     
     // Focus first field
@@ -233,23 +293,136 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
       return;
     }
     
+    // Clear any previous error states
+    _errorTimer?.cancel();
     setState(() {
       _validationState = 'normal';
       _errorMessage = '';
+      _showWrongCodeError = false;
     });
     
-    // Navigate to reset password screen (verification occurs on reset)
-    // For now, we just navigate with the code - validation happens in reset_password_page
-    if (mounted) {
-      Navigator.pushReplacementNamed(
-        context,
-        '/reset-password',
-        arguments: {
-          'identifier': widget.identifier,
-          'code': code,
-        },
-      );
+    // TEST MODE - Simulate validation without backend
+    // TODO: Uncomment backend validation in production
+    // try {
+    //   final authRepository = GetIt.instance<AuthRepository>();
+    //   final result = await authRepository.verifyRegisterOtp(
+    //     identifier: widget.identifier,
+    //     code: code,
+    //   );
+    //   
+    //   result.fold(
+    //     (failure) {
+    //       String errorMsg;
+    //       final failureMsgLower = failure.message.toLowerCase();
+    //       
+    //       if (failureMsgLower.contains('expired') || failureMsgLower.contains('expir')) {
+    //         errorMsg = 'The code has expired. Please request a new one to continue.';
+    //         setState(() {
+    //           _validationState = 'error';
+    //           _errorMessage = errorMsg;
+    //           _codeExpired = true;
+    //         });
+    //       } else {
+    //         errorMsg = 'Wrong code, please try again';
+    //         _handleWrongCode();
+    //       }
+    //     },
+    //     (verified) {
+    //       if (verified) {
+    //         setState(() {
+    //           _validationState = 'success';
+    //           _errorMessage = '';
+    //         });
+    //         
+    //         Future.delayed(const Duration(milliseconds: 500), () {
+    //           if (mounted) {
+    //             Navigator.pushReplacementNamed(
+    //               context,
+    //               '/reset-password',
+    //               arguments: {
+    //                 'identifier': widget.identifier,
+    //                 'code': code,
+    //               },
+    //             );
+    //           }
+    //         });
+    //       } else {
+    //         _handleWrongCode();
+    //       }
+    //     },
+    //   );
+    // } catch (e) {
+    //   setState(() {
+    //     _validationState = 'success';
+    //     _errorMessage = '';
+    //   });
+    //   
+    //   Future.delayed(const Duration(milliseconds: 500), () {
+    //     if (mounted) {
+    //       Navigator.pushReplacementNamed(
+    //         context,
+    //         '/reset-password',
+    //         arguments: {
+    //           'identifier': widget.identifier,
+    //           'code': code,
+    //         },
+    //       );
+    //     }
+    //   });
+    // }
+    
+    // Simulate validation delay
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Check if code matches test code
+    if (code == _testCorrectCode) {
+      // Code is correct - show success
+      setState(() {
+        _validationState = 'success';
+        _errorMessage = '';
+      });
+      
+      // Navigate to reset password screen after showing success
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          Navigator.pushReplacementNamed(
+            context,
+            '/reset-password',
+            arguments: {
+              'identifier': widget.identifier,
+              'code': code,
+            },
+          );
+        }
+      });
+    } else {
+      // Code is incorrect - show error
+      _handleWrongCode();
     }
+  }
+  
+  void _handleWrongCode() {
+    setState(() {
+      _validationState = 'error';
+      _errorMessage = 'Wrong code, please try again';
+      _showWrongCodeError = true;
+    });
+    
+    // Clear error after 2 seconds
+    _errorTimer?.cancel();
+    _errorTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _showWrongCodeError = false;
+          _validationState = 'normal';
+        });
+        // Clear all fields
+        for (var controller in _controllers) {
+          controller.clear();
+        }
+        _focusNodes[0].requestFocus();
+      }
+    });
   }
   
   String _formatTime(int seconds) {
@@ -301,23 +474,11 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
                   padding: EdgeInsets.zero,
                 ),
               ),
-              const SizedBox(height: 16),
-              // Step indicator
-              Text(
-                'Step 1/2 - Recover account',
-                style: TextStyle(
-                  fontFamily: 'Delight',
-                  fontSize: 14,
-                  color: _primaryGreen,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              
               const SizedBox(height: 32),
-              
+
               // Title
               const Text(
-                'Verify your account',
+                'Enter code',
                 style: TextStyle(
                   fontFamily: 'Delight',
                   fontSize: 32,
@@ -417,16 +578,46 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
               
               const SizedBox(height: 24),
               
-              // Countdown timer / Resend button / Error message
+              // Countdown timer / Resend button / Error message / Expiration messages
               Center(
                 child: Column(
                   children: [
-                    // Error message (only show if there's an error)
-                    if (_validationState == 'error')
+                    // Wrong code error (shows for 2 seconds then disappears)
+                    if (_showWrongCodeError)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          _errorMessage,
+                          'Wrong code, please try again',
+                          style: TextStyle(
+                            fontFamily: 'Delight',
+                            fontSize: 14,
+                            color: _errorRed,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    
+                    // Expiration warning (first message when timer expires)
+                    if (_showExpirationWarning && !_showExpirationMessage)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          'The code has expired',
+                          style: TextStyle(
+                            fontFamily: 'Delight',
+                            fontSize: 14,
+                            color: _errorRed,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    
+                    // Expiration message (after 2 seconds of warning)
+                    if (_showExpirationMessage)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          'The code has expired. Please request a new one to continue.',
                           style: TextStyle(
                             fontFamily: 'Delight',
                             fontSize: 14,
@@ -437,39 +628,42 @@ class _ForgotPasswordCodePageState extends State<ForgotPasswordCodePage> {
                       ),
                     
                     // Countdown timer or Resend CTA
-                    _canResend
-                        ? RichText(
-                            text: TextSpan(
+                    // Show countdown if timer is still running
+                    // Show resend if timer expired and expiration sequence is complete
+                    if (!_showExpirationWarning && !_showExpirationMessage && !_showWrongCodeError)
+                      _canResend
+                          ? RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontFamily: 'Delight',
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                ),
+                                children: [
+                                  const TextSpan(text: 'I didn\u2019t receive a code '),
+                                  TextSpan(
+                                    text: 'Resend',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Colors.black,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = _handleResendCode,
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Text(
+                              'Send code again  ${_formatTime(_remainingSeconds)}',
                               style: TextStyle(
                                 fontFamily: 'Delight',
                                 fontSize: 14,
-                                color: Colors.grey[700],
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
                               ),
-                              children: [
-                                const TextSpan(text: 'I didn\u2019t receive a code '),
-                                TextSpan(
-                                  text: 'Resend',
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.black,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = _handleResendCode,
-                                ),
-                              ],
                             ),
-                          )
-                        : Text(
-                            'Send code again  ${_formatTime(_remainingSeconds)}',
-                            style: TextStyle(
-                              fontFamily: 'Delight',
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
                   ],
                 ),
               ),

@@ -44,19 +44,18 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   bool _obscureConfirmPassword = true;
   
   // Validation state
+  bool _hasMinLength = false;
   bool _hasUppercase = false;
   bool _hasLowercase = false;
-  bool _hasSymbolsOrNumbers = false;
+  bool _hasNumbers = false;
+  bool _hasSpecialChars = false;
   bool _passwordsMatch = false;
-  bool _hasStartedTyping = false;
   
   // Color constants
   static const Color _primaryGreen = Color(0xFF2CA97B);
   static const Color _errorRed = Color(0xFFE53935);
-  static const Color _successGreen = Color(0xFF4CAF50);
-  static const Color _lightGreen = Color(0xFFE8F5E9);
-  static const Color _lightRed = Color(0xFFFFEBEE);
-  static const Color _lightGray = Color(0xFFEEEEEE);
+  static const Color _infoBackgroundGray = Color(0xFFE0E0E0);
+  static const Color _infoBackgroundGreen = Color(0xFFE8F5E9);
   
   @override
   void initState() {
@@ -79,14 +78,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final confirm = _confirmPasswordController.text;
     
     setState(() {
-      _hasStartedTyping = password.isNotEmpty;
+      // Check minimum length (8 characters) and maximum length (25 characters)
+      _hasMinLength = password.length >= 8 && password.length <= 25;
       
-      // Rule 1: Check for uppercase and lowercase letters
+      // Check for uppercase letters
       _hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      
+      // Check for lowercase letters
       _hasLowercase = password.contains(RegExp(r'[a-z]'));
       
-      // Rule 2: Check for symbols and numbers
-      _hasSymbolsOrNumbers = password.contains(RegExp(r'[@\-_*#0-9]'));
+      // Check for numbers
+      _hasNumbers = password.contains(RegExp(r'[0-9]'));
+      
+      // Check for special characters (@ - _ * #)
+      _hasSpecialChars = password.contains(RegExp(r'[@\-_*#]'));
       
       // Check if passwords match
       _passwordsMatch = password.isNotEmpty && 
@@ -96,89 +101,25 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
   
   bool _isPasswordValid() {
-    return _hasUppercase && 
+    return _hasMinLength && 
+           _hasUppercase && 
            _hasLowercase && 
-           _hasSymbolsOrNumbers;
+           _hasNumbers && 
+           _hasSpecialChars;
   }
   
-  bool _canCreateAccount() {
+  bool _canResetPassword() {
     return _isPasswordValid() && _passwordsMatch;
   }
   
-  String _getButtonText() {
-    if (!_hasStartedTyping) {
-      return 'Reset password';
-    } else if (_canCreateAccount()) {
-      return 'Create account';
-    } else {
-      return 'Restore';
-    }
-  }
-  
-  Color _getValidationBoxColor() {
-    if (!_hasStartedTyping) {
-      return _lightGray;
-    } else if (_isPasswordValid()) {
-      return _lightGreen;
-    } else {
-      return _lightRed;
-    }
-  }
-  
-  Color _getValidationBorderColor() {
-    if (!_hasStartedTyping) {
-      return Colors.grey.shade300;
-    } else if (_isPasswordValid()) {
-      return _successGreen;
-    } else {
-      return _errorRed;
-    }
-  }
-  
-  Color _getValidationIconColor() {
-    if (!_hasStartedTyping) {
-      return Colors.grey.shade600;
-    } else if (_isPasswordValid()) {
-      return _successGreen;
-    } else {
-      return _errorRed;
-    }
-  }
-  
-  Widget _getValidationIcon() {
-    if (!_hasStartedTyping) {
-      return Icon(
-        Icons.error_outline,
-        color: Colors.grey.shade600,
-        size: 32,
-      );
-    } else if (_isPasswordValid()) {
-      return Icon(
-        Icons.check_circle,
-        color: _successGreen,
-        size: 32,
-      );
-    } else {
-      return Icon(
-        Icons.error_outline,
-        color: _errorRed,
-        size: 32,
-      );
-    }
-  }
-  
   Color _getFieldBorderColor(bool isConfirmField) {
-    if (!_hasStartedTyping) {
-      return Colors.black;
-    }
-    
     if (isConfirmField) {
       // Confirm field turns red if doesn't match
       if (_confirmPasswordController.text.isNotEmpty && !_passwordsMatch) {
         return _errorRed;
       }
     } else {
-      // New password field turns red if doesn't meet criteria
+      // Password field turns red if doesn't meet criteria
       if (_newPasswordController.text.isNotEmpty && !_isPasswordValid()) {
         return _errorRed;
       }
@@ -188,39 +129,44 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
   
   void _handleSubmit() async {
-    if (!_canCreateAccount()) {
+    if (!_canResetPassword()) {
       // Don't submit if password is invalid
       return;
     }
     
-    try {
-      final authRepository = GetIt.instance<AuthRepository>();
-      final result = await authRepository.resetPasswordWithCode(
-        identifier: widget.identifier,
-        code: widget.code,
-        newPassword: _newPasswordController.text,
-      );
-      result.fold(
-        (failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Reset failed: ${failure.message}'),
-              backgroundColor: _errorRed,
-            ),
-          );
-        },
-        (_) {
-          Navigator.pushReplacementNamed(context, '/password-changed');
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Reset error: $e'),
-          backgroundColor: _errorRed,
-        ),
-      );
-    }
+    // TEST MODE - Backend call commented for testing
+    // TODO: Uncomment in production
+    // try {
+    //   final authRepository = GetIt.instance<AuthRepository>();
+    //   final result = await authRepository.resetPasswordWithCode(
+    //     identifier: widget.identifier,
+    //     code: widget.code,
+    //     newPassword: _newPasswordController.text,
+    //   );
+    //   result.fold(
+    //     (failure) {
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(
+    //           content: Text('Reset failed: ${failure.message}'),
+    //           backgroundColor: _errorRed,
+    //         ),
+    //       );
+    //     },
+    //     (_) {
+    //       Navigator.pushReplacementNamed(context, '/password-changed');
+    //     },
+    //   );
+    // } catch (e) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Reset error: $e'),
+    //       backgroundColor: _errorRed,
+    //     ),
+    //   );
+    // }
+    
+    // TEST MODE - Always allow access when password meets requirements
+    Navigator.pushReplacementNamed(context, '/password-changed');
   }
   
   @override
@@ -248,7 +194,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           border: Border.all(color: _primaryGreen, width: 2),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: _primaryGreen),
+                          icon: Image.asset(
+                            'assets/images/icons/back.png',
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.arrow_back, color: _primaryGreen, size: 24);
+                            },
+                          ),
                           onPressed: () => Navigator.pop(context),
                           padding: EdgeInsets.zero,
                         ),
@@ -283,9 +237,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       
                       const SizedBox(height: 32),
                       
-                      // New Password label
+                      // Password label
                       const Text(
-                        'New Password',
+                        'Password',
                         style: TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
@@ -296,17 +250,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       
                       const SizedBox(height: 8),
                       
-                      // New Password field
+                      // Password field
                       TextField(
                         controller: _newPasswordController,
                         obscureText: _obscureNewPassword,
+                        maxLength: 25,
                         style: const TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: '********',
+                          hintText: '*******',
+                          counterText: '', // Hide character counter
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],
@@ -367,13 +323,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       TextField(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
+                        maxLength: 25,
                         style: const TextStyle(
                           fontFamily: 'Delight',
                           fontSize: 14,
                           color: Colors.black,
                         ),
                         decoration: InputDecoration(
-                          hintText: '********',
+                          hintText: '*******',
+                          counterText: '', // Hide character counter
                           hintStyle: TextStyle(
                             fontFamily: 'Delight',
                             color: Colors.grey[400],
@@ -415,66 +373,59 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         ),
                       ),
                       
-                      const SizedBox(height: 24),
-                      
-                      // Validation box
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: _getValidationBoxColor(),
-                          border: Border.all(
-                            color: _getValidationBorderColor(),
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(32),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: _getValidationIcon(),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      style: TextStyle(
-                                        fontFamily: 'Delight',
-                                        fontSize: 14,
-                                        color: Colors.grey[800],
-                                        height: 1.5,
-                                      ),
-                                      children: const [
-                                        TextSpan(
-                                          text: '1. Ensure the password contain both upper and lowercase letter\n',
-                                        ),
-                                        TextSpan(
-                                          text: '2. Include symbols like ',
-                                        ),
-                                        TextSpan(
-                                          text: '@ - _ * #',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: ' and numbers',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
+                ),
+              ),
+            ),
+            
+            // Warning box - Above Reset password button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: _isPasswordValid() ? _infoBackgroundGreen : _infoBackgroundGray,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: _isPasswordValid() ? _primaryGreen : Colors.grey[600]!,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      _isPasswordValid() 
+                        ? 'assets/images/icons/check.png'
+                        : 'assets/images/icons/exclamation.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          _isPasswordValid() ? Icons.check_circle : Icons.info_outline,
+                          color: _isPasswordValid() ? _primaryGreen : Colors.grey[700],
+                          size: 24,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Ensure your password has at least 8 characters, includes both uppercase and lowercase letters, and contains symbols like @ - _ * # and numbers.',
+                        style: TextStyle(
+                          fontFamily: 'Delight',
+                          fontSize: 14,
+                          color: Colors.black,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -486,18 +437,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _handleSubmit,
+                  onPressed: _canResetPassword() ? _handleSubmit : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryGreen,
+                    backgroundColor: _canResetPassword() ? _primaryGreen : Colors.grey[400],
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey[400],
+                    disabledForegroundColor: Colors.grey[600],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
-                    _getButtonText(),
-                    style: const TextStyle(
+                  child: const Text(
+                    'Restore',
+                    style: TextStyle(
                       fontFamily: 'Delight',
                       fontSize: 16,
                       color: Colors.black,
